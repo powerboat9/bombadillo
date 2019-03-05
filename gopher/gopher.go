@@ -60,7 +60,7 @@ type Url struct {
 
 // Types is a map of gophertypes to a string representing their
 // type, to be used when displaying gophermaps
-var Types = map[string]string{
+var types = map[string]string{
 	"0": "TXT",
 	"1": "MAP",
 	"h": "HTM",
@@ -123,7 +123,8 @@ func (h History) Get() (*View, error) {
 func (h *History) GoBack() {
 	if h.Position > 0 {
 		h.Position--
-		h.DisplayCurrentView()
+	} else {
+		fmt.Print("\a")
 	}
 }
 
@@ -136,6 +137,8 @@ func (h *History) GoForward() {
 	if h.Position + 1 < h.Length {
 		h.Position++
 		h.DisplayCurrentView()
+	} else {
+		fmt.Print("\a")
 	}
 }
 
@@ -148,33 +151,6 @@ func (h *History) DisplayCurrentView() {
 	h.Collection[h.Position].Display()
 }
 
-// The "Visit" receiver is a high level combination of a few
-// different receivers that makes it easy to create a Url,
-// make a request to that Url, and add the response and Url
-// to a View. That View then gets added to the History struct
-// that the Visit receiver was called on. Returns a boolean
-// value indicating whether or not the content is binary or
-// textual data.
-func (h *History) Visit(addr string) (View, error) {
-	u, err := MakeUrl(addr)
-	if err != nil {
-		return View{}, err
-	}
-
-	text, err := Retrieve(u)
-	if err != nil {
-		return View{}, err
-	}
-
-	var pageContent []string
-	if u.IsBinary {
-		pageContent = []string{string(text)}
-	} else {
-		pageContent = strings.Split(string(text), "\n")
-	}
-
-	return MakeView(u, pageContent), nil
-}
 
 // The "ParseMap" receiver is called by a view struct. It
 // checks if the view is for a gophermap. If not,it does
@@ -185,19 +161,25 @@ func (h *History) Visit(addr string) (View, error) {
 // relates to the link position in the links slice. This
 // receiver does not return anything.
 func (v *View) ParseMap() {
-	if v.Address.Gophertype == "1" {
+	if v.Address.Gophertype == "1" || v.Address.Gophertype == "7" {
 		for i, e := range v.Content {
 			e = strings.Trim(e, "\r\n")
 			line := strings.Split(e,"\t")
+			var title string
+			if len(line[0]) > 1 {
+				title = line[0][1:]
+			} else {
+				title = ""
+			}
 			if len(line[0]) > 0 && string(line[0][0]) == "i" {
-				v.Content[i] = "           " + string(line[0][1:])
+				v.Content[i] = "           " + string(title)
 				continue
 			} else if len(line) >= 4 {
 				fulllink := fmt.Sprintf("%s:%s/%s%s", line[2], line[3], string(line[0][0]), line[1])
 				v.Links = append(v.Links, fulllink)
-				linktext := fmt.Sprintf("(%s) %2d   %s", Types[string(line[0][0])], len(v.Links), string(line[0][1:]))
+				linktext := fmt.Sprintf("(%s) %2d   %s", GetType(string(line[0][0])), len(v.Links), title)
 				v.Content[i] = linktext
-			}
+			} 
 		}
 	}	
 }
@@ -208,9 +190,7 @@ func (v *View) ParseMap() {
 func (v View) Display() {
 	fmt.Println()
 	for _, el := range v.Content {
-		if el != "." {
-			fmt.Println(el)
-		}
+		fmt.Println(el)
 	}
 }
 
@@ -340,4 +320,37 @@ func Retrieve(u Url) ([]byte, error) {
 	return result, err
 }
 
+
+// The "Visit" function is a high level combination of a few
+// different types that makes it easy to create a Url,
+// make a request to that Url, and add the response and Url
+// to a View. Returns a copy of the view and an error (or nil).
+func Visit(addr string) (View, error) {
+	u, err := MakeUrl(addr)
+	if err != nil {
+		return View{}, err
+	}
+
+	text, err := Retrieve(u)
+	if err != nil {
+		return View{}, err
+	}
+
+	var pageContent []string
+	if u.IsBinary && u.Gophertype != "7" {
+		pageContent = []string{string(text)}
+	} else {
+		pageContent = strings.Split(string(text), "\n")
+	}
+
+	return MakeView(u, pageContent), nil
+}
+
+func GetType(t string) string {
+	if val, ok := types[t]; ok {
+		return val
+	} 
+	return "???"
+
+}
 
