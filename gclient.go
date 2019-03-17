@@ -314,7 +314,7 @@ func initClient() {
 	screen = cui.NewScreen()
 	screen.SetCharMode()
 	screen.AddWindow(2, 1, screen.Height - 2, screen.Width, false, false, true)
-	screen.AddMsgBar(1, "  ((( Badger )))  ", "  A fun gopher client!", true)
+	screen.AddMsgBar(1, "  ((( Bombadillo )))  ", "  A fun gopher client!", true)
 	bookmarksWidth := 40
 	if screen.Width < 40 {
 		bookmarksWidth = screen.Width
