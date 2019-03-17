@@ -1,3 +1,9 @@
+***TODO
+- Load homepage on open, if one is set
+- Add built in help system: SIMPLE :help, DO :help action
+- Add styles/color support
+- Revisit the name?
+
 Control keys/input:
 
 q     quit
@@ -6,28 +12,31 @@ k     scrollup
 f     toggle showing favorites as subwindow
 r     refresh current page data (re-request)
 
+GO
 :#    go to link num
 :url  go to url
 
-:w # name       write linknum to file 
-:w url name     write url to file
-:w name         write current to file
+SIMPLE
+:quit                         quit
+:home                         visit home
+:bookmarks                    toogle bookmarks window
 
-:q              quit
+DOLINK
+:delete #                     delete bookmark with num
+:bookmarks #                  visit bookmark with num     
 
-:f add #__ name    add link num as favorite
-:f add url name  add link url as favorite
-:f add name      add current page as favorite
-:f del #         delete favorite with num
-:f del url       delete favorite with url
-:f del name      delete favorite with name
-:f #             visit favorite with num
+DOLINKAS
+:write # name                 write linknum to file 
+:add # name                   add link num as favorite
 
-:s ...kywds      search assigned engine with keywords
+DOAS
+:write url name               write url to file
+:add url name                 add link url as favorite
+:set something something      set a system variable
 
-:home #          set homepage to link num
-:home url        set homepage to url
-:home            visit home
+
+
+value, action, word
 
 - - - - - - - - - - - - - - - - - - 
 
@@ -38,8 +47,11 @@ colorfield.space ++ gopher://colorfield.space:70/
 My phlog ++ gopher://circumlunar.space/1/~sloum/
 
 [options]
-homepage ++ gopher://sdf.org
+home ++ gopher://sdf.org
 searchengine ++ gopher://floodgap.place/v2/veronicasomething
 savelocation ++ ~/Downloads/
 httpbrowser ++ lynx
 openhttp ++ true
+
+
+
