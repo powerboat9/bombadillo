@@ -1,4 +1,4 @@
-***TODO
+TODO
 - Load homepage on open, if one is set
 - Add built in help system: SIMPLE :help, DO :help action
 - Add styles/color support
