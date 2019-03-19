@@ -127,12 +127,16 @@ func GetLine() string {
 }
 
 func SetCharMode() {
-	exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
-	exec.Command("stty", "-F", "/dev/tty", "-echo").Run()
+	cmd := exec.Command("stty", "cbreak", "-echo")
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Run()
 	fmt.Print("\033[?25l")
 }
 
 func SetLineMode() {
-	exec.Command("stty", "-F", "/dev/tty", "-cbreak").Run()
-	exec.Command("stty", "-F", "/dev/tty", "echo").Run()
+	cmd := exec.Command("stty", "-cbreak", "echo")
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Run()
 }

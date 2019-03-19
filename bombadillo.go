@@ -1,10 +1,10 @@
 package main
 
 import (
-	"gsock/gopher"
-	"gsock/cmdparse"
-	"gsock/config"
-	"gsock/cui"
+	"bombadillo/gopher"
+	"bombadillo/cmdparse"
+	"bombadillo/config"
+	"bombadillo/cui"
 	"os/user"
 	"io/ioutil"
 	"os"
@@ -19,7 +19,7 @@ var screen *cui.Screen
 var userinfo, _ = user.Current()
 var settings config.Config
 var options = map[string]string{
-	"homeurl": "",
+	"homeurl": "unset",
 	"savelocation": userinfo.HomeDir + "/Downloads/",
 	"searchengine": "gopher://gopher.floodgap.com:70/7/v2/vs",
 	"openhttp": "false",
@@ -138,6 +138,7 @@ func go_to_url(u string) error {
 			}
 		} else if v.Address.IsBinary {
 			// TO DO: run this into the write to file method
+			return fmt.Errorf("Not built yet")
 		} else {
 			history.Add(v)
 		}
@@ -178,7 +179,7 @@ func go_to_link(l string) error {
 }
 
 func go_home() error {
-	if options["homeurl"] != "" {
+	if options["homeurl"] != "unset" {
 		return go_to_url(options["homeurl"])
 	}
 	return fmt.Errorf("No home address has been set")
@@ -292,11 +293,14 @@ func save_config() {
 		opts += v
 		opts += "\n"
 	}
-	ioutil.WriteFile(userinfo.HomeDir + "/.badger.ini", []byte(bkmrks+opts), 0644)
+	ioutil.WriteFile(userinfo.HomeDir + "/.bombadillo.ini", []byte(bkmrks+opts), 0644)
 }
 
 func load_config() {
-	file, _ := os.Open(userinfo.HomeDir + "/.badger.ini")
+	file, err := os.Open(userinfo.HomeDir + "/.bombadillo.ini")
+	if err != nil {
+		save_config()
+	}
 	confparser := config.NewParser(file)
 	settings, _ = confparser.Parse()
 	file.Close()
@@ -307,6 +311,12 @@ func load_config() {
 			options[lowerkey] = v.Value
 		}
 	}
+}
+
+func display_error(err error, redraw *bool) {
+	cui.MoveCursorTo(screen.Height, 0)
+	fmt.Print("\033[41m\033[37m", err, "\033[0m")
+	*redraw = false
 }
 
 func initClient() {
@@ -328,17 +338,19 @@ func main() {
 	initClient()
 	mainWindow := screen.Windows[0]
 	first_load := true
-
 	redrawScreen := true
 
 	for {
 		screen.ReflashScreen(redrawScreen)
 
 		if first_load {
-			go_home()
 			first_load = false
-			mainWindow.Content = history.Collection[history.Position].Content
-			screen.Bars[0].SetMessage(history.Collection[history.Position].Address.Full)
+			err := go_home()
+
+			if err == nil {
+				mainWindow.Content = history.Collection[history.Position].Content
+				screen.Bars[0].SetMessage(history.Collection[history.Position].Address.Full)
+			}
 			continue
 		}
 
@@ -375,16 +387,12 @@ func main() {
 				parser := cmdparse.NewParser(strings.NewReader(entry))
 				p, err := parser.Parse()
 				if err != nil {
-					cui.MoveCursorTo(screen.Height, 0)
-					fmt.Print("\033[41m\033[37m", err, "\033[0m")
+					display_error(err, &redrawScreen)
 					// Set screen to not reflash
-					redrawScreen = false
 				} else {
 					err := route_input(p)
 					if err != nil {
-						cui.MoveCursorTo(screen.Height, 0)
-						fmt.Print("\033[41m\033[37m", err, "\033[0m")
-						redrawScreen = false
+						display_error(err, &redrawScreen)
 					} else {
 						mainWindow.Scrollposition = 0
 					}

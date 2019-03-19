@@ -4,7 +4,7 @@ import (
 	"io"
 	"fmt"
 	"strings"
-	"gsock/gopher"
+	"bombadillo/gopher"
 )
 
 
