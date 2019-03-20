@@ -56,6 +56,7 @@ func (v *View) ParseMap() {
 				v.Content[i] = linktext
 			} 
 		}
+		v.Content = v.Content[: len(v.Content) - 1]
 	}	
 }
 
