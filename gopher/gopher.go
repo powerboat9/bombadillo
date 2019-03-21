@@ -1,6 +1,6 @@
-// Contains the building blocks of a gopher client: history and view.
+// Contains the building blocks of a gopher client: history, url, and view.
 // History handles the browsing session and view represents individual
-// text based resources.
+// text based resources, the url represents a parsed url.
 package gopher
 
 import (
@@ -16,7 +16,7 @@ import (
 // + + +          V A R I A B L E S          + + + \\
 //--------------------------------------------------\\
 
-// Types is a map of gophertypes to a string representing their
+// types is a map of gophertypes to a string representing their
 // type, to be used when displaying gophermaps
 var types = map[string]string{
 	"0": "TXT",
@@ -80,10 +80,10 @@ func Retrieve(u Url) ([]byte, error) {
 }
 
 
-// The "Visit" function is a high level combination of a few
-// different types that makes it easy to create a Url,
-// make a request to that Url, and add the response and Url
-// to a View. Returns a copy of the view and an error (or nil).
+// Visit is a high level combination of a few different
+// types that makes it easy to create a Url, make a request
+// to that Url, and add the response and Url to a View.
+// Returns a copy of the view and an error (or nil).
 func Visit(addr string) (View, error) {
 	u, err := MakeUrl(addr)
 	if err != nil {

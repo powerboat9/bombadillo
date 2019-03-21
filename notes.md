@@ -2,7 +2,6 @@ TODO
 - Add built in help system: SIMPLE :help, DO :help action
 - Add styles/color support
 - Add comments/documentation for all items
-- Finish out binary download support
 - Make sure html links using the URL convention work correctly
 - Add "Search" command. ":search thing1 thing2" that uses search as set in config
 - Verify that all gophertypes work correctly

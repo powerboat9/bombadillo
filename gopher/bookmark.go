@@ -5,11 +5,30 @@ import (
 	"strings"
 )
 
+//------------------------------------------------\\
+// + + +             T Y P E S               + + + \\
+//--------------------------------------------------\\
+
+
+//Bookmarks is a holder for titles and links that
+//can be retrieved by index
 type Bookmarks struct {
 	Titles	[]string
 	Links		[]string
 }
 
+
+
+
+//------------------------------------------------\\
+// + + +           R E C E I V E R S         + + + \\
+//--------------------------------------------------\\
+
+
+// Add adds a new title and link combination to the bookmarks
+// struct. It takes as input a string slice in which the first 
+// element represents the link and all following items represent
+// the title of the bookmark (they will be joined with spaces).
 func (b *Bookmarks) Add(v []string) error {
 	if len(v) < 2 {
 		return fmt.Errorf("Received %d arguments, expected 2 or more", len(v))

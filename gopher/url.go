@@ -72,10 +72,11 @@ func MakeUrl(u string) (Url, error) {
 		out.Gophertype = "1"
 	} 
 
-	if out.Gophertype == "1" || out.Gophertype == "0" {
-		out.IsBinary = false
-	} else {
-		out.IsBinary = true
+	switch out.Gophertype {
+		case "1", "0", "h", "7":
+			out.IsBinary = false
+		default:
+			out.IsBinary = true
 	}
 
 	if out.Scheme == "gopher" && out.Gophertype == "" {

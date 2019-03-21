@@ -12,7 +12,7 @@ import (
 //--------------------------------------------------\\
 
 
-// The view struct represents a gopher page. It contains
+// View is a struct representing a gopher page. It contains
 // the page content as a string slice, a list of link URLs
 // as string slices, and the Url struct representing the page.
 type View struct {
@@ -27,8 +27,8 @@ type View struct {
 //--------------------------------------------------\\
 
 
-// The "ParseMap" receiver is called by a view struct. It
-// checks if the view is for a gophermap. If not,it does
+// ParseMap is called by a view struct to parse a gophermap. 
+// It checks if the view is for a gophermap. If not,it does
 // nothing. If so, it parses the gophermap into comment lines
 // and link lines. For link lines it adds a link to the links
 // slice and changes the content value to just the printable
@@ -60,8 +60,7 @@ func (v *View) ParseMap() {
 	}	
 }
 
-// The "Display" receiver is called on a view struct.
-// It prints the content, line by line, of the View.
+// Display is called on a view struct to print the contents of the view.
 // This receiver does not return anything.
 func (v View) Display() {
 	fmt.Println()
@@ -76,10 +75,10 @@ func (v View) Display() {
 //--------------------------------------------------\\
 
 
-// Constructor function for View struct.
-// This is used to initialize a View with
-// a Url struct, links, and content. It takes
-// a Url struct and a content []string and returns
+// MakeView creates and returns a new View struct from
+// a Url and a string splice of content. This is used to
+// initialize a View with a Url struct, links, and content.
+// It takes a Url struct and a content []string and returns
 // a View (NOT a pointer to a View).
 func MakeView(url Url, content []string) View {
 	v := View{content, make([]string, 0), url}

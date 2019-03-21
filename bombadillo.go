@@ -45,12 +45,26 @@ func save_file(address, name string) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(userinfo.HomeDir + "/" + name, data, 0644)
+	err = ioutil.WriteFile(options["savelocation"] + name, data, 0644)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	return fmt.Errorf("Saved file to " + options["savelocation"] + name)
+}
+
+func save_file_from_data(v gopher.View) error {
+	urlsplit := strings.Split(v.Address.Full, "/")
+	filename := urlsplit[len(urlsplit) - 1]
+	save_msg := fmt.Sprintf("Saved file as %q", options["savelocation"] + filename)
+	quickMessage(save_msg, false)
+	defer quickMessage(save_msg, true)
+	err := ioutil.WriteFile(options["savelocation"] + filename, []byte(strings.Join(v.Content, "")), 0644)
+	if err != nil {
+		return err
+	}
+
+	return fmt.Errorf(save_msg)
 }
 
 func search(u string) error {
@@ -138,7 +152,7 @@ func go_to_url(u string) error {
 			}
 		} else if v.Address.IsBinary {
 			// TO DO: run this into the write to file method
-			return fmt.Errorf("Not built yet")
+			return save_file_from_data(v)
 		} else {
 			history.Add(v)
 		}
@@ -165,7 +179,7 @@ func go_to_link(l string) error {
 					return err
 				}
 			} else if v.Address.IsBinary {
-				// TO DO: run this into the write to file method
+				return save_file_from_data(v)
 			} else {
 				history.Add(v)
 			}
@@ -322,7 +336,7 @@ func display_error(err error, redraw *bool) {
 func initClient() {
 	history.Position = -1
 	screen = cui.NewScreen()
-	screen.SetCharMode()
+	cui.SetCharMode()
 	screen.AddWindow(2, 1, screen.Height - 2, screen.Width, false, false, true)
 	screen.AddMsgBar(1, "  ((( Bombadillo )))  ", "  A fun gopher client!", true)
 	bookmarksWidth := 40
