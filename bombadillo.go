@@ -73,12 +73,15 @@ func search(u string) error {
 	fmt.Print("Enter form input: ")
 	cui.MoveCursorTo(screen.Height - 1, 17)
 	entry := cui.GetLine()
-	searchurl := fmt.Sprintf("%s\t%s", u, entry[:len(entry) - 1])
+	quickMessage("Searching...", false)
+	searchurl := fmt.Sprintf("%s\t%s", u, entry)
 	sv, err := gopher.Visit(searchurl)
 	if err != nil {
+		quickMessage("Searching...", true)
 		return err
 	}
 	history.Add(sv)
+	quickMessage("Searching...", true)
 
 	return nil
 }
@@ -130,6 +133,9 @@ func simple_command(a string) error {
 			return go_home()
 		case "B", "BOOKMARKS":
 			toggle_bookmarks()
+		case "SEARCH":
+			return search(options["searchengine"])
+
 		default:
 			return fmt.Errorf("Unknown action %q", a)
 	}
@@ -249,7 +255,7 @@ func do_command_as(action string, values []string) error {
 			}
 			return fmt.Errorf("Unable to set %s, it does not exist",values[0])
 	}
-	return fmt.Errorf("This method has not been built")
+	return fmt.Errorf("Unknown command structure")
 }
 
 func do_link_command_as(action, target string, values []string) error {
