@@ -19,7 +19,7 @@ var screen *cui.Screen
 var userinfo, _ = user.Current()
 var settings config.Config
 var options = map[string]string{
-	"homeurl": "unset",
+	"homeurl": "gopher://colorfield.space:70/1/bombadillo-info",
 	"savelocation": userinfo.HomeDir + "/Downloads/",
 	"searchengine": "gopher://gopher.floodgap.com:70/7/v2/vs",
 	"openhttp": "false",
@@ -233,11 +233,12 @@ func do_command_as(action string, values []string) error {
 		return fmt.Errorf("%q", values)
 	}
 
+	if values[0] == "." {
+		values[0] = history.Collection[history.Position].Address.Full
+	}
+
 	switch action {
 		case "ADD", "A":
-			if values[0] == "." {
-				values[0] = history.Collection[history.Position].Address.Full
-			}
 			err := settings.Bookmarks.Add(values)
 			if err != nil {
 				return err

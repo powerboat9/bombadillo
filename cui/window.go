@@ -85,7 +85,14 @@ func (w *Window) DrawContent(){
 }
 
 func (w *Window) ScrollDown() {
-	height := w.Box.row2 - w.Box.row1 - 1
+	var border_thickness int
+	if w.drawBox {
+		border_thickness = -1
+	} else {
+		border_thickness = 1
+	}
+
+	height := w.Box.row2 - w.Box.row1 + border_thickness
 	contentLength := len(w.Content)
 	if w.Scrollposition < contentLength - height {
 		w.Scrollposition++

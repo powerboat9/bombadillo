@@ -1,0 +1,136 @@
+i - bombadillo -  false null.host 70
+i   false null.host 70
+ibombadillo is a gopher client for the terminal. it functions as a pager  false null.host 70
+iwith a "full screen" terminal user interface. Keys are mapped similarly  false null.host 70
+ito vim (as detailed below). source code can be downloaded from the link  false null.host 70
+iand is written in golang. linux and osx are fully supported for both arm false null.host 70
+iand x86_64.  false null.host 70
+i   false null.host 70
+i   false null.host 70
+i   false null.host 70
+isource code is available here: false null.host 70
+hhttp://tildegit.org/sloum/bombadillo url:http://tildegit.org/sloum/bombadillo  colorfield.space  70
+i   false null.host 70
+i   false null.host 70
+i   false null.host 70
+i   false null.host 70
+iusage: false null.host 70
+i   false null.host 70
+iupon opening for the first time a user will be presented with a blank  false null.host 70
+iscreen and a top bar with the application title. to visit a page a user can enter: false null.host 70
+i:colorfield.space false  null.host 70
+i   false null.host 70
+iupon doing so the user will see the colorfield.space gopher page false null.host 70
+iyou will see the ':' key come up a lot as it leads into many commands. false null.host 70
+i   false null.host 70
+i   false null.host 70
+i   false null.host 70
+isome keys function as "hot keys". when pressed, their will initite an  false null.host 70
+iaction immediately. the following keys work as hot keys: false null.host 70
+iq - quit bombadillo  false null.host 70
+ib - back (go back a place in browsing history if available) false null.host 70
+if - forward (go forward a place in browsing history if available)  false null.host 70
+ij - scroll down (if there is room to do so)  false null.host 70
+ik - scroll up (if there is room to do so)  false null.host 70
+iB - toggle bookmarks sidebar into or out of view false null.host 70
+i: - enter command mode false null.host false
+i   false null.host 70
+i   false null.host 70
+once in command mode, the following commands are available: false null.host 70
+i   false null.host 70
+iquit false null.host 70
+i   false null.host 70
+i  - quit                :quit
+i      - quits the program  false null.host 70
+i   false null.host 70
+i - - - - - - - - - -   false null.host 70
+i   false null.host 70
+ihome false null.host 70
+i   false null.host 70
+i - home                 :home  false null.host 70
+i      - navigates to a user's home page if one is set (see 'set' command)  false null.host 70
+i        false null.host 70
+i - - - - - - - - - -   false null.host 70
+i   false null.host 70
+ibookmarks  false null.host 70
+i   false null.host 70
+i  - view bookmarks      :bookmarks false null.host 70
+i      - alias for 'B' hotkey. toggles the bookmarks sidebar. false null.host 70
+i   false null.host 70
+i  - visit bookmark      :bookmarks [bookmark link #] false null.host 70
+i      - if the number is a valid bookmark id, the user will be navigates to  false null.host 70
+i        the requested bookmark's page
+i   false null.host 70
+i  - add bookmark v1     :add [url] [title of bookmark] false null.host 70
+i      - adds a bookmark from a url. the title is a series of space separated words.  false null.host 70
+i   false null.host 70
+i  - add bookmark v2     :add [link #] [title of bookmark]  false null.host 70
+i      - adds a bookmark from a valid link number on the current/active page false null.host 70
+i   false null.host 70
+i  - add bookmark v3     :add . [title of bookmark] false null.host 70
+i      - adds the current page as a bookmark with the supplied title  false null.host 70
+i   false null.host 70
+i  - delete bookmark     :delete [bookmark link #]  false null.host 70
+i      - delete a bookmark from a valid bookmark link number  false null.host 70
+i   false null.host 70
+i - - - - - - - - - - false null.host 70 
+i   false null.host 70
+ifiles  false null.host 70
+i   false null.host 70
+i  - save as v1          :write [url] [file name] false null.host 70
+i      - saves the content at the address provided as the name provided.  false null.host 70
+i        this only works if the address resolves to actual content. false null.host 70
+i   false null.host 70
+i  - save as v2          :write [link #] [file name]  false null.host 70
+i      - saves the content at the link number as the name provided. falsenull.host  70
+i        only works if the link number is valid and resolves to actual content. false null.host 70
+i   false null.host 70
+i  - save as v3          :write . [file name]  false null.host 70
+i      - saves the current/active page as the name provided. falsenull.host  70
+i   false null.host 70
+i - - - - - - - - - - false null.host 70 
+i   false null.host 70
+iset  false null.host 70
+i   false null.host 70
+i  - set option as       :set [item] [value]
+i      - sets the item/option as the value. see "configuartion" for more  false null.host 70
+i        information on available options.  false null.host 70
+i   false null.host 70
+i - - - - - - - - - - false null.host 70 
+i   false null.host 70
+i   false null.host 70
+i    *  *  *   false null.host 70
+i   false null.host 70
+i   false null.host 70
+iconfiguartion  false null.host 70
+i   false null.host 70
+ivarious configuartion options can be set via the 'set' command.  false null.host 70
+ithe following are the currently avialable options, more will be  false null.host 70
+icoming in the near future (including color theme options)  false null.host 70
+i   false null.host 70
+i   false null.host 70
+i option          value type                  default   false null.host 70
+i---------------  -------------------------   -------------------  false null.host 70
+i   false null.host 70
+ihomeurl          valid gopher url            this document false null.host 70
+isavelocation     an non-relative filepath    /[home directory path]/Downloads/ false null.host 70
+isearchengine     a type 7 gopher url         gopher.floodgap.com:70/7/v2/vs  false null.host 70
+iopenhttp         true/false                  false false null.host 70
+ihttpbrowser      terminal callable browser   lynx  false null.host 70
+i   false null.host 70
+i   false null.host 70
+i*httpbrowser and openhttp are not currently functional, but are on  false null.host 70
+ithe short list to get functionality added. false null.host 70
+i   false null.host 70
+i   false null.host 70
+i   false null.host 70
+i = - = - = - = - = - = - = - = - = - = - = - = - = false null.host 70
+i   false null.host 70
+i   false null.host 70
+ifor more information please contact the following: false null.host 70
+1colorfield space / colorfield.space  70
+isloum@sdf.org  false null.host 70
+htildegit url:http://tildergit.org/sloum  colorfield.space  70
+i   false null.host 70
+i   false null.host 70
+i   false null.host 70
