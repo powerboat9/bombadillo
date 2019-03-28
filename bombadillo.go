@@ -14,6 +14,7 @@ import (
 	"strconv"
 )
 
+var helplocation string ="gopher://colorfield.space:70/1/bombadillo-info"
 var history gopher.History = gopher.MakeHistory()
 var screen *cui.Screen
 var userinfo, _ = user.Current()
@@ -75,7 +76,7 @@ func search(u string) error {
 	entry := cui.GetLine()
 	quickMessage("Searching...", false)
 	searchurl := fmt.Sprintf("%s\t%s", u, entry)
-	sv, err := gopher.Visit(searchurl)
+	sv, err := gopher.Visit(searchurl, options["openhttp"])
 	if err != nil {
 		quickMessage("Searching...", true)
 		return err
@@ -135,6 +136,8 @@ func simple_command(a string) error {
 			toggle_bookmarks()
 		case "SEARCH":
 			return search(options["searchengine"])
+		case "HELP":
+			return go_to_url(helplocation)
 
 		default:
 			return fmt.Errorf("Unknown action %q", a)
@@ -144,7 +147,7 @@ func simple_command(a string) error {
 
 func go_to_url(u string) error {
 		quickMessage("Loading...", false)
-		v, err := gopher.Visit(u)
+		v, err := gopher.Visit(u, options["openhttp"])
 		if err != nil {
 			quickMessage("Loading...", true)
 			return err
@@ -172,7 +175,7 @@ func go_to_link(l string) error {
 		if item <= linkcount {
 			linkurl := history.Collection[history.Position].Links[item - 1]
 			quickMessage("Loading...", false)
-			v, err := gopher.Visit(linkurl)
+			v, err := gopher.Visit(linkurl, options["openhttp"])
 			if err != nil {
 				quickMessage("Loading...", true)
 				return err
@@ -386,15 +389,19 @@ func main() {
 			case 'q', 'Q':
 				cui.Exit()
 			case 'b':
-				history.GoBack()
-				mainWindow.Scrollposition = 0
-				redrawScreen = true
+				success := history.GoBack()
+				if success {
+					mainWindow.Scrollposition = 0
+					redrawScreen = true
+				}
 			case 'B':
 				toggle_bookmarks()
 			case 'f', 'F':
-				history.GoForward()
-				mainWindow.Scrollposition = 0
-				redrawScreen = true
+				success := history.GoForward()
+				if success {
+					mainWindow.Scrollposition = 0
+					redrawScreen = true
+				}
 			case ':':
 				redrawScreen = true
 				cui.MoveCursorTo(screen.Height - 1, 0)

@@ -66,12 +66,14 @@ func (h History) Get() (*View, error) {
 // When called it decrements the current position and
 // displays the content for the View in that position.
 // If history is at position 0, no action is taken.
-func (h *History) GoBack() {
+func (h *History) GoBack() bool {
 	if h.Position > 0 {
 		h.Position--
-	} else {
-		fmt.Print("\a")
+		return true
 	}
+
+	fmt.Print("\a")
+	return false
 }
 
 
@@ -79,13 +81,14 @@ func (h *History) GoBack() {
 // When called it increments the current position and
 // displays the content for the View in that position.
 // If history is at position len - 1, no action is taken.
-func (h *History) GoForward() {
+func (h *History) GoForward() bool {
 	if h.Position + 1 < h.Length {
 		h.Position++
-		h.DisplayCurrentView()
-	} else {
-		fmt.Print("\a")
+		return true
 	}
+
+	fmt.Print("\a")
+	return false
 }
 
 // The "DisplayCurrentView" receiver is called by a history

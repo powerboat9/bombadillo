@@ -9,6 +9,9 @@ import (
 	"net"
 	"io/ioutil"
 	"time"
+	"os/exec"
+	"runtime"
+	"fmt"
 )
 
 
@@ -84,10 +87,20 @@ func Retrieve(u Url) ([]byte, error) {
 // types that makes it easy to create a Url, make a request
 // to that Url, and add the response and Url to a View.
 // Returns a copy of the view and an error (or nil).
-func Visit(addr string) (View, error) {
+func Visit(addr, openhttp string) (View, error) {
 	u, err := MakeUrl(addr)
 	if err != nil {
 		return View{}, err
+	}
+
+	if u.Gophertype == "h" {
+		if res, tf := isWebLink(u.Resource); tf && strings.ToUpper(openhttp) == "TRUE" {
+			err := openbrowser(res)
+			if err != nil {
+				return View{}, err
+			}
+			return View{}, fmt.Errorf("")
+		}
 	}
 
 	text, err := Retrieve(u)
@@ -113,3 +126,31 @@ func GetType(t string) string {
 
 }
 
+func isWebLink(resource string) (string, bool) {
+	split := strings.SplitN(resource, ":", 2)
+	if first := strings.ToUpper(split[0]); first == "URL" && len(split) > 1 {
+		return split[1], true
+	}
+	return "", false
+}
+
+func openbrowser(url string) error {
+	// gist.github.com/hyg/9c4afcd91fe24316cbf0
+	var err error
+
+	switch runtime.GOOS {
+	case "linux":
+		err = exec.Command("xdg-open", url).Start()
+	case "windows":
+		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	case "darwin":
+		err = exec.Command("open", url).Start()
+	default:
+		err = fmt.Errorf("Unsupported os for browser detection")
+	}
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

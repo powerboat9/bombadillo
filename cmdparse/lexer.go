@@ -75,7 +75,7 @@ func (s *scanner) scanText() Token {
 	capInput := strings.ToUpper(buf.String())
 	switch capInput {
 		case "DELETE", "ADD", "WRITE", "SET", "RECALL", "R", "SEARCH",
-			"W", "A", "D", "S", "Q", "QUIT", "B", "BOOKMARKS", "H", "HOME":
+			"W", "A", "D", "S", "Q", "QUIT", "B", "BOOKMARKS", "H", "HOME", "HELP":
 			return Token{Action, capInput}
 	}
 

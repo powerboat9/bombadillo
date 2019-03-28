@@ -32,7 +32,7 @@ type Url struct {
 // an error (or nil).
 func MakeUrl(u string) (Url, error) {
 	var out Url
-	re := regexp.MustCompile(`^((?P<scheme>gopher|http|https|ftp|telnet):\/\/)?(?P<host>[\w\-\.\d]+)(?::(?P<port>\d+)?)?(?:/(?P<type>[01345679gIhisp])?)?(?P<resource>(?:\/.*)?)?$`)
+	re := regexp.MustCompile(`^((?P<scheme>gopher|http|https|ftp|telnet):\/\/)?(?P<host>[\w\-\.\d]+)(?::(?P<port>\d+)?)?(?:/(?P<type>[01345679gIhisp])?)?(?P<resource>(?:[\/|Uu].*)?)?$`)
 	match := re.FindStringSubmatch(u)
 
 	if valid := re.MatchString(u); valid != true {
