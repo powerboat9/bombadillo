@@ -84,6 +84,7 @@ func search(u string) error {
 	history.Add(sv)
 	quickMessage("Searching...", true)
 	updateMainContent()
+	screen.Windows[0].Scrollposition = 0
 	screen.ReflashScreen(true)
 	return nil
 }
@@ -173,6 +174,7 @@ func go_to_url(u string) error {
 		history.Add(v)
 	}
 	updateMainContent()
+	screen.Windows[0].Scrollposition = 0
 	screen.ReflashScreen(true)
 	return nil
 }
@@ -208,6 +210,7 @@ func go_to_link(l string) error {
 			return fmt.Errorf("Invalid link id: %s", l)
 	}
 	updateMainContent()
+	screen.Windows[0].Scrollposition = 0
 	screen.ReflashScreen(true)
 	return nil
 }
