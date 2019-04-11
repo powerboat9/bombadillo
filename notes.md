@@ -1,10 +1,9 @@
 TODO
-- Add built in help system: SIMPLE :help, DO :help action
 - Add styles/color support
-- Add comments/documentation for all items
+- Add code comments/documentation for all items
 - Make sure html links using the URL convention work correctly
-- Add "Search" command. ":search thing1 thing2" that uses search as set in config
-- Verify that all gophertypes work correctly
+
+
 
 Control keys/input:
 
@@ -12,7 +11,7 @@ q     quit
 j     scrolldown
 k     scrollup
 f     toggle showing favorites as subwindow
-r     refresh current page data (re-request)
+TODO - r     refresh current page data (re-request)
 
 GO
 :#    go to link num
@@ -22,6 +21,8 @@ SIMPLE
 :quit                         quit
 :home                         visit home
 :bookmarks                    toogle bookmarks window
+:search
+:help
 
 DOLINK
 :delete #                     delete bookmark with num

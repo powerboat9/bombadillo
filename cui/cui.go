@@ -10,15 +10,20 @@ import (
 )
 
 var shapes = map[string]string{
-	"wall": "│",
-	"ceiling": "─",
+	"wall": "╵",
+	"ceiling": "╴",
 	"tl": "┌",
 	"tr": "┐",
 	"bl": "└",
 	"br": "┘",
-	"scroll-thumb": "▉",
-	"scroll-track": "░",
+	"awall": "║",
+	"aceiling": "═",
+	"atl": "╔",
+	"atr": "╗",
+	"abl": "╚",
+	"abr": "╝",
 }
+
 
 func drawShape(shape string) {
 	if val, ok := shapes[shape]; ok {

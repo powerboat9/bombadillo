@@ -51,10 +51,9 @@ func (s Screen) DrawAllWindows() {
 
 // Clear removes all content from the interior of the screen
 func (s Screen) Clear() {
-	fill := strings.Repeat(" ", s.Width)
 	for i := 0; i <= s.Height; i++ {
 		MoveCursorTo(i, 0)
-		fmt.Print(fill)
+		Clear("line")
 	}
 }
 
