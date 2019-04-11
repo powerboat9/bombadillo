@@ -83,7 +83,8 @@ func search(u string) error {
 	}
 	history.Add(sv)
 	quickMessage("Searching...", true)
-
+	updateMainContent()
+	screen.ReflashScreen(true)
 	return nil
 }
 
@@ -112,17 +113,23 @@ func route_input(com *cmdparse.Command) error {
 
 func toggle_bookmarks() {
 	bookmarks := screen.Windows[1]
+	main := screen.Windows[0]
 	if bookmarks.Show {
 		bookmarks.Show = false
+		screen.Activewindow = 0
+		main.Active = true
+		bookmarks.Active = false
 	} else {
 		bookmarks.Show = true
+		screen.Activewindow = 1
+		main.Active = false
+		bookmarks.Active = true
 	}
 
 	if screen.Activewindow == 0 {
-		screen.Activewindow = 1
 	} else {
-		screen.Activewindow = 0
 	}
+	screen.ReflashScreen(false)
 }
 
 func simple_command(a string) error {
@@ -146,26 +153,28 @@ func simple_command(a string) error {
 }
 
 func go_to_url(u string) error {
-		quickMessage("Loading...", false)
-		v, err := gopher.Visit(u, options["openhttp"])
+	quickMessage("Loading...", false)
+	v, err := gopher.Visit(u, options["openhttp"])
+	if err != nil {
+		quickMessage("Loading...", true)
+		return err
+	}
+	quickMessage("Loading...", true)
+
+	if v.Address.Gophertype == "7" {
+		err := search(v.Address.Full)
 		if err != nil {
-			quickMessage("Loading...", true)
 			return err
 		}
-		quickMessage("Loading...", true)
-
-		if v.Address.Gophertype == "7" {
-			err := search(v.Address.Full)
-			if err != nil {
-				return err
-			}
-		} else if v.Address.IsBinary {
-			// TO DO: run this into the write to file method
-			return save_file_from_data(v)
-		} else {
-			history.Add(v)
-		}
-		return nil
+	} else if v.Address.IsBinary {
+		// TO DO: run this into the write to file method
+		return save_file_from_data(v)
+	} else {
+		history.Add(v)
+	}
+	updateMainContent()
+	screen.ReflashScreen(true)
+	return nil
 }
 
 func go_to_link(l string) error {
@@ -198,6 +207,8 @@ func go_to_link(l string) error {
 	} else {
 			return fmt.Errorf("Invalid link id: %s", l)
 	}
+	updateMainContent()
+	screen.ReflashScreen(true)
 	return nil
 }
 
@@ -219,6 +230,7 @@ func do_link_command(action, target string) error {
 			err := settings.Bookmarks.Del(num)
 			screen.Windows[1].Content = settings.Bookmarks.List()
 			save_config()
+			screen.ReflashScreen(false)
 			return err
 		case "BOOKMARKS", "B":
 			if num > len(settings.Bookmarks.Links) - 1 {
@@ -248,6 +260,7 @@ func do_command_as(action string, values []string) error {
 			}
 			screen.Windows[1].Content = settings.Bookmarks.List()
 			save_config()
+			screen.ReflashScreen(false)
 			return nil
 		case "WRITE", "W":
 			return  save_file(values[0], strings.Join(values[1:], " "))
@@ -282,12 +295,19 @@ func do_link_command_as(action, target string, values []string) error {
 			}
 			screen.Windows[1].Content = settings.Bookmarks.List()
 			save_config()
+			screen.ReflashScreen(false)
 			return nil
 		case "WRITE", "W":
 			return save_file(links[num - 1], strings.Join(values, " "))
 	}
 
 	return fmt.Errorf("This method has not been built")
+}
+
+
+func updateMainContent() {
+	screen.Windows[0].Content = history.Collection[history.Position].Content
+	screen.Bars[0].SetMessage(history.Collection[history.Position].Address.Full)
 }
 
 func clearInput(incError bool) {
@@ -308,6 +328,7 @@ func quickMessage(msg string, clearMsg bool) {
 	}
 }
 
+
 func save_config() {
 	bkmrks := settings.Bookmarks.IniDump()
 	opts := "\n[SETTINGS]\n"
@@ -319,6 +340,7 @@ func save_config() {
 	}
 	ioutil.WriteFile(userinfo.HomeDir + "/.bombadillo.ini", []byte(bkmrks+opts), 0644)
 }
+
 
 func load_config() {
 	file, err := os.Open(userinfo.HomeDir + "/.bombadillo.ini")
@@ -337,17 +359,34 @@ func load_config() {
 	}
 }
 
-func display_error(err error, redraw *bool) {
+func toggleActiveWindow(){
+	if screen.Windows[1].Show {
+		if screen.Windows[0].Active {
+			screen.Windows[0].Active = false
+			screen.Windows[1].Active = true
+			screen.Activewindow = 1
+		} else {
+			screen.Windows[0].Active = true
+			screen.Windows[1].Active = false
+			screen.Activewindow = 0
+		}
+		screen.Windows[1].DrawWindow()
+	}
+}
+
+
+func display_error(err error) {
 	cui.MoveCursorTo(screen.Height, 0)
 	fmt.Print("\033[41m\033[37m", err, "\033[0m")
-	*redraw = false
 }
+
 
 func initClient() {
 	history.Position = -1
 	screen = cui.NewScreen()
 	cui.SetCharMode()
 	screen.AddWindow(2, 1, screen.Height - 2, screen.Width, false, false, true)
+	screen.Windows[0].Active = true
 	screen.AddMsgBar(1, "  ((( Bombadillo )))  ", "  A fun gopher client!", true)
 	bookmarksWidth := 40
 	if screen.Width < 40 {
@@ -357,42 +396,40 @@ func initClient() {
 	load_config()
 }
 
+
 func main() {
 	defer cui.Exit()
 	initClient()
 	mainWindow := screen.Windows[0]
 	first_load := true
-	redrawScreen := true
 
 	for {
-		screen.ReflashScreen(redrawScreen)
-
 		if first_load {
 			first_load = false
 			err := go_home()
 
 			if err == nil {
-				mainWindow.Content = history.Collection[history.Position].Content
-				screen.Bars[0].SetMessage(history.Collection[history.Position].Address.Full)
+				updateMainContent()
 			}
 			continue
 		}
-
-		redrawScreen = false
 
 		c := cui.Getch()
 		switch c {
 			case 'j', 'J':
 				screen.Windows[screen.Activewindow].ScrollDown()
+				screen.ReflashScreen(false)
 			case 'k', 'K':
 				screen.Windows[screen.Activewindow].ScrollUp()
+				screen.ReflashScreen(false)
 			case 'q', 'Q':
 				cui.Exit()
 			case 'b':
 				success := history.GoBack()
 				if success {
 					mainWindow.Scrollposition = 0
-					redrawScreen = true
+					updateMainContent()
+					screen.ReflashScreen(true)
 				}
 			case 'B':
 				toggle_bookmarks()
@@ -400,35 +437,29 @@ func main() {
 				success := history.GoForward()
 				if success {
 					mainWindow.Scrollposition = 0
-					redrawScreen = true
+					updateMainContent()
+					screen.ReflashScreen(true)
 				}
-			case ':','-':
-				redrawScreen = true
+			case '\t':
+				toggleActiveWindow()
+			case ':',' ':
 				cui.MoveCursorTo(screen.Height - 1, 0)
 				entry := cui.GetLine()
 				// Clear entry line and error line
 				clearInput(true)
 				if entry == "" {
-					redrawScreen = false
 					continue
 				}
 				parser := cmdparse.NewParser(strings.NewReader(entry))
 				p, err := parser.Parse()
 				if err != nil {
-					display_error(err, &redrawScreen)
-					// Set screen to not reflash
+					display_error(err)
 				} else {
 					err := route_input(p)
 					if err != nil {
-						display_error(err, &redrawScreen)
-					} else {
-						mainWindow.Scrollposition = 0
+						display_error(err)
 					}
 				}
-		}
-		if history.Position >= 0 {
-			mainWindow.Content = history.Collection[history.Position].Content
-			screen.Bars[0].SetMessage(history.Collection[history.Position].Address.Full)
 		}
 	}
 }

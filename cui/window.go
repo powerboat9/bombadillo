@@ -33,18 +33,22 @@ func (w *Window) DrawWindow() {
 }
 
 func (w *Window) DrawBox(){
-	moveThenDrawShape(w.Box.row1, w.Box.col1, "tl")
-	moveThenDrawShape(w.Box.row1, w.Box.col2, "tr")
-	moveThenDrawShape(w.Box.row2, w.Box.col1, "bl")
-	moveThenDrawShape(w.Box.row2, w.Box.col2, "br")
+	lead := ""
+	if w.Active {
+		lead = "a"
+	}
+	moveThenDrawShape(w.Box.row1, w.Box.col1, lead + "tl")
+	moveThenDrawShape(w.Box.row1, w.Box.col2, lead + "tr")
+	moveThenDrawShape(w.Box.row2, w.Box.col1, lead + "bl")
+	moveThenDrawShape(w.Box.row2, w.Box.col2, lead + "br")
 	for i := w.Box.col1 + 1; i < w.Box.col2; i++ {
-		moveThenDrawShape(w.Box.row1, i, "ceiling")
-		moveThenDrawShape(w.Box.row2, i, "ceiling")
+		moveThenDrawShape(w.Box.row1, i, lead + "ceiling")
+		moveThenDrawShape(w.Box.row2, i, lead + "ceiling")
 	}
 
 	for i:= w.Box.row1 + 1; i < w.Box.row2; i++ {
-		moveThenDrawShape(i, w.Box.col1, "wall")
-		moveThenDrawShape(i, w.Box.col2, "wall")
+		moveThenDrawShape(i, w.Box.col1, lead + "wall")
+		moveThenDrawShape(i, w.Box.col2, lead + "wall")
 	}
 }
 
