@@ -402,7 +402,7 @@ func main() {
 					mainWindow.Scrollposition = 0
 					redrawScreen = true
 				}
-			case ':':
+			case ':','-':
 				redrawScreen = true
 				cui.MoveCursorTo(screen.Height - 1, 0)
 				entry := cui.GetLine()
