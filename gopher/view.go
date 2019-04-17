@@ -39,6 +39,11 @@ func (v *View) ParseMap() {
 	if v.Address.Gophertype == "1" || v.Address.Gophertype == "7" {
 		for i, e := range v.Content {
 			e = strings.Trim(e, "\r\n")
+			if e == "." {
+				v.Content[i] = " "
+				continue
+			}
+
 			line := strings.Split(e,"\t")
 			var title string
 			if len(line[0]) > 1 {
@@ -54,9 +59,8 @@ func (v *View) ParseMap() {
 				v.Links = append(v.Links, fulllink)
 				linktext := fmt.Sprintf("(%s) %2d   %s", GetType(string(line[0][0])), len(v.Links), title)
 				v.Content[i] = linktext
-			} 
+			}
 		}
-		v.Content = v.Content[: len(v.Content) - 1]
 	}	
 }
 
