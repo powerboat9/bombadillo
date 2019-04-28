@@ -1,34 +1,32 @@
 package gopher
 
 import (
-	"regexp"
 	"errors"
+	"regexp"
 )
 
 //------------------------------------------------\\
 // + + +             T Y P E S               + + + \\
 //--------------------------------------------------\\
 
-
 // The url struct represents a URL for the rest of the system.
 // It includes component parts as well as a full URL string.
 type Url struct {
-	Scheme      string
-	Host        string
-	Port        string
-	Gophertype  string
-	Resource    string
-	Full				string
-	IsBinary		bool
+	Scheme     string
+	Host       string
+	Port       string
+	Gophertype string
+	Resource   string
+	Full       string
+	IsBinary   bool
 }
-
 
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\
 //--------------------------------------------------\\
 
-// MakeUrl is a Url constructor that takes in a string 
-// representation of a url and returns a Url struct and 
+// MakeUrl is a Url constructor that takes in a string
+// representation of a url and returns a Url struct and
 // an error (or nil).
 func MakeUrl(u string) (Url, error) {
 	var out Url
@@ -41,16 +39,16 @@ func MakeUrl(u string) (Url, error) {
 
 	for i, name := range re.SubexpNames() {
 		switch name {
-			case "scheme":
-				out.Scheme = match[i]
-			case "host":
-				out.Host = match[i]
-			case "port":
-				out.Port = match[i]
-			case "type":
-				out.Gophertype = match[i]
-			case "resource":
-				out.Resource = match[i]
+		case "scheme":
+			out.Scheme = match[i]
+		case "host":
+			out.Host = match[i]
+		case "port":
+			out.Port = match[i]
+		case "type":
+			out.Gophertype = match[i]
+		case "resource":
+			out.Resource = match[i]
 		}
 	}
 
@@ -70,13 +68,13 @@ func MakeUrl(u string) (Url, error) {
 
 	if out.Gophertype == "" && (out.Resource == "" || out.Resource == "/") {
 		out.Gophertype = "1"
-	} 
+	}
 
 	switch out.Gophertype {
-		case "1", "0", "h", "7":
-			out.IsBinary = false
-		default:
-			out.IsBinary = true
+	case "1", "0", "h", "7":
+		out.IsBinary = false
+	default:
+		out.IsBinary = true
 	}
 
 	if out.Scheme == "gopher" && out.Gophertype == "" {
@@ -87,4 +85,3 @@ func MakeUrl(u string) (Url, error) {
 
 	return out, nil
 }
-

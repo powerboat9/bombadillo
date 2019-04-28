@@ -1,37 +1,35 @@
 package config
 
 import (
-	"io"
 	"fmt"
+	"io"
 	"strings"
-	"bombadillo/gopher"
+	"tildegit.org/sloum/bombadillo/gopher"
 )
-
 
 //------------------------------------------------\\
 // + + +             T Y P E S               + + + \\
 //--------------------------------------------------\\
 
 type Parser struct {
-	s					*scanner
-	row				int
-	buffer		struct {
-		token		Token
-		size		int
+	s      *scanner
+	row    int
+	buffer struct {
+		token Token
+		size  int
 	}
 }
 
 type Config struct {
-	Bookmarks		gopher.Bookmarks
-	Colors			[]KeyValue
-	Settings		[]KeyValue
+	Bookmarks gopher.Bookmarks
+	Colors    []KeyValue
+	Settings  []KeyValue
 }
 
 type KeyValue struct {
-	Key				string
-	Value			string
+	Key   string
+	Value string
 }
-
 
 //------------------------------------------------\\
 // + + +           R E C E I V E R S         + + + \\
@@ -45,7 +43,7 @@ func (p *Parser) scan() (current Token) {
 
 	current = p.s.scan()
 	p.buffer.token = current
-	return 
+	return
 }
 
 func (p *Parser) parseKeyValue() (KeyValue, error) {
@@ -68,7 +66,6 @@ func (p *Parser) parseKeyValue() (KeyValue, error) {
 
 func (p *Parser) unscan() { p.buffer.size = 1 }
 
-
 func (p *Parser) Parse() (Config, error) {
 	p.row = 1
 	section := ""
@@ -88,12 +85,12 @@ func (p *Parser) Parse() (Config, error) {
 				return Config{}, err
 			}
 			switch section {
-				case "BOOKMARKS":
-					c.Bookmarks.Add([]string{keyval.Value, keyval.Key})
-				case "COLORS":
-					c.Colors = append(c.Colors, keyval)
-				case "SETTINGS":
-					c.Settings = append(c.Settings, keyval)
+			case "BOOKMARKS":
+				c.Bookmarks.Add([]string{keyval.Value, keyval.Key})
+			case "COLORS":
+				c.Colors = append(c.Colors, keyval)
+			case "SETTINGS":
+				c.Settings = append(c.Settings, keyval)
 			}
 		} else if t.kind == TOK_ERROR {
 			return Config{}, fmt.Errorf("Error on row %d: %s", p.row, t.val)
@@ -102,7 +99,6 @@ func (p *Parser) Parse() (Config, error) {
 
 	return c, nil
 }
-
 
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\

@@ -1,33 +1,28 @@
 package gopher
 
 import (
-	"strings"
 	"fmt"
+	"strings"
 )
-
-
 
 //------------------------------------------------\\
 // + + +             T Y P E S               + + + \\
 //--------------------------------------------------\\
 
-
 // View is a struct representing a gopher page. It contains
 // the page content as a string slice, a list of link URLs
 // as string slices, and the Url struct representing the page.
 type View struct {
-	Content		[]string
-	Links			[]string
-	Address		Url
+	Content []string
+	Links   []string
+	Address Url
 }
-
 
 //------------------------------------------------\\
 // + + +           R E C E I V E R S         + + + \\
 //--------------------------------------------------\\
 
-
-// ParseMap is called by a view struct to parse a gophermap. 
+// ParseMap is called by a view struct to parse a gophermap.
 // It checks if the view is for a gophermap. If not,it does
 // nothing. If so, it parses the gophermap into comment lines
 // and link lines. For link lines it adds a link to the links
@@ -44,7 +39,7 @@ func (v *View) ParseMap() {
 				continue
 			}
 
-			line := strings.Split(e,"\t")
+			line := strings.Split(e, "\t")
 			var title string
 			if len(line[0]) > 1 {
 				title = line[0][1:]
@@ -61,7 +56,7 @@ func (v *View) ParseMap() {
 				v.Content[i] = linktext
 			}
 		}
-	}	
+	}
 }
 
 // Display is called on a view struct to print the contents of the view.
@@ -73,11 +68,9 @@ func (v View) Display() {
 	}
 }
 
-
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\
 //--------------------------------------------------\\
-
 
 // MakeView creates and returns a new View struct from
 // a Url and a string splice of content. This is used to
@@ -89,5 +82,3 @@ func MakeView(url Url, content []string) View {
 	v.ParseMap()
 	return v
 }
-
-

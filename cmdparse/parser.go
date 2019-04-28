@@ -1,31 +1,31 @@
 package cmdparse
 
 import (
-	"io"
 	"fmt"
+	"io"
 )
-
 
 //------------------------------------------------\\
 // + + +             T Y P E S               + + + \\
 //--------------------------------------------------\\
 
 type Parser struct {
-	s				*scanner
-	buffer		struct {
-		token		Token
-		size		int
+	s      *scanner
+	buffer struct {
+		token Token
+		size  int
 	}
 }
 
 type Command struct {
-	Action			string
-	Target			string
-	Value				[]string
-	Type				Comtype
+	Action string
+	Target string
+	Value  []string
+	Type   Comtype
 }
 
 type Comtype int
+
 const (
 	GOURL Comtype = iota
 	GOLINK
@@ -34,7 +34,6 @@ const (
 	DOLINKAS
 	DOAS
 )
-
 
 //------------------------------------------------\\
 // + + +           R E C E I V E R S         + + + \\
@@ -55,7 +54,7 @@ func (p *Parser) scan() (current Token) {
 	}
 
 	p.buffer.token = current
-	return 
+	return
 }
 
 func (p *Parser) unscan() { p.buffer.size = 1 }
@@ -88,17 +87,17 @@ func (p *Parser) parseAction() (*Command, error) {
 	cm.Action = t.val
 	t = p.scan()
 	switch t.kind {
-		case End:
-			cm.Type = SIMPLE
-			return cm, nil
-		case Value:
-			cm.Target = t.val
-			cm.Type = DOLINK
-		case Word:
-			cm.Value = append(cm.Value, t.val)
-			cm.Type = DOAS
-		case Action, Whitespace:
-			return nil, fmt.Errorf("Found %q (%d), expected value", t.val, t.kind)
+	case End:
+		cm.Type = SIMPLE
+		return cm, nil
+	case Value:
+		cm.Target = t.val
+		cm.Type = DOLINK
+	case Word:
+		cm.Value = append(cm.Value, t.val)
+		cm.Type = DOAS
+	case Action, Whitespace:
+		return nil, fmt.Errorf("Found %q (%d), expected value", t.val, t.kind)
 	}
 	t = p.scan()
 	if t.kind == End {
@@ -118,7 +117,7 @@ func (p *Parser) parseAction() (*Command, error) {
 			} else if token.kind == Whitespace {
 				continue
 			}
-			cm.Value = append(cm.Value, token.val)	
+			cm.Value = append(cm.Value, token.val)
 		}
 	}
 	return cm, nil
@@ -131,7 +130,6 @@ func (p *Parser) Parse() (*Command, error) {
 		return p.parseAction()
 	}
 }
-
 
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\

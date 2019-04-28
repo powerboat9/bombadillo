@@ -1,29 +1,28 @@
 package cui
 
 import (
-	"strings"
+	"bufio"
 	"bytes"
 	"fmt"
-	"bufio"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 var shapes = map[string]string{
-	"wall": "╵",
-	"ceiling": "╴",
-	"tl": "┌",
-	"tr": "┐",
-	"bl": "└",
-	"br": "┘",
-	"awall": "║",
+	"wall":     "╵",
+	"ceiling":  "╴",
+	"tl":       "┌",
+	"tr":       "┐",
+	"bl":       "└",
+	"br":       "┘",
+	"awall":    "║",
 	"aceiling": "═",
-	"atl": "╔",
-	"atr": "╗",
-	"abl": "╚",
-	"abr": "╝",
+	"atl":      "╔",
+	"atr":      "╗",
+	"abl":      "╚",
+	"abr":      "╝",
 }
-
 
 func drawShape(shape string) {
 	if val, ok := shapes[shape]; ok {
@@ -44,9 +43,9 @@ func MoveCursorTo(row, col int) {
 
 func moveCursorToward(dir string, amount int) {
 	directions := map[string]string{
-		"up": "A",
-		"down": "B",
-		"left": "D",
+		"up":    "A",
+		"down":  "B",
+		"left":  "D",
 		"right": "C",
 	}
 
@@ -66,11 +65,11 @@ func Exit() {
 
 func Clear(dir string) {
 	directions := map[string]string{
-		"up": "\033[1J",
-		"down": "\033[0J",
-		"left": "\033[1K",
-		"right": "\033[0K",
-		"line": "\033[2K",
+		"up":     "\033[1J",
+		"down":   "\033[0J",
+		"left":   "\033[1K",
+		"right":  "\033[0K",
+		"line":   "\033[2K",
 		"screen": "\033[2J",
 	}
 
@@ -90,22 +89,22 @@ func WrapLines(s []string, length int) []string {
 			var subout bytes.Buffer
 			for i, wd := range words {
 				sublen := subout.Len()
-				if sublen + len(wd) + 1 <= length {
+				if sublen+len(wd)+1 <= length {
 					if sublen > 0 {
 						subout.WriteString(" ")
 					}
-					subout.WriteString(wd)	
-					if i == len(words) - 1 {
+					subout.WriteString(wd)
+					if i == len(words)-1 {
 						out = append(out, subout.String())
 					}
 				} else {
+					out = append(out, subout.String())
+					subout.Reset()
+					subout.WriteString(wd)
+					if i == len(words)-1 {
 						out = append(out, subout.String())
 						subout.Reset()
-						subout.WriteString(wd)
-						if i == len(words) - 1 {
-							out = append(out, subout.String())
-							subout.Reset()
-						}
+					}
 				}
 			}
 		}

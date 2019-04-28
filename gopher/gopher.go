@@ -4,16 +4,15 @@
 package gopher
 
 import (
-	"strings"
 	"errors"
-	"net"
+	"fmt"
 	"io/ioutil"
-	"time"
+	"net"
 	"os/exec"
 	"runtime"
-	"fmt"
+	"strings"
+	"time"
 )
-
 
 //------------------------------------------------\\
 // + + +          V A R I A B L E S          + + + \\
@@ -37,12 +36,9 @@ var types = map[string]string{
 	"p": "PNG",
 }
 
-
-
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\
 //--------------------------------------------------\\
-
 
 // Retrieve makes a request to a Url and resturns
 // the response as []byte/error. This function is
@@ -50,12 +46,12 @@ var types = map[string]string{
 // using the "Visit" receiver of the History struct will
 // be better.
 func Retrieve(u Url) ([]byte, error) {
-  nullRes := make([]byte, 0)
+	nullRes := make([]byte, 0)
 	timeOut := time.Duration(5) * time.Second
 
-  if u.Host == "" || u.Port == "" {
+	if u.Host == "" || u.Port == "" {
 		return nullRes, errors.New("Incomplete request url")
-  }
+	}
 
 	addr := u.Host + ":" + u.Port
 
@@ -81,7 +77,6 @@ func Retrieve(u Url) ([]byte, error) {
 
 	return result, err
 }
-
 
 // Visit is a high level combination of a few different
 // types that makes it easy to create a Url, make a request
@@ -121,7 +116,7 @@ func Visit(addr, openhttp string) (View, error) {
 func GetType(t string) string {
 	if val, ok := types[t]; ok {
 		return val
-	} 
+	}
 	return "???"
 
 }
