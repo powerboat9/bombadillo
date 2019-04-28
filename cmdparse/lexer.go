@@ -2,34 +2,32 @@ package cmdparse
 
 import (
 	"bufio"
-	"strings"
-	"io"
 	"bytes"
+	"io"
+	"strings"
 )
-
-
 
 //------------------------------------------------\\
 // + + +             T Y P E S               + + + \\
 //--------------------------------------------------\\
 
 type Token struct {
-	kind	tok
-	val	string
+	kind tok
+	val  string
 }
 
 type scanner struct {
-	r	*bufio.Reader
+	r *bufio.Reader
 }
 
 type tok int
-
 
 //------------------------------------------------\\
 // + + +         V A R I A B L E S           + + + \\
 //--------------------------------------------------\\
 
 var eof rune = rune(0)
+
 const (
 	Word tok = iota
 	Action
@@ -42,7 +40,6 @@ const (
 	ws
 	illegal
 )
-
 
 //------------------------------------------------\\
 // + + +           R E C E I V E R S         + + + \\
@@ -74,9 +71,9 @@ func (s *scanner) scanText() Token {
 
 	capInput := strings.ToUpper(buf.String())
 	switch capInput {
-		case "DELETE", "ADD", "WRITE", "SET", "RECALL", "R", "SEARCH",
-			"W", "A", "D", "S", "Q", "QUIT", "B", "BOOKMARKS", "H", "HOME", "HELP":
-			return Token{Action, capInput}
+	case "DELETE", "ADD", "WRITE", "SET", "RECALL", "R", "SEARCH",
+		"W", "A", "D", "S", "Q", "QUIT", "B", "BOOKMARKS", "H", "HOME", "HELP":
+		return Token{Action, capInput}
 	}
 
 	return Token{Word, buf.String()}
@@ -94,7 +91,7 @@ func (s *scanner) scanWhitespace() Token {
 			s.unread()
 			break
 		} else {
-			_,_ = buf.WriteRune(ch)
+			_, _ = buf.WriteRune(ch)
 		}
 	}
 
@@ -105,7 +102,7 @@ func (s *scanner) scanWhitespace() Token {
 func (s *scanner) scanNumber() Token {
 	var buf bytes.Buffer
 	buf.WriteRune(s.read())
-	
+
 	for {
 		if ch := s.read(); ch == eof {
 			break
@@ -113,10 +110,10 @@ func (s *scanner) scanNumber() Token {
 			s.unread()
 			break
 		} else {
-			_,_ = buf.WriteRune(ch)
+			_, _ = buf.WriteRune(ch)
 		}
 	}
-	
+
 	return Token{Value, buf.String()}
 }
 
@@ -134,7 +131,7 @@ func (s *scanner) scan() Token {
 	} else if isLetter(char) {
 		s.unread()
 		return s.scanText()
-	}	
+	}
 
 	if char == eof {
 		return Token{End, ""}
@@ -142,7 +139,6 @@ func (s *scanner) scan() Token {
 
 	return Token{illegal, string(char)}
 }
-
 
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\
@@ -167,4 +163,3 @@ func isDigit(ch rune) bool {
 func isEOF(ch rune) bool {
 	return ch == rune(0)
 }
-

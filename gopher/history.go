@@ -1,8 +1,8 @@
 package gopher
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 )
 
 //------------------------------------------------\\
@@ -17,11 +17,10 @@ import (
 // each page in the current history. In general usage this
 // struct should be initialized via the MakeHistory function.
 type History struct {
-	Position		int
-	Length			int
-	Collection	[20]View
+	Position   int
+	Length     int
+	Collection [20]View
 }
-
 
 //------------------------------------------------\\
 // + + +           R E C E I V E R S         + + + \\
@@ -34,11 +33,11 @@ type History struct {
 // history length if something is added in the middle.
 func (h *History) Add(v View) {
 	v.ParseMap()
-	if h.Position == h.Length - 1 && h.Length < len(h.Collection) {
+	if h.Position == h.Length-1 && h.Length < len(h.Collection) {
 		h.Collection[h.Length] = v
 		h.Length++
 		h.Position++
-	} else if h.Position == h.Length - 1 && h.Length == 20  {
+	} else if h.Position == h.Length-1 && h.Length == 20 {
 		for x := 1; x < len(h.Collection); x++ {
 			h.Collection[x-1] = h.Collection[x]
 		}
@@ -76,13 +75,12 @@ func (h *History) GoBack() bool {
 	return false
 }
 
-
 // The "GoForward" receiver is called by a history struct.
 // When called it increments the current position and
 // displays the content for the View in that position.
 // If history is at position len - 1, no action is taken.
 func (h *History) GoForward() bool {
-	if h.Position + 1 < h.Length {
+	if h.Position+1 < h.Length {
 		h.Position++
 		return true
 	}
@@ -100,11 +98,9 @@ func (h *History) DisplayCurrentView() {
 	h.Collection[h.Position].Display()
 }
 
-
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\
 //--------------------------------------------------\\
-
 
 // Constructor function for History struct.
 // This is used to initialize history position

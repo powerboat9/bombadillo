@@ -2,28 +2,25 @@ package config
 
 import (
 	"bufio"
-	"io"
 	"bytes"
 	"fmt"
+	"io"
 )
-
-
 
 //------------------------------------------------\\
 // + + +             T Y P E S               + + + \\
 //--------------------------------------------------\\
 
 type Token struct {
-	kind	TokenType
-	val		string
+	kind TokenType
+	val  string
 }
 
 type scanner struct {
-	r	*bufio.Reader
+	r *bufio.Reader
 }
 
 type TokenType int
-
 
 //------------------------------------------------\\
 // + + +         V A R I A B L E S           + + + \\
@@ -35,7 +32,6 @@ var r_brace rune = ']'
 var newline rune = '\n'
 var equal rune = '='
 
-
 const (
 	TOK_SECTION TokenType = iota
 	TOK_KEY
@@ -46,7 +42,6 @@ const (
 	TOK_ERROR
 	TOK_WHITESPACE
 )
-
 
 //------------------------------------------------\\
 // + + +           R E C E I V E R S         + + + \\
@@ -68,7 +63,7 @@ func (s *scanner) skipWhitespace() {
 		} else if !isWhitespace(ch) {
 			s.unread()
 			break
-		} 
+		}
 	}
 }
 
@@ -87,7 +82,7 @@ func (s *scanner) skipToEndOfLine() {
 func (s *scanner) scanSection() Token {
 	var buf bytes.Buffer
 	buf.WriteRune(s.read())
-	
+
 	for {
 		if ch := s.read(); ch == eof {
 			s.unread()
@@ -103,10 +98,10 @@ func (s *scanner) scanSection() Token {
 			s.skipToEndOfLine()
 			return Token{TOK_ERROR, "Second left brace encountered before closing right brace in section"}
 		} else {
-			_,_ = buf.WriteRune(ch)
+			_, _ = buf.WriteRune(ch)
 		}
 	}
-	
+
 	return Token{TOK_SECTION, buf.String()}
 }
 
@@ -127,7 +122,7 @@ func (s *scanner) scanKey() Token {
 			s.skipToEndOfLine()
 			return Token{TOK_ERROR, "Illegal brace character in key"}
 		} else {
-			_,_ = buf.WriteRune(ch)
+			_, _ = buf.WriteRune(ch)
 		}
 	}
 
@@ -142,7 +137,7 @@ func (s *scanner) scanValue() Token {
 			s.unread()
 			break
 		} else if ch == equal {
-			_,_ = buf.WriteRune(ch)
+			_, _ = buf.WriteRune(ch)
 		} else if ch == newline {
 			s.unread()
 			break
@@ -150,7 +145,7 @@ func (s *scanner) scanValue() Token {
 			s.skipToEndOfLine()
 			return Token{TOK_ERROR, "Illegal brace character in key"}
 		} else {
-			_,_ = buf.WriteRune(ch)
+			_, _ = buf.WriteRune(ch)
 		}
 	}
 
@@ -164,11 +159,11 @@ func (s *scanner) scan() Token {
 
 	if isWhitespace(char) {
 		s.skipWhitespace()
-	} 
-	
+	}
+
 	if char == l_brace {
 		return s.scanSection()
-	}	else if isText(char) {
+	} else if isText(char) {
 		s.unread()
 		return s.scanKey()
 	} else if char == equal {
@@ -183,7 +178,6 @@ func (s *scanner) scan() Token {
 
 	return Token{TOK_ERROR, fmt.Sprintf("Error on character %q", char)}
 }
-
 
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\

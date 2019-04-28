@@ -1,11 +1,11 @@
 package cui
 
 import (
-	"strings"
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
-	"bytes"
+	"strings"
 )
 
 // screenInit records whether or not the screen has been initialized
@@ -17,13 +17,12 @@ var screenInit bool = false
 // holds the various Windows and MsgBars for the application as well
 // as a record of which window is active for control purposes.
 type Screen struct {
-	Height				int
-	Width					int
-	Windows				[]*Window
-  Activewindow	int
-	Bars					[]*MsgBar
+	Height       int
+	Width        int
+	Windows      []*Window
+	Activewindow int
+	Bars         []*MsgBar
 }
-
 
 // AddWindow adds a new window to the Screen struct in question
 func (s *Screen) AddWindow(r1, c1, r2, c2 int, scroll, border, show bool) {
@@ -46,7 +45,7 @@ func (s Screen) DrawAllWindows() {
 			w.DrawWindow()
 		}
 	}
-	MoveCursorTo(s.Height - 1, 1)
+	MoveCursorTo(s.Height-1, 1)
 }
 
 // Clear removes all content from the interior of the screen
@@ -56,7 +55,6 @@ func (s Screen) Clear() {
 		Clear("line")
 	}
 }
-
 
 // ReflashScreen checks for a screen resize and resizes windows if
 // needed then redraws the screen. It takes a bool to decide whether
@@ -108,12 +106,12 @@ func (s *Screen) DrawMsgBars() {
 		title := bar.title
 		fmt.Print(title)
 		if len(bar.title) > s.Width {
-			title = string(bar.title[:s.Width - 3]) + "..."
+			title = string(bar.title[:s.Width-3]) + "..."
 		}
 		_, _ = buf.WriteString(title)
 		msg := bar.message
-		if len(bar.message) > s.Width - len(title) {
-			msg = string(bar.message[:s.Width - len(title) - 3]) + "..."
+		if len(bar.message) > s.Width-len(title) {
+			msg = string(bar.message[:s.Width-len(title)-3]) + "..."
 		}
 		_, _ = buf.WriteString(msg)
 
@@ -124,23 +122,21 @@ func (s *Screen) DrawMsgBars() {
 	}
 }
 
-
 // GetSize retrieves the terminal size and sets the Screen
 // width and height to that size
 func (s *Screen) GetSize() {
-  cmd := exec.Command("stty", "size")
-  cmd.Stdin = os.Stdin
-  out, err := cmd.Output()
-  if err != nil {
+	cmd := exec.Command("stty", "size")
+	cmd.Stdin = os.Stdin
+	out, err := cmd.Output()
+	if err != nil {
 		fmt.Println("Fatal error: Unable to retrieve terminal size")
 		os.Exit(1)
-  }
+	}
 	var h, w int
 	fmt.Sscan(string(out), &h, &w)
 	s.Height = h
 	s.Width = w
 }
-
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - -
 
