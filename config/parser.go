@@ -86,7 +86,10 @@ func (p *Parser) Parse() (Config, error) {
 			}
 			switch section {
 			case "BOOKMARKS":
-				c.Bookmarks.Add([]string{keyval.Value, keyval.Key})
+				err := c.Bookmarks.Add([]string{keyval.Value, keyval.Key})
+				if err != nil {
+					return c, err
+				}
 			case "COLORS":
 				c.Colors = append(c.Colors, keyval)
 			case "SETTINGS":

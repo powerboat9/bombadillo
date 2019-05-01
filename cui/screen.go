@@ -142,7 +142,7 @@ func (s *Screen) GetSize() {
 
 // NewScreen is a constructor function that returns a pointer
 // to a Screen struct
-func NewScreen() *Screen {
+func NewScreen() (*Screen, error) {
 	if screenInit {
 		fmt.Println("Fatal error: Cannot create multiple screens")
 		os.Exit(1)
@@ -152,8 +152,12 @@ func NewScreen() *Screen {
 	for i := 0; i < s.Height; i++ {
 		fmt.Println()
 	}
-	SetCharMode()
+	err := SetCharMode()
+	if err != nil {
+		return nil, err
+	}
+
 	Clear("screen")
 	screenInit = true
-	return &s
+	return &s, nil
 }
