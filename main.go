@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
 	"tildegit.org/sloum/bombadillo/cmdparse"
 	"tildegit.org/sloum/bombadillo/config"
 	"tildegit.org/sloum/bombadillo/cui"
@@ -403,16 +404,8 @@ func displayError(err error) {
 func initClient() error {
 	history.Position = -1
 
-	var err error
-	screen, err = cui.NewScreen()
-	if err != nil {
-		return err
-	}
-
-	err = cui.SetCharMode()
-	if err != nil {
-		return err
-	}
+	screen = cui.NewScreen()
+	cui.SetCharMode()
 
 	screen.AddWindow(2, 1, screen.Height-2, screen.Width, false, false, true)
 	screen.Windows[0].Active = true

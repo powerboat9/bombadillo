@@ -57,10 +57,7 @@ func moveCursorToward(dir string, amount int) {
 func Exit() {
 	moveCursorToward("down", 500)
 	moveCursorToward("right", 500)
-	err := SetLineMode()
-	if err != nil {
-		panic(err)
-	}
+	SetLineMode()
 
 	fmt.Print("\n")
 	fmt.Print("\033[?25h")
@@ -126,10 +123,7 @@ func Getch() rune {
 }
 
 func GetLine() (string, error) {
-	err := SetLineMode()
-	if err != nil {
-		return "", err
-	}
+	SetLineMode()
 
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print(": ")
@@ -138,30 +132,28 @@ func GetLine() (string, error) {
 		return "", err
 	}
 
-	err = SetCharMode()
-	if err != nil {
-		return "", err
-	}
-
+	SetCharMode()
 	return text[:len(text)-1], nil
 }
 
-func SetCharMode() error {
+func SetCharMode() {
 	cmd := exec.Command("stty", "cbreak", "-echo")
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	err := cmd.Run()
 	if err != nil {
-		return err
+		panic(err)
 	}
 
-	_, err = fmt.Print("\033[?25l")
-	return err
+	fmt.Print("\033[?25l")
 }
 
-func SetLineMode() error {
+func SetLineMode() {
 	cmd := exec.Command("stty", "-cbreak", "echo")
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
-	return cmd.Run()
+	err := cmd.Run()
+	if err != nil {
+		panic(err)
+	}
 }
