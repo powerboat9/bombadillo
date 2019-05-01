@@ -33,7 +33,7 @@ func MakeUrl(u string) (Url, error) {
 	re := regexp.MustCompile(`^((?P<scheme>gopher|http|https|ftp|telnet):\/\/)?(?P<host>[\w\-\.\d]+)(?::(?P<port>\d+)?)?(?:/(?P<type>[01345679gIhisp])?)?(?P<resource>(?:[\/|Uu].*)?)?$`)
 	match := re.FindStringSubmatch(u)
 
-	if valid := re.MatchString(u); valid != true {
+	if valid := re.MatchString(u); !valid {
 		return out, errors.New("Invalid URL or command character")
 	}
 

@@ -194,7 +194,3 @@ func isWhitespace(ch rune) bool {
 func isText(ch rune) bool {
 	return ch >= '!' && ch <= '~' && ch != equal && ch != l_brace && ch != r_brace
 }
-
-func isEOF(ch rune) bool {
-	return ch == eof
-}

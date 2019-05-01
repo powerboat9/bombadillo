@@ -152,7 +152,9 @@ func NewScreen() *Screen {
 	for i := 0; i < s.Height; i++ {
 		fmt.Println()
 	}
+
 	SetCharMode()
+
 	Clear("screen")
 	screenInit = true
 	return &s

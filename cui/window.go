@@ -64,7 +64,7 @@ func (w *Window) DrawContent() {
 	height := w.Box.row2 - w.Box.row1 + borderThickness
 	width := w.Box.col2 - w.Box.col1 + borderThickness
 
-	content := WrapLines(w.Content, width)
+	content := wrapLines(w.Content, width)
 
 	if len(content) < w.Scrollposition+height {
 		maxlines = len(content)

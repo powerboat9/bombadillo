@@ -58,6 +58,7 @@ func Exit() {
 	moveCursorToward("down", 500)
 	moveCursorToward("right", 500)
 	SetLineMode()
+
 	fmt.Print("\n")
 	fmt.Print("\033[?25h")
 	os.Exit(0)
@@ -79,7 +80,7 @@ func Clear(dir string) {
 
 }
 
-func WrapLines(s []string, length int) []string {
+func wrapLines(s []string, length int) []string {
 	out := []string{}
 	for _, ln := range s {
 		if len(ln) <= length {
@@ -121,20 +122,29 @@ func Getch() rune {
 	return char
 }
 
-func GetLine() string {
+func GetLine() (string, error) {
 	SetLineMode()
+
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print(": ")
-	text, _ := reader.ReadString('\n')
+	text, err := reader.ReadString('\n')
+	if err != nil {
+		return "", err
+	}
+
 	SetCharMode()
-	return text[:len(text)-1]
+	return text[:len(text)-1], nil
 }
 
 func SetCharMode() {
 	cmd := exec.Command("stty", "cbreak", "-echo")
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
-	cmd.Run()
+	err := cmd.Run()
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Print("\033[?25l")
 }
 
@@ -142,5 +152,8 @@ func SetLineMode() {
 	cmd := exec.Command("stty", "-cbreak", "echo")
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
-	cmd.Run()
+	err := cmd.Run()
+	if err != nil {
+		panic(err)
+	}
 }
