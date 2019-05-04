@@ -394,6 +394,7 @@ func initClient() {
 }
 
 func main() {
+	cui.HandleAlternateScreen("smcup")
 	defer cui.Exit()
 	initClient()
 	mainWindow := screen.Windows[0]

@@ -60,6 +60,7 @@ func Exit() {
 	SetLineMode()
 	fmt.Print("\n")
 	fmt.Print("\033[?25h")
+	HandleAlternateScreen("rmcup")
 	os.Exit(0)
 }
 
@@ -140,6 +141,13 @@ func SetCharMode() {
 
 func SetLineMode() {
 	cmd := exec.Command("stty", "-cbreak", "echo")
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Run()
+}
+
+func HandleAlternateScreen(opt string) {
+	cmd := exec.Command("tput", opt)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Run()
