@@ -35,9 +35,6 @@ const (
 	End
 	Whitespace
 
-	number
-	letter
-	ws
 	illegal
 )
 
@@ -158,8 +155,4 @@ func isLetter(ch rune) bool {
 
 func isDigit(ch rune) bool {
 	return ch >= '0' && ch <= '9'
-}
-
-func isEOF(ch rune) bool {
-	return ch == rune(0)
 }

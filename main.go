@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
 	"tildegit.org/sloum/bombadillo/cmdparse"
 	"tildegit.org/sloum/bombadillo/config"
 	"tildegit.org/sloum/bombadillo/cui"
@@ -25,11 +26,6 @@ var options = map[string]string{
 	"searchengine": "gopher://gopher.floodgap.com:70/7/v2/vs",
 	"openhttp":     "false",
 	"httpbrowser":  "lynx",
-}
-
-func errExit(err string, code int) {
-	fmt.Println(err)
-	os.Exit(code)
 }
 
 func saveFile(address, name string) error {
@@ -73,7 +69,12 @@ func search(u string) error {
 	cui.Clear("line")
 	fmt.Print("Enter form input: ")
 	cui.MoveCursorTo(screen.Height-1, 17)
-	entry := cui.GetLine()
+
+	entry, err := cui.GetLine()
+	if err != nil {
+		return err
+	}
+
 	quickMessage("Searching...", false)
 	searchurl := fmt.Sprintf("%s\t%s", u, entry)
 	sv, err := gopher.Visit(searchurl, options["openhttp"])
@@ -126,9 +127,6 @@ func toggleBookmarks() {
 		bookmarks.Active = true
 	}
 
-	if screen.Activewindow == 0 {
-	} else {
-	}
 	screen.ReflashScreen(false)
 }
 
@@ -230,10 +228,18 @@ func doLinkCommand(action, target string) error {
 	switch action {
 	case "DELETE", "D":
 		err := settings.Bookmarks.Del(num)
+		if err != nil {
+			return err
+		}
+
 		screen.Windows[1].Content = settings.Bookmarks.List()
-		saveConfig()
+		err = saveConfig()
+		if err != nil {
+			return err
+		}
+
 		screen.ReflashScreen(false)
-		return err
+		return nil
 	case "BOOKMARKS", "B":
 		if num > len(settings.Bookmarks.Links)-1 {
 			return fmt.Errorf("There is no bookmark with ID %d", num)
@@ -260,8 +266,13 @@ func doCommandAs(action string, values []string) error {
 		if err != nil {
 			return err
 		}
+
 		screen.Windows[1].Content = settings.Bookmarks.List()
-		saveConfig()
+		err = saveConfig()
+		if err != nil {
+			return err
+		}
+
 		screen.ReflashScreen(false)
 		return nil
 	case "WRITE", "W":
@@ -269,8 +280,7 @@ func doCommandAs(action string, values []string) error {
 	case "SET", "S":
 		if _, ok := options[values[0]]; ok {
 			options[values[0]] = strings.Join(values[1:], " ")
-			saveConfig()
-			return nil
+			return saveConfig()
 		}
 		return fmt.Errorf("Unable to set %s, it does not exist", values[0])
 	}
@@ -295,8 +305,14 @@ func doLinkCommandAs(action, target string, values []string) error {
 		if err != nil {
 			return err
 		}
+
 		screen.Windows[1].Content = settings.Bookmarks.List()
-		saveConfig()
+
+		err = saveConfig()
+		if err != nil {
+			return err
+		}
+
 		screen.ReflashScreen(false)
 		return nil
 	case "WRITE", "W":
@@ -329,7 +345,7 @@ func quickMessage(msg string, clearMsg bool) {
 	}
 }
 
-func saveConfig() {
+func saveConfig() error {
 	bkmrks := settings.Bookmarks.IniDump()
 	opts := "\n[SETTINGS]\n"
 	for k, v := range options {
@@ -338,14 +354,19 @@ func saveConfig() {
 		opts += v
 		opts += "\n"
 	}
-	ioutil.WriteFile(userinfo.HomeDir+"/.bombadillo.ini", []byte(bkmrks+opts), 0644)
+
+	return ioutil.WriteFile(userinfo.HomeDir+"/.bombadillo.ini", []byte(bkmrks+opts), 0644)
 }
 
-func loadConfig() {
+func loadConfig() error {
 	file, err := os.Open(userinfo.HomeDir + "/.bombadillo.ini")
 	if err != nil {
-		saveConfig()
+		err = saveConfig()
+		if err != nil {
+			return err
+		}
 	}
+
 	confparser := config.NewParser(file)
 	settings, _ = confparser.Parse()
 	file.Close()
@@ -356,6 +377,8 @@ func loadConfig() {
 			options[lowerkey] = v.Value
 		}
 	}
+
+	return nil
 }
 
 func toggleActiveWindow() {
@@ -378,10 +401,12 @@ func displayError(err error) {
 	fmt.Print("\033[41m\033[37m", err, "\033[0m")
 }
 
-func initClient() {
+func initClient() error {
 	history.Position = -1
+
 	screen = cui.NewScreen()
 	cui.SetCharMode()
+
 	screen.AddWindow(2, 1, screen.Height-2, screen.Width, false, false, true)
 	screen.Windows[0].Active = true
 	screen.AddMsgBar(1, "  ((( Bombadillo )))  ", "  A fun gopher client!", true)
@@ -390,13 +415,19 @@ func initClient() {
 		bookmarksWidth = screen.Width
 	}
 	screen.AddWindow(2, screen.Width-bookmarksWidth, screen.Height-2, screen.Width, false, true, false)
-	loadConfig()
+	return loadConfig()
 }
 
 func main() {
 	cui.HandleAlternateScreen("smcup")
 	defer cui.Exit()
-	initClient()
+	err := initClient()
+	if err != nil {
+		// if we can't initialize the window,
+		// we can't do anything!
+		panic(err)
+	}
+
 	mainWindow := screen.Windows[0]
 	firstLoad := true
 
@@ -441,7 +472,11 @@ func main() {
 			toggleActiveWindow()
 		case ':', ' ':
 			cui.MoveCursorTo(screen.Height-1, 0)
-			entry := cui.GetLine()
+			entry, err := cui.GetLine()
+			if err != nil {
+				displayError(err)
+			}
+
 			// Clear entry line and error line
 			clearInput(true)
 			if entry == "" {
