@@ -52,7 +52,7 @@ func (v *View) ParseMap() {
 			} else if len(line) >= 4 {
 				fulllink := fmt.Sprintf("%s:%s/%s%s", line[2], line[3], string(line[0][0]), line[1])
 				v.Links = append(v.Links, fulllink)
-				linktext := fmt.Sprintf("(%s) %2d   %s", GetType(string(line[0][0])), len(v.Links), title)
+				linktext := fmt.Sprintf("(%s) %2d   %s", getType(string(line[0][0])), len(v.Links), title)
 				v.Content[i] = linktext
 			}
 		}

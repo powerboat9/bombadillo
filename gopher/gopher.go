@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
-	"os/exec"
-	"runtime"
 	"strings"
 	"time"
 )
@@ -90,10 +88,11 @@ func Visit(addr, openhttp string) (View, error) {
 
 	if u.Gophertype == "h" {
 		if res, tf := isWebLink(u.Resource); tf && strings.ToUpper(openhttp) == "TRUE" {
-			err := openbrowser(res)
+			err := openBrowser(res)
 			if err != nil {
 				return View{}, err
 			}
+
 			return View{}, fmt.Errorf("")
 		}
 	}
@@ -113,12 +112,12 @@ func Visit(addr, openhttp string) (View, error) {
 	return MakeView(u, pageContent), nil
 }
 
-func GetType(t string) string {
+func getType(t string) string {
 	if val, ok := types[t]; ok {
 		return val
 	}
-	return "???"
 
+	return "???"
 }
 
 func isWebLink(resource string) (string, bool) {
@@ -127,25 +126,4 @@ func isWebLink(resource string) (string, bool) {
 		return split[1], true
 	}
 	return "", false
-}
-
-func openbrowser(url string) error {
-	// gist.github.com/hyg/9c4afcd91fe24316cbf0
-	var err error
-
-	switch runtime.GOOS {
-	case "linux":
-		err = exec.Command("xdg-open", url).Start()
-	case "windows":
-		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
-	case "darwin":
-		err = exec.Command("open", url).Start()
-	default:
-		err = fmt.Errorf("Unsupported os for browser detection")
-	}
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

@@ -63,7 +63,3 @@ func (b Bookmarks) IniDump() string {
 	}
 	return out
 }
-
-func MakeBookmarks() Bookmarks {
-	return Bookmarks{[]string{}, []string{}}
-}

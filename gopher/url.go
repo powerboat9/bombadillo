@@ -57,13 +57,15 @@ func MakeUrl(u string) (Url, error) {
 	}
 
 	if out.Host == "" {
-		return out, errors.New("No host.")
+		return out, errors.New("no host")
 	}
 
 	if out.Scheme == "gopher" && out.Port == "" {
 		out.Port = "70"
-	} else if out.Scheme == "http" || out.Scheme == "https" && out.Port == "" {
+	} else if out.Scheme == "http" && out.Port == "" {
 		out.Port = "80"
+	} else if out.Scheme == "https" && out.Port == "" {
+		out.Port = "443"
 	}
 
 	if out.Gophertype == "" && (out.Resource == "" || out.Resource == "/") {
