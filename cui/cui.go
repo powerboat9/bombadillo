@@ -163,5 +163,9 @@ func HandleAlternateScreen(opt string) {
 	cmd := exec.Command("tput", opt)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
-	cmd.Run()
+	// explicitly ignoring the error here as
+	// the alternate screen is an optional feature
+	// that may not be available everywhere we expect
+	// to run
+	_ = cmd.Run()
 }
