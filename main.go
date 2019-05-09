@@ -429,19 +429,20 @@ func main() {
 	}
 
 	mainWindow := screen.Windows[0]
-	firstLoad := true
+
+	if len(os.Args) > 1 {
+		err = goToURL(os.Args[1])
+	} else {
+		err = goHome()
+	}
+
+	if err != nil {
+		displayError(err)
+	} else {
+		updateMainContent()
+	}
 
 	for {
-		if firstLoad {
-			firstLoad = false
-			err := goHome()
-
-			if err == nil {
-				updateMainContent()
-			}
-			continue
-		}
-
 		c := cui.Getch()
 		switch c {
 		case 'j', 'J':
