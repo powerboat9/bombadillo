@@ -33,6 +33,7 @@ const (
 	DOLINK
 	DOLINKAS
 	DOAS
+	DO
 )
 
 //------------------------------------------------\\
@@ -95,7 +96,7 @@ func (p *Parser) parseAction() (*Command, error) {
 		cm.Type = DOLINK
 	case Word:
 		cm.Value = append(cm.Value, t.val)
-		cm.Type = DOAS
+		cm.Type = DO
 	case Action, Whitespace:
 		return nil, fmt.Errorf("Found %q (%d), expected value", t.val, t.kind)
 	}
