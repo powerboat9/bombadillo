@@ -310,11 +310,7 @@ func doCommand(action string, values []string) error {
 }
 
 func checkConfigValue(setting string) error {
-	// Leverages the error system until the messaging system
-	// is improved. This function will always return an
-	// error, this is intentional.
 	if val, ok := options[setting]; ok {
-		// return fmt.Errorf("%s is set to: %q", setting, val)
 		quickMessage(fmt.Sprintf("%s is set to: %q", setting, val), false)
 		return nil
 
