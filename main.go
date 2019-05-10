@@ -54,16 +54,17 @@ func saveFile(address, name string) error {
 }
 
 func saveFileFromData(v gopher.View) error {
+	quickMessage("Saving file...", false)
 	urlsplit := strings.Split(v.Address.Full, "/")
 	filename := urlsplit[len(urlsplit)-1]
 	saveMsg := fmt.Sprintf("Saved file as %q", options["savelocation"]+filename)
-	quickMessage(saveMsg, false)
 	err := ioutil.WriteFile(options["savelocation"]+filename, []byte(strings.Join(v.Content, "")), 0644)
 	if err != nil {
+		quickMessage("Saving file...", true)
 		return err
 	}
 
-	// return fmt.Errorf(saveMsg)
+	quickMessage(saveMsg, false)
 	return nil
 }
 
