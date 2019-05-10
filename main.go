@@ -30,38 +30,42 @@ var options = map[string]string{
 
 func saveFile(address, name string) error {
 	quickMessage("Saving file...", false)
-	defer quickMessage("Saving file...", true)
 
 	url, err := gopher.MakeUrl(address)
 	if err != nil {
+		quickMessage("Saving file...", true)
 		return err
 	}
 
 	data, err := gopher.Retrieve(url)
 	if err != nil {
+		quickMessage("Saving file...", true)
 		return err
 	}
 
 	err = ioutil.WriteFile(options["savelocation"]+name, data, 0644)
 	if err != nil {
+		quickMessage("Saving file...", true)
 		return err
 	}
 
-	return fmt.Errorf("Saved file to " + options["savelocation"] + name)
+	quickMessage(fmt.Sprintf("Saved file to %s%s", options["savelocation"], name), false)
+	return nil
 }
 
 func saveFileFromData(v gopher.View) error {
+	quickMessage("Saving file...", false)
 	urlsplit := strings.Split(v.Address.Full, "/")
 	filename := urlsplit[len(urlsplit)-1]
 	saveMsg := fmt.Sprintf("Saved file as %q", options["savelocation"]+filename)
-	quickMessage(saveMsg, false)
-	defer quickMessage(saveMsg, true)
 	err := ioutil.WriteFile(options["savelocation"]+filename, []byte(strings.Join(v.Content, "")), 0644)
 	if err != nil {
+		quickMessage("Saving file...", true)
 		return err
 	}
 
-	return fmt.Errorf(saveMsg)
+	quickMessage(saveMsg, false)
+	return nil
 }
 
 func search(u string) error {
@@ -99,6 +103,8 @@ func routeInput(com *cmdparse.Command) error {
 		err = goToURL(com.Target)
 	case cmdparse.GOLINK:
 		err = goToLink(com.Target)
+	case cmdparse.DO:
+		err = doCommand(com.Action, com.Value)
 	case cmdparse.DOLINK:
 		err = doLinkCommand(com.Action, com.Target)
 	case cmdparse.DOAS:
@@ -141,7 +147,7 @@ func simpleCommand(a string) error {
 		toggleBookmarks()
 	case "SEARCH":
 		return search(options["searchengine"])
-	case "HELP":
+	case "HELP", "?":
 		return goToURL(helplocation)
 
 	default:
@@ -287,6 +293,31 @@ func doCommandAs(action string, values []string) error {
 	return fmt.Errorf("Unknown command structure")
 }
 
+func doCommand(action string, values []string) error {
+	if length := len(values); length != 1 {
+		return fmt.Errorf("Expected 1 argument, received %d", length)
+	}
+
+	switch action {
+	case "CHECK", "C":
+		err := checkConfigValue(values[0])
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	return fmt.Errorf("Unknown command structure")
+}
+
+func checkConfigValue(setting string) error {
+	if val, ok := options[setting]; ok {
+		quickMessage(fmt.Sprintf("%s is set to: %q", setting, val), false)
+		return nil
+
+	}
+	return fmt.Errorf("Unable to check %q, it does not exist", setting)
+}
+
 func doLinkCommandAs(action, target string, values []string) error {
 	num, err := strconv.Atoi(target)
 	if err != nil {
@@ -337,7 +368,11 @@ func clearInput(incError bool) {
 }
 
 func quickMessage(msg string, clearMsg bool) {
-	cui.MoveCursorTo(screen.Height, screen.Width-2-len(msg))
+	xPos := screen.Width - 2 - len(msg)
+	if xPos < 2 {
+		xPos = 2
+	}
+	cui.MoveCursorTo(screen.Height, xPos)
 	if clearMsg {
 		cui.Clear("right")
 	} else {
