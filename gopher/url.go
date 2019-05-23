@@ -30,7 +30,7 @@ type Url struct {
 // an error (or nil).
 func MakeUrl(u string) (Url, error) {
 	var out Url
-	re := regexp.MustCompile(`^((?P<scheme>gopher|http|https|ftp|telnet):\/\/)?(?P<host>[\w\-\.\d]+)(?::(?P<port>\d+)?)?(?:/(?P<type>[01345679gIhisp])?)?(?P<resource>(?:[\/|Uu].*)?)?$`)
+	re := regexp.MustCompile(`^((?P<scheme>gopher|http|https|ftp|telnet):\/\/)?(?P<host>[\w\-\.\d]+)(?::(?P<port>\d+)?)?(?:/(?P<type>[01345679gIhisp])?)?(?P<resource>.*)?$`)
 	match := re.FindStringSubmatch(u)
 
 	if valid := re.MatchString(u); !valid {
@@ -72,6 +72,10 @@ func MakeUrl(u string) (Url, error) {
 		out.Gophertype = "1"
 	}
 
+	if out.Scheme == "gopher" && out.Gophertype == "" {
+		out.Gophertype = "0"
+	}
+
 	switch out.Gophertype {
 	case "1", "0", "h", "7":
 		out.IsBinary = false
@@ -79,9 +83,6 @@ func MakeUrl(u string) (Url, error) {
 		out.IsBinary = true
 	}
 
-	if out.Scheme == "gopher" && out.Gophertype == "" {
-		out.Gophertype = "0"
-	}
 
 	out.Full = out.Scheme + "://" + out.Host + ":" + out.Port + "/" + out.Gophertype + out.Resource
 

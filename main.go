@@ -22,7 +22,7 @@ var userinfo, _ = user.Current()
 var settings config.Config
 var options = map[string]string{
 	"homeurl":      "gopher://colorfield.space:70/1/bombadillo-info",
-	"savelocation": userinfo.HomeDir + "/Downloads/",
+	"savelocation": userinfo.HomeDir,
 	"searchengine": "gopher://gopher.floodgap.com:70/7/v2/vs",
 	"openhttp":     "false",
 	"httpbrowser":  "lynx",
@@ -171,7 +171,6 @@ func goToURL(u string) error {
 			return err
 		}
 	} else if v.Address.IsBinary {
-		// TO DO: run this into the write to file method
 		return saveFileFromData(v)
 	} else {
 		history.Add(v)
