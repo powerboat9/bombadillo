@@ -111,3 +111,69 @@ func (w *Window) ScrollUp() {
 		fmt.Print("\a")
 	}
 }
+
+func (w *Window) PageDown() {
+	var borderThickness int
+	if w.drawBox {
+		borderThickness = -1
+	} else {
+		borderThickness = 1
+	}
+
+	height := w.Box.row2 - w.Box.row1 + borderThickness
+	contentLength := len(w.Content)
+	if w.Scrollposition < contentLength-height {
+		w.Scrollposition += height
+		if w.Scrollposition > contentLength-height {
+			w.Scrollposition = contentLength-height
+		}
+	} else {
+		fmt.Print("\a")
+	}
+}
+
+func (w *Window) PageUp() {
+	var borderThickness int
+	if w.drawBox {
+		borderThickness = -1
+	} else {
+		borderThickness = 1
+	}
+
+	height := w.Box.row2 - w.Box.row1 + borderThickness
+	contentLength := len(w.Content)
+	if w.Scrollposition > 0 && height < contentLength {
+		w.Scrollposition -= height
+		if w.Scrollposition < 0 {
+			w.Scrollposition = 0
+		}
+	} else {
+		fmt.Print("\a")
+	}
+}
+
+func (w *Window) ScrollHome() {
+	if w.Scrollposition > 0 {
+		w.Scrollposition = 0
+	} else {
+		fmt.Print("\a")
+	}
+}
+
+func (w *Window) ScrollEnd() {
+	var borderThickness int
+	if w.drawBox {
+		borderThickness = -1
+	} else {
+		borderThickness = 1
+	}
+
+	height := w.Box.row2 - w.Box.row1 + borderThickness
+
+	contentLength := len(w.Content)
+	if w.Scrollposition < contentLength-height {
+		w.Scrollposition = contentLength-height
+	} else {
+		fmt.Print("\a")
+	}
+}
