@@ -487,6 +487,18 @@ func main() {
 			screen.ReflashScreen(false)
 		case 'q', 'Q':
 			cui.Exit()
+		case 'g':
+			screen.Windows[screen.Activewindow].ScrollHome()
+			screen.ReflashScreen(false)
+		case 'G':
+			screen.Windows[screen.Activewindow].ScrollEnd()
+			screen.ReflashScreen(false)
+		case 'd':
+			screen.Windows[screen.Activewindow].PageDown()
+			screen.ReflashScreen(false)
+		case 'u':
+			screen.Windows[screen.Activewindow].PageUp()
+			screen.ReflashScreen(false)
 		case 'b':
 			success := history.GoBack()
 			if success {
