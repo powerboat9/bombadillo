@@ -157,6 +157,9 @@ func simpleCommand(a string) error {
 }
 
 func goToURL(u string) error {
+	if num, _ := regexp.MatchString(`^-?\d+.?\d*$`, u); num {
+		return goToLink(u)
+	}
 	quickMessage("Loading...", false)
 	v, err := gopher.Visit(u, options["openhttp"])
 	if err != nil {
@@ -182,10 +185,10 @@ func goToURL(u string) error {
 }
 
 func goToLink(l string) error {
-	if num, _ := regexp.MatchString(`^\d+$`, l); num && history.Length > 0 {
+	if num, _ := regexp.MatchString(`^-?\d+$`, l); num && history.Length > 0 {
 		linkcount := len(history.Collection[history.Position].Links)
 		item, _ := strconv.Atoi(l)
-		if item <= linkcount {
+		if item <= linkcount && item > 0 {
 			linkurl := history.Collection[history.Position].Links[item-1]
 			quickMessage("Loading...", false)
 			v, err := gopher.Visit(linkurl, options["openhttp"])
