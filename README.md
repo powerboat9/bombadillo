@@ -49,5 +49,5 @@ Bombadillo development is largely handled by Sloum, with help from jboverf and s
 
 ## License
 
-This project is licensed under the GNU GPL version 3- see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the GNU GPL version 3- see the [LICENSE](LICENSE.md) file for details
 
