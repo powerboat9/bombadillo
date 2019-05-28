@@ -26,7 +26,7 @@ type Screen struct {
 
 // AddWindow adds a new window to the Screen struct in question
 func (s *Screen) AddWindow(r1, c1, r2, c2 int, scroll, border, show bool) {
-	w := Window{box{r1, c1, r2, c2}, scroll, 0, []string{}, border, false, show}
+	w := Window{box{r1, c1, r2, c2}, scroll, 0, []string{}, border, false, show, 1}
 	s.Windows = append(s.Windows, &w)
 }
 
@@ -61,27 +61,7 @@ func (s Screen) Clear() {
 // to redraw the full screen or just the content. On a resize
 // event, the full screen will always be redrawn.
 func (s *Screen) ReflashScreen(clearScreen bool) {
-	oldh, oldw := s.Height, s.Width
-	s.GetSize()
-	if s.Height != oldh || s.Width != oldw {
-		// TODO this should be pure library code and not rely on
-		// specific windows being present with specific behaviors.
-		// Maybe allow windows to have a resize function that can
-		// be declared within the application?
-		// For now this will be ok though.
-		s.Windows[0].Box.row2 = s.Height - 2
-		s.Windows[0].Box.col2 = s.Width
-		bookmarksWidth := 40
-		if s.Width < 40 {
-			bookmarksWidth = s.Width
-		}
-		s.Windows[1].Box.row2 = s.Height - 2
-		s.Windows[1].Box.col1 = s.Width - bookmarksWidth
-		s.Windows[1].Box.col2 = s.Width
-
-		s.DrawAllWindows()
-		s.DrawMsgBars()
-	} else if clearScreen {
+	if clearScreen {
 		s.DrawAllWindows()
 		s.DrawMsgBars()
 	} else {

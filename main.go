@@ -455,6 +455,25 @@ func initClient() error {
 	return loadConfig()
 }
 
+func handleResize() {
+  oldh, oldw := screen.Height, screen.Width
+  screen.GetSize()
+  if screen.Height != oldh || screen.Width != oldw {
+    screen.Windows[0].Box.Row2 = screen.Height - 2
+    screen.Windows[0].Box.Col2 = screen.Width
+    bookmarksWidth := 40
+    if screen.Width < 40 {
+      bookmarksWidth = screen.Width
+    }
+    screen.Windows[1].Box.Row2 = screen.Height - 2
+    screen.Windows[1].Box.Col1 = screen.Width - bookmarksWidth
+    screen.Windows[1].Box.Col2 = screen.Width
+
+		screen.DrawAllWindows()
+		screen.DrawMsgBars()
+  }
+}
+
 func main() {
 	cui.HandleAlternateScreen("smcup")
 	defer cui.Exit()
@@ -481,6 +500,7 @@ func main() {
 
 	for {
 		c := cui.Getch()
+    handleResize()
 		switch c {
 		case 'j', 'J':
 			screen.Windows[screen.Activewindow].ScrollDown()
