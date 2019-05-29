@@ -21,7 +21,7 @@ type Window struct {
 	drawBox        bool
 	Active         bool
 	Show           bool
-  tempContentLen  int
+	tempContentLen int
 }
 
 func (w *Window) DrawWindow() {
@@ -66,10 +66,10 @@ func (w *Window) DrawContent() {
 	width := w.Box.Col2 - w.Box.Col1 + borderThickness
 
 	content := wrapLines(w.Content, width)
-  w.tempContentLen = len(content)
+	w.tempContentLen = len(content)
 
 	if w.Scrollposition > w.tempContentLen-height {
-		w.Scrollposition = w.tempContentLen-height
+		w.Scrollposition = w.tempContentLen - height
 		if w.Scrollposition < 0 {
 			w.Scrollposition = 0
 		}
@@ -134,7 +134,7 @@ func (w *Window) PageDown() {
 	if w.Scrollposition < w.tempContentLen-height {
 		w.Scrollposition += height
 		if w.Scrollposition > w.tempContentLen-height {
-			w.Scrollposition = w.tempContentLen-height
+			w.Scrollposition = w.tempContentLen - height
 		}
 	} else {
 		fmt.Print("\a")
@@ -180,7 +180,7 @@ func (w *Window) ScrollEnd() {
 	height := w.Box.Row2 - w.Box.Row1 + borderThickness
 
 	if w.Scrollposition < w.tempContentLen-height {
-		w.Scrollposition = w.tempContentLen-height
+		w.Scrollposition = w.tempContentLen - height
 	} else {
 		fmt.Print("\a")
 	}

@@ -456,9 +456,9 @@ func initClient() error {
 }
 
 func handleResize() {
-  oldh, oldw := screen.Height, screen.Width
-  screen.GetSize()
-  if screen.Height != oldh || screen.Width != oldw {
+	oldh, oldw := screen.Height, screen.Width
+	screen.GetSize()
+	if screen.Height != oldh || screen.Width != oldw {
 		screen.Windows[0].Box.Row2 = screen.Height - 2
 		screen.Windows[0].Box.Col2 = screen.Width
 		bookmarksWidth := 40
@@ -471,7 +471,7 @@ func handleResize() {
 
 		screen.DrawAllWindows()
 		screen.DrawMsgBars()
-  }
+	}
 }
 
 func main() {
