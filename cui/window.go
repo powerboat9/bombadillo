@@ -68,6 +68,13 @@ func (w *Window) DrawContent() {
 	content := wrapLines(w.Content, width)
   w.tempContentLen = len(content)
 
+	if w.Scrollposition > w.tempContentLen-height {
+		w.Scrollposition = w.tempContentLen-height
+		if w.Scrollposition < 0 {
+			w.Scrollposition = 0
+		}
+	}
+
 	if len(content) < w.Scrollposition+height {
 		maxlines = len(content)
 		short_content = true
