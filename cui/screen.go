@@ -39,7 +39,6 @@ func (s *Screen) AddMsgBar(row int, title, msg string, showTitle bool) {
 // DrawAllWindows loops over every window in the Screen struct and
 // draws it to screen in index order (smallest to largest)
 func (s Screen) DrawAllWindows() {
-	// s.Clear()
 	for _, w := range s.Windows {
 		if w.Show {
 			w.DrawWindow()
@@ -56,6 +55,15 @@ func (s Screen) Clear() {
 	}
 }
 
+// Clears message/error/command area
+func (s *Screen) ClearCommandArea() {
+	MoveCursorTo(s.Height-1, 1)
+	Clear("line")
+	MoveCursorTo(s.Height, 1)
+	Clear("line")
+	MoveCursorTo(s.Height-1, 1)
+}
+
 // ReflashScreen checks for a screen resize and resizes windows if
 // needed then redraws the screen. It takes a bool to decide whether
 // to redraw the full screen or just the content. On a resize
@@ -64,12 +72,9 @@ func (s *Screen) ReflashScreen(clearScreen bool) {
 	if clearScreen {
 		s.DrawAllWindows()
 		s.DrawMsgBars()
+		s.ClearCommandArea()
 	} else {
-		for _, w := range s.Windows {
-			if w.Show {
-				w.DrawWindow()
-			}
-		}
+		s.DrawAllWindows()
 	}
 }
 
