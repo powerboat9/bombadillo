@@ -69,12 +69,11 @@ func (s *Screen) ClearCommandArea() {
 // to redraw the full screen or just the content. On a resize
 // event, the full screen will always be redrawn.
 func (s *Screen) ReflashScreen(clearScreen bool) {
+	s.DrawAllWindows()
+
 	if clearScreen {
-		s.DrawAllWindows()
 		s.DrawMsgBars()
 		s.ClearCommandArea()
-	} else {
-		s.DrawAllWindows()
 	}
 }
 
