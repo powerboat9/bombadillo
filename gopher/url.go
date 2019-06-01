@@ -83,7 +83,6 @@ func MakeUrl(u string) (Url, error) {
 		out.IsBinary = true
 	}
 
-
 	out.Full = out.Scheme + "://" + out.Host + ":" + out.Port + "/" + out.Gophertype + out.Resource
 
 	return out, nil

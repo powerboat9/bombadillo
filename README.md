@@ -39,7 +39,7 @@ If you would prefer to download a binary for your system, rather than build from
 
 ### Documentation
 
-Bombadillo has documentation available in two places currently. The first if the [Bombadillo homepage](https://rawtext.club/~sloum/bombadillo.html#docs), which has lots of information about the program, links to places around Gopher, and documentation of the commands and configuration options. 
+Bombadillo has documentation available in two places currently. The first is the [Bombadillo homepage](https://rawtext.club/~sloum/bombadillo.html#docs), which has lots of information about the program, links to places around Gopher, and documentation of the commands and configuration options.
 
 Secondly, and possibly more importantly, documentation is available via Gopher from within Bombadillo. When a user launches Bombadillo for the first time, their `homeurl` is set to the help file. As such they will have access to all of the key bindings, commands, and configuration from the first run. A user can also type `:?` or `:help` at any time to return to the documentation. Remember that Bombadillo uses vim-like key bindings, so scroll with `j` and `k` to view the docs file.
 
