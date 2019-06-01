@@ -39,7 +39,7 @@ func (s *Screen) AddMsgBar(row int, title, msg string, showTitle bool) {
 // DrawAllWindows loops over every window in the Screen struct and
 // draws it to screen in index order (smallest to largest)
 func (s Screen) DrawAllWindows() {
-	s.Clear()
+	// s.Clear()
 	for _, w := range s.Windows {
 		if w.Show {
 			w.DrawWindow()
@@ -77,14 +77,9 @@ func (s *Screen) ReflashScreen(clearScreen bool) {
 // All MsgBars are looped over and drawn in index order (sm - lg).
 func (s *Screen) DrawMsgBars() {
 	for _, bar := range s.Bars {
-		MoveCursorTo(bar.row, 1)
-		Clear("line")
 		fmt.Print("\033[7m")
-		fmt.Print(strings.Repeat(" ", s.Width))
-		MoveCursorTo(bar.row, 1)
 		var buf bytes.Buffer
 		title := bar.title
-		fmt.Print(title)
 		if len(bar.title) > s.Width {
 			title = string(bar.title[:s.Width-3]) + "..."
 		}
@@ -94,6 +89,10 @@ func (s *Screen) DrawMsgBars() {
 			msg = string(bar.message[:s.Width-len(title)-3]) + "..."
 		}
 		_, _ = buf.WriteString(msg)
+		if buf.Len() < s.Width {
+			wsLength := s.Width - buf.Len()
+			_,_ = buf.WriteString(strings.Repeat(" ", wsLength))
+		}
 
 		MoveCursorTo(bar.row, 1)
 		fmt.Print(buf.String())
