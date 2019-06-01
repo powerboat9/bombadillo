@@ -471,6 +471,7 @@ func handleResize() {
 
 		screen.DrawAllWindows()
 		screen.DrawMsgBars()
+		screen.ClearCommandArea()
 	}
 }
 

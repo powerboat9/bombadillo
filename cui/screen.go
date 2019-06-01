@@ -39,7 +39,6 @@ func (s *Screen) AddMsgBar(row int, title, msg string, showTitle bool) {
 // DrawAllWindows loops over every window in the Screen struct and
 // draws it to screen in index order (smallest to largest)
 func (s Screen) DrawAllWindows() {
-	s.Clear()
 	for _, w := range s.Windows {
 		if w.Show {
 			w.DrawWindow()
@@ -56,20 +55,25 @@ func (s Screen) Clear() {
 	}
 }
 
+// Clears message/error/command area
+func (s *Screen) ClearCommandArea() {
+	MoveCursorTo(s.Height-1, 1)
+	Clear("line")
+	MoveCursorTo(s.Height, 1)
+	Clear("line")
+	MoveCursorTo(s.Height-1, 1)
+}
+
 // ReflashScreen checks for a screen resize and resizes windows if
 // needed then redraws the screen. It takes a bool to decide whether
 // to redraw the full screen or just the content. On a resize
 // event, the full screen will always be redrawn.
 func (s *Screen) ReflashScreen(clearScreen bool) {
+	s.DrawAllWindows()
+
 	if clearScreen {
-		s.DrawAllWindows()
 		s.DrawMsgBars()
-	} else {
-		for _, w := range s.Windows {
-			if w.Show {
-				w.DrawWindow()
-			}
-		}
+		s.ClearCommandArea()
 	}
 }
 
@@ -77,14 +81,9 @@ func (s *Screen) ReflashScreen(clearScreen bool) {
 // All MsgBars are looped over and drawn in index order (sm - lg).
 func (s *Screen) DrawMsgBars() {
 	for _, bar := range s.Bars {
-		MoveCursorTo(bar.row, 1)
-		Clear("line")
 		fmt.Print("\033[7m")
-		fmt.Print(strings.Repeat(" ", s.Width))
-		MoveCursorTo(bar.row, 1)
 		var buf bytes.Buffer
 		title := bar.title
-		fmt.Print(title)
 		if len(bar.title) > s.Width {
 			title = string(bar.title[:s.Width-3]) + "..."
 		}
@@ -94,6 +93,10 @@ func (s *Screen) DrawMsgBars() {
 			msg = string(bar.message[:s.Width-len(title)-3]) + "..."
 		}
 		_, _ = buf.WriteString(msg)
+		if buf.Len() < s.Width {
+			wsLength := s.Width - buf.Len()
+			_,_ = buf.WriteString(strings.Repeat(" ", wsLength))
+		}
 
 		MoveCursorTo(bar.row, 1)
 		fmt.Print(buf.String())
