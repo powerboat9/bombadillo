@@ -95,10 +95,7 @@ func Visit(addr, openhttp string) (View, error) {
 
 			return View{}, fmt.Errorf("")
 		}
-	} else if u.Gophertype == "7" && strings.Contains(u.Resource, "\t") {
-		u.Gophertype = "1"
-		u.Full = u.Scheme + "://" + u.Host + ":" + u.Port + "/" + u.Gophertype + u.Resource
-	}
+	} 
 
 	text, err := Retrieve(u)
 	if err != nil {

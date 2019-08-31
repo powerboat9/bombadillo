@@ -3,6 +3,7 @@ package gopher
 import (
 	"errors"
 	"regexp"
+	"strings"
 )
 
 //------------------------------------------------\\
@@ -74,6 +75,10 @@ func MakeUrl(u string) (Url, error) {
 
 	if out.Scheme == "gopher" && out.Gophertype == "" {
 		out.Gophertype = "0"
+	}
+
+	if out.Gophertype == "7" && strings.Contains(out.Resource, "\t") {
+		out.Gophertype = "1"
 	}
 
 	switch out.Gophertype {
