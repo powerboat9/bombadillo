@@ -95,7 +95,7 @@ func Visit(addr, openhttp string) (View, error) {
 
 			return View{}, fmt.Errorf("")
 		}
-	}
+	} 
 
 	text, err := Retrieve(u)
 	if err != nil {

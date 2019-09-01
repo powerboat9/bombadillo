@@ -46,9 +46,8 @@ func (v *View) ParseMap() {
 			} else {
 				title = ""
 			}
-			if len(line[0]) > 0 && string(line[0][0]) == "i" {
+			if len(line) > 1 && len(line[0]) > 0 && string(line[0][0]) == "i" {
 				v.Content[i] = "           " + string(title)
-				continue
 			} else if len(line) >= 4 {
 				fulllink := fmt.Sprintf("%s:%s/%s%s", line[2], line[3], string(line[0][0]), line[1])
 				v.Links = append(v.Links, fulllink)
