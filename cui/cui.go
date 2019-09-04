@@ -81,17 +81,25 @@ func Clear(dir string) {
 
 }
 
-func wrapLines(s []string, length int) []string {
+// takes the document content (as a slice) and modifies any lines that are longer
+// than the specified console width, splitting them over two lines. returns the
+// amended document content as a slice.
+func wrapLines(s []string, consolewidth int) []string {
+	indent := "           " //11 spaces
 	out := []string{}
 	for _, ln := range s {
-		if len(ln) <= length {
+		if len(ln) <= consolewidth {
 			out = append(out, ln)
 		} else {
 			words := strings.Split(ln, " ")
 			var subout bytes.Buffer
 			for i, wd := range words {
 				sublen := subout.Len()
-				if sublen+len(wd)+1 <= length {
+				if sublen+len(wd)+1 <= consolewidth {
+					//if line was indented, reinsert indent
+					if i == 11 && sublen == 0 {
+						subout.WriteString(indent)
+					}
 					if sublen > 0 {
 						subout.WriteString(" ")
 					}
@@ -102,7 +110,7 @@ func wrapLines(s []string, length int) []string {
 				} else {
 					out = append(out, subout.String())
 					subout.Reset()
-					subout.WriteString(wd)
+					subout.WriteString(indent + wd)
 					if i == len(words)-1 {
 						out = append(out, subout.String())
 						subout.Reset()
