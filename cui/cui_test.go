@@ -34,3 +34,16 @@ func Test_wrapLines_doesnt_break_indents(t *testing.T) {
 		}
 	}
 }
+
+func Benchmark_wrapLines(b *testing.B) {
+	indent := "           "
+	teststring := []string{
+		indent + "0123456789\n",
+		indent + "a really long line that will prolly be wrapped\n",
+		indent + "a l i n e w i t h a l o t o f w o r d s\n",
+	}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		wrapLines(teststring, 20)
+	}
+}
