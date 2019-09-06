@@ -93,15 +93,14 @@ func (s *Screen) DrawMsgBars() {
 			msg = string(bar.message[:s.Width-len(title)-3]) + "..."
 		}
 		_, _ = buf.WriteString(msg)
-		if buf.Len() < s.Width {
-			wsLength := s.Width - buf.Len()
-			_,_ = buf.WriteString(strings.Repeat(" ", wsLength))
-		}
-
 		MoveCursorTo(bar.row, 1)
-		fmt.Print(buf.String())
+		fmt.Print(strings.Repeat(" ", s.Width))
 		fmt.Print("\033[0m")
-
+		MoveCursorTo(bar.row, 1)
+		fmt.Print("\033[7m")
+		fmt.Print(buf.String())
+		MoveCursorTo(bar.row, s.Width)
+		fmt.Print("\033[0m")
 	}
 }
 
