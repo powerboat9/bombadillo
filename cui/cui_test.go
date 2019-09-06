@@ -89,6 +89,19 @@ func Test_wrapLines_doesnt_break_indents(t *testing.T) {
 			},
 			20,
 		},
+		{
+			//a specific test from cat's phlog that was wrapping and I'm not sure why
+			[]string{
+				"   Suldusk – Really cool dark  folk/black metal sort of deal.  The lead singer",
+				"is a tiny fairy  of a person  and she's  very charming. It's the bass  players",
+			},
+			[]string{
+				"   Suldusk – Really cool dark  folk/black metal sort of deal.  The lead singer",
+				"is a tiny fairy  of a person  and she's  very charming. It's the bass  players",
+			},
+			80,
+		},
+
 		//TODO further tests
 		//lines that are just spaces don't get misidentified as indents and then mangled
 	}
