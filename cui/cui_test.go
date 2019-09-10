@@ -45,8 +45,10 @@ func Test_wrapLines_incorrect_wrapping_endash(t *testing.T) {
 		linelength     int
 	}{
 		{
-			//a specific test from cat's phlog that was wrapping and I'm not sure why
-			//TODO this test passes but in reality it does not
+
+			// a specific test from cat's phlog (gopher://baud.baby:70/0/phlog/fs20190818.txt)
+			// I think the – character U+2013 : EN DASH characteris causing wrapping incorrectly
+			// but the test passes and i'm not sure why
 			[]string{
 				"   Suldusk – Really cool dark  folk/black metal sort of deal.  The lead singer",
 				"is a tiny fairy  of a person  and she's  very charming. It's the bass  players",
