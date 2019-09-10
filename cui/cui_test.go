@@ -27,20 +27,6 @@ func Test_wrapLines_space_preservation(t *testing.T) {
 			},
 			20,
 		},
-		{
-			// a specific test from cat's phlog (gopher://baud.baby:70/0/phlog/fs20190818.txt)
-			// I think the – character U+2013 : EN DASH characteris causing wrapping incorrectly
-			// but the test passes and i'm not sure why
-			[]string{
-				"   Suldusk – Really cool dark  folk/black metal sort of deal.  The lead singer",
-				"is a tiny fairy  of a person  and she's  very charming. It's the bass  players",
-			},
-			[]string{
-				"   Suldusk – Really cool dark  folk/black metal sort of deal.  The lead singer",
-				"is a tiny fairy  of a person  and she's  very charming. It's the bass  players",
-			},
-			80,
-		},
 	}
 
 	for _, table := range tables {
