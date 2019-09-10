@@ -88,7 +88,7 @@ func Visit(addr, openhttp string) (View, error) {
 
 	if u.Gophertype == "h" {
 		if res, tf := isWebLink(u.Resource); tf && strings.ToUpper(openhttp) == "TRUE" {
-			err := openBrowser(res)
+			err := OpenBrowser(res)
 			if err != nil {
 				return View{}, err
 			}

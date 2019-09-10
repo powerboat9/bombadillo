@@ -6,6 +6,6 @@ package gopher
 
 import "fmt"
 
-func openBrowser(url string) error {
+func OpenBrowser(url string) error {
 	return fmt.Errorf("Unsupported os for browser detection")
 }
