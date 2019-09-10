@@ -5,92 +5,32 @@ import (
 	"testing"
 )
 
-func Test_wrapLines_doesnt_break_indents(t *testing.T) {
-	indent := "           "
+// tests related to issue 31
+func Test_wrapLines_space_preservation(t *testing.T) {
 	tables := []struct {
 		testinput      []string
 		expectedoutput []string
 		linelength     int
 	}{
 		{
-			//indented long word - 20 characters - should not wrap
-			[]string{indent + "012345678"},
-			[]string{indent + "012345678"},
-			20,
-		},
-		{
-			//indented long word - 21 characters - should wrap
-			[]string{indent + "0123456789"},
-			[]string{indent + "012345678", indent + "9"},
-			20,
-		},
-		{
-			//indented really long word - should wrap
-			[]string{indent + "0123456789zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"},
-			[]string{
-				indent + "012345678",
-				indent + "9zzzzzzzz",
-				indent + "zzzzzzzzz",
-				indent + "zzzzzzzzz",
-				indent + "zzzzz"},
-			20,
-		}, {
-			//non-indented long word - 20 characters - should not wrap
-			[]string{"01234567890123456789"},
-			[]string{"01234567890123456789"},
-			20,
-		},
-		{
-			//non-indented long word - 21 characters - should wrap
-			[]string{"01234567890123456789a"},
-			[]string{"01234567890123456789", "a"},
-			20,
-		},
-		{
-			//non-indented really long word - should wrap
-			[]string{"01234567890123456789zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"},
-			[]string{
-				"01234567890123456789",
-				"zzzzzzzzzzzzzzzzzzzz",
-				"zzzzzzzzzzzzzzzzzzzz",
-				"zzzzzzzzzzzzzzzzzzzz",
-				"zzzz"},
-			20,
-		},
-		{
-			//indented normal sentence - 20 characters - should not wrap
-			[]string{indent + "it is her"},
-			[]string{indent + "it is her"},
-			20,
-		},
-		{
-			//indented normal sentence - more than 20 characters - should wrap
-			[]string{indent + "it is her favourite thing in the world"},
-			[]string{
-				indent + "it is her",
-				indent + "favourite",
-				indent + "thing in",
-				indent + "the world",
-			},
-			20,
-		},
-		{
-			//non-indented normal sentence - 20 characters - should not wrap
+			//normal sentence - 20 characters - should not wrap
 			[]string{"it is her fav thingy"},
 			[]string{"it is her fav thingy"},
 			20,
 		},
 		{
-			//non-indented normal sentence - more than 20 characters - should wrap
+			//normal sentence - more than 20 characters - should wrap with a space at the end of the first line
 			[]string{"it is her favourite thing in the world"},
 			[]string{
-				"it is her favourite",
+				"it is her favourite ",
 				"thing in the world",
 			},
 			20,
 		},
 		{
-			//a specific test from cat's phlog that was wrapping and I'm not sure why
+			// a specific test from cat's phlog (gopher://baud.baby:70/0/phlog/fs20190818.txt)
+			// I think the – character U+2013 : EN DASH characteris causing wrapping incorrectly
+			// but the test passes and i'm not sure why
 			[]string{
 				"   Suldusk – Really cool dark  folk/black metal sort of deal.  The lead singer",
 				"is a tiny fairy  of a person  and she's  very charming. It's the bass  players",
@@ -101,9 +41,6 @@ func Test_wrapLines_doesnt_break_indents(t *testing.T) {
 			},
 			80,
 		},
-
-		//TODO further tests
-		//lines that are just spaces don't get misidentified as indents and then mangled
 	}
 
 	for _, table := range tables {
@@ -116,11 +53,11 @@ func Test_wrapLines_doesnt_break_indents(t *testing.T) {
 }
 
 func Benchmark_wrapLines(b *testing.B) {
-	indent := "           "
 	teststring := []string{
-		indent + "0123456789\n",
-		indent + "a really long line that will prolly be wrapped\n",
-		indent + "a l i n e w i t h a l o t o f w o r d s\n",
+		"0123456789",
+		"a really long line that will prolly be wrapped",
+		"a l i n e w i t h a l o t o f w o r d s",
+		"onehugelongwordaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
 	}
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
