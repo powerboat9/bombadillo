@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 //------------------------------------------------\\
@@ -21,14 +22,24 @@ type Bookmarks struct {
 // + + +           R E C E I V E R S         + + + \\
 //--------------------------------------------------\\
 
-func (b *Bookmarks) Add([]string) error {
-	// TODO add a bookmark
-	return fmt.Errorf("")
+func (b *Bookmarks) Add(v []string) (string, error) {
+	if len(v) < 2 {
+		return "", fmt.Errorf("Received %d arguments, expected 2+", len(v))
+	}
+	b.Titles = append(b.Titles, strings.Join(v[1:], " "))
+	b.Links = append(b.Links, v[0])
+	b.Length = len(b.Titles)
+	return "Bookmark added successfully", nil
 }
 
-func (b *Bookmarks) Delete(int) error {
-	// TODO delete a bookmark
-	return fmt.Errorf("")
+func (b *Bookmarks) Delete(i int) (string, error) {
+	if i < len(b.Titles) && len(b.Titles) == len(b.Links) {
+		b.Titles = append(b.Titles[:i], b.Titles[i+1:]...)
+		b.Links = append(b.Links[:i], b.Links[i+1:]...)
+		b.Length = len(b.Titles)
+		return "Bookmark deleted successfully", nil
+	}
+	return "", fmt.Errorf("Bookmark %d does not exist", i)
 }
 
 func (b *Bookmarks) ToggleOpen() {
@@ -46,16 +57,41 @@ func (b *Bookmarks) ToggleFocused() {
 	}
 }
 
-func (b *Bookmarks) IniDump() string {
-	// TODO create dump of values for INI file
-	return ""
+func (b Bookmarks) IniDump() string {
+	if len(b.Titles) < 0 {
+		return ""
+	}
+	out := "[BOOKMARKS]\n"
+	for i := 0; i < len(b.Titles); i++ {
+		out += b.Titles[i]
+		out += "="
+		out += b.Links[i]
+		out += "\n"
+	}
+	return out
 }
 
-func (b *Bookmarks) Render() ([]string, error) {
-	// TODO grab all of the bookmarks as a fixed
-	// width string including border and spacing
-	return []string{}, fmt.Errorf("")
+// Get a list, including link nums, of bookmarks
+// as a string slice
+func (b Bookmarks) List() []string {
+	var out []string
+	for i, t := range b.Titles {
+		out = append(out, fmt.Sprintf("[%d] %s", i, t))
+	}
+	return out
 }
+
+func (b Bookmarks) Render() ([]string, error) {
+	// TODO Use b.List() to get the necessary
+	// text and add on the correct border for
+	// rendering the focus. Use sprintf, left
+	// aligned: "| %-36.36s |" of the like.
+	return []string{}, nil
+}
+
+// TODO handle scrolling of the bookmarks list
+// either here widh a scroll up/down or in the client
+// code for scroll
 
 
 //------------------------------------------------\\

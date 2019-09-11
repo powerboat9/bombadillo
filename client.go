@@ -14,7 +14,10 @@ import (
 
 	"tildegit.org/sloum/bombadillo/cmdparse"
 	"tildegit.org/sloum/bombadillo/cui"
-	"tildegit.org/sloum/bombadillo/gopher"
+	// "tildegit.org/sloum/bombadillo/gemini"
+	// "tildegit.org/sloum/bombadillo/gopher"
+	"tildegit.org/sloum/bombadillo/http"
+	"tildegit.org/sloum/bombadillo/telnet"
 )
 
 //------------------------------------------------\\
@@ -231,11 +234,14 @@ func (c *client) doCommandAs(action string, values []string) {
 
 	switch action {
 	case "ADD", "A":
-		err := c.BookMarks.Add(values)
+		msg, err := c.BookMarks.Add(values)
 		if err != nil {
 			c.SetMessage(err.Error(), true)
 			c.DrawMessage()
 			return
+		} else {
+			c.SetMessage(msg, false)
+			c.DrawMessage()
 		}
 
 		err = saveConfig()
@@ -342,15 +348,7 @@ func (c *client) search() {
 		escapedEntry := entry
 		go c.Visit(fmt.Sprintf("%s?%s",u.Full,escapedEntry))
 	case "http", "https":
-		c.SetMessage("Attempting to open in web browser", false)
-		c.DrawMessage()
-		err := gopher.OpenBrowser(u.Full)
-		if err != nil {
-			c.SetMessage(err.Error(), true)
-		} else {
-			c.SetMessage("Opened in web browser", false)
-		}
-		c.DrawMessage()
+		c.Visit(u.Full)
 	default:
 		c.SetMessage(fmt.Sprintf("%q is not a supported protocol", u.Scheme), true)
 		c.DrawMessage()
@@ -463,19 +461,31 @@ func (c *client) Visit(url string) {
 		// TODO send over to gopher request
 	case "gemini":
 		// TODO send over to gemini request
+	case "telnet":
+		c.SetMessage("Attempting to start telnet session", false)
+		c.DrawMessage()
+		msg, err := telnet.StartSession(u.Host, u.Port)
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+		} else {
+			c.SetMessage(msg, true)
+			c.DrawMessage()
+		}
+		c.Draw()
 	case "http", "https":
 		c.SetMessage("Attempting to open in web browser", false)
 		c.DrawMessage()
 		if strings.ToUpper(c.Options["openhttp"]) == "TRUE"  {
-			err := gopher.OpenBrowser(u.Full)
+			msg, err := http.OpenInBrowser(u.Full)
 			if err != nil {
 				c.SetMessage(err.Error(), true)
 			} else {
-				c.SetMessage("Opened in web browser", false)
+				c.SetMessage(msg, false)
 			}
 			c.DrawMessage()
 		} else {
-			c.SetMessage("'openhttp' is not set to true, aborting opening web link", false)
+			c.SetMessage("'openhttp' is not set to true, cannot open web link", false)
 			c.DrawMessage()
 		}
 	default:

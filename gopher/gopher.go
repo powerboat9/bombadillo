@@ -5,7 +5,7 @@ package gopher
 
 import (
 	"errors"
-	"fmt"
+	// "fmt"
 	"io/ioutil"
 	"net"
 	"strings"
@@ -86,16 +86,16 @@ func Visit(addr, openhttp string) (View, error) {
 		return View{}, err
 	}
 
-	if u.Gophertype == "h" {
-		if res, tf := isWebLink(u.Resource); tf && strings.ToUpper(openhttp) == "TRUE" {
-			err := OpenBrowser(res)
-			if err != nil {
-				return View{}, err
-			}
-
-			return View{}, fmt.Errorf("")
-		}
-	} 
+	// if u.Gophertype == "h" {
+		// if res, tf := isWebLink(u.Resource); tf && strings.ToUpper(openhttp) == "TRUE" {
+			// err := OpenBrowser(res)
+			// if err != nil {
+				// return View{}, err
+			// }
+//
+			// return View{}, fmt.Errorf("")
+		// }
+	// }
 
 	text, err := Retrieve(u)
 	if err != nil {

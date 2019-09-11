@@ -6,7 +6,7 @@ package main
 //--------------------------------------------------\\
 
 type Page struct {
-	WrappedContent []string
+	WrappedContent string
 	RawContent string
 	Links []string
 	Location Url
@@ -24,7 +24,7 @@ type Page struct {
 //--------------------------------------------------\\
 
 func MakePage(url Url, content string) Page {
-	p := Page{make([]string, 0), content, make([]string, 0), url, 0}
+	p := Page{"", content, make([]string, 0), url, 0}
 	return p
 }
 
