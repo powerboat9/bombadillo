@@ -81,3 +81,27 @@ func Benchmark_wrapLines(b *testing.B) {
 		wrapLines(teststring, 20)
 	}
 }
+func Benchmark_wrapLines2(b *testing.B) {
+	teststring := []string{
+		"0123456789",
+		"a really long line that will prolly be wrapped",
+		"a l i n e w i t h a l o t o f w o r d s",
+		"onehugelongwordaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+	}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		wrapLines2(teststring, 20)
+	}
+}
+func Benchmark_wrapLines3(b *testing.B) {
+	teststring := []string{
+		"0123456789",
+		"a really long line that will prolly be wrapped",
+		"a l i n e w i t h a l o t o f w o r d s",
+		"onehugelongwordaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+	}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		wrapLines3(teststring, 20)
+	}
+}

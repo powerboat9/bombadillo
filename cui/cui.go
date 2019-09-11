@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"unicode/utf8"
 )
 
 var shapes = map[string]string{
@@ -88,14 +89,14 @@ func Clear(dir string) {
 func wrapLines(s []string, consolewidth int) []string {
 	out := []string{}
 	for _, ln := range s {
-		if len(ln) <= consolewidth {
+		if len([]rune(ln)) <= consolewidth {
 			out = append(out, ln)
 		} else {
 			words := strings.SplitAfter(ln, " ")
 			var subout bytes.Buffer
 			for i, wd := range words {
 				sublen := subout.Len()
-				wdlen := len(wd)
+				wdlen := len([]rune(wd))
 				if sublen+wdlen <= consolewidth {
 					subout.WriteString(wd)
 					if i == len(words)-1 {
@@ -170,4 +171,66 @@ func HandleAlternateScreen(opt string) {
 	// that may not be available everywhere we expect
 	// to run
 	_ = cmd.Run()
+}
+
+func wrapLines2(s []string, consolewidth int) []string {
+	out := []string{}
+	for _, ln := range s {
+		if utf8.RuneCountInString(ln) <= consolewidth {
+			out = append(out, ln)
+		} else {
+			words := strings.SplitAfter(ln, " ")
+			var subout bytes.Buffer
+			for i, wd := range words {
+				sublen := subout.Len()
+				wdlen := utf8.RuneCountInString(wd)
+				if sublen+wdlen <= consolewidth {
+					subout.WriteString(wd)
+					if i == len(words)-1 {
+						out = append(out, subout.String())
+					}
+				} else {
+					out = append(out, subout.String())
+					subout.Reset()
+					subout.WriteString(wd)
+					if i == len(words)-1 {
+						out = append(out, subout.String())
+						subout.Reset()
+					}
+				}
+			}
+		}
+	}
+	return out
+}
+
+func wrapLines3(s []string, consolewidth int) []string {
+	out := []string{}
+	for _, ln := range s {
+		if len(ln) <= consolewidth {
+			out = append(out, ln)
+		} else {
+			words := strings.SplitAfter(ln, " ")
+			var subout bytes.Buffer
+			for i, wd := range words {
+				sublen := subout.Len()
+				wdlen := len(wd)
+				if sublen+wdlen <= consolewidth {
+					subout.WriteString(wd)
+					if i == len(words)-1 {
+						out = append(out, subout.String())
+					}
+				} else {
+					out = append(out, subout.String())
+					subout.Reset()
+					subout.WriteString(wd)
+					if i == len(words)-1 {
+						out = append(out, subout.String())
+						subout.Reset()
+					}
+				}
+			}
+		}
+	}
+	return out
 }
