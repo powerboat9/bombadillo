@@ -85,6 +85,12 @@ func Clear(dir string) {
 // than the specified console width, splitting them over two lines. returns the
 // amended document content as a slice.
 func wrapLines(s []string, consolewidth int) []string {
+	// TODO redo this so that it returns a string and can hard and
+	// soft wrap. It will use parsing to go char by char. CUI should
+	// set tabs to 4 on screen init. Multispace chars should be detected
+	// tab spacing should be detected using % to see where the next tab stop
+	// is. Use a counter as building the sub buffer. len returns num of bytes
+	// be sure to get num of chars instead: len([]rune("a")).
 	indent := "           " //11 spaces
 	out := []string{}
 	for _, ln := range s {

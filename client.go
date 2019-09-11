@@ -449,6 +449,8 @@ func (c *client) goToLink(l string) {
 }
 
 func (c *client) Visit(url string) {
+	// TODO both gemini and gopher should return a string
+	// The wrap lines function in cui needs to be rewritten
 	u, err := MakeUrl(url)
 	if err != nil {
 		c.SetMessage(err.Error(), true)
