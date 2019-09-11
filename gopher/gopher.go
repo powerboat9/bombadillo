@@ -5,7 +5,7 @@ package gopher
 
 import (
 	"errors"
-	// "fmt"
+	"fmt"
 	"io/ioutil"
 	"net"
 	"strings"
@@ -21,17 +21,21 @@ import (
 var types = map[string]string{
 	"0": "TXT",
 	"1": "MAP",
-	"h": "HTM",
 	"3": "ERR",
 	"4": "BIN",
 	"5": "DOS",
-	"s": "SND",
-	"g": "GIF",
-	"I": "IMG",
-	"9": "BIN",
-	"7": "FTS",
 	"6": "UUE",
+	"7": "FTS",
+	"8": "TEL",
+	"9": "BIN",
+	"g": "GIF",
+	"G": "GEM",
+	"h": "HTM",
+	"I": "IMG",
 	"p": "PNG",
+	"s": "SND",
+	"S": "SSH",
+	"T": "TEL",
 }
 
 //------------------------------------------------\\
@@ -43,25 +47,22 @@ var types = map[string]string{
 // available to use directly, but in most implementations
 // using the "Visit" receiver of the History struct will
 // be better.
-func Retrieve(u Url) ([]byte, error) {
+func Retrieve(host, port, resource string) ([]byte, error) {
 	nullRes := make([]byte, 0)
 	timeOut := time.Duration(5) * time.Second
 
-	if u.Host == "" || u.Port == "" {
+	if host == "" || port == "" {
 		return nullRes, errors.New("Incomplete request url")
 	}
 
-	addr := u.Host + ":" + u.Port
+	addr := host + ":" + port
 
 	conn, err := net.DialTimeout("tcp", addr, timeOut)
 	if err != nil {
 		return nullRes, err
 	}
 
-	send := u.Resource + "\n"
-	if u.Scheme == "http" || u.Scheme == "https" {
-		send = u.Gophertype
-	}
+	send := resource + "\n"
 
 	_, err = conn.Write([]byte(send))
 	if err != nil {
@@ -73,43 +74,27 @@ func Retrieve(u Url) ([]byte, error) {
 		return nullRes, err
 	}
 
-	return result, err
+	return result, nil
 }
 
-// Visit is a high level combination of a few different
-// types that makes it easy to create a Url, make a request
-// to that Url, and add the response and Url to a View.
-// Returns a copy of the view and an error (or nil).
-func Visit(addr, openhttp string) (View, error) {
-	u, err := MakeUrl(addr)
+// Visit handles the making of the request, parsing of maps, and returning
+// the correct information to the client
+func Visit(gophertype, host, port, resource string) (string, []string, error) {
+	resp, err := Retrieve(host, port, resource)
+	text := string(resp)
+	links := []string{}
+
 	if err != nil {
-		return View{}, err
+		return "", []string{}, err
+	} else if IsDownloadOnly(gophertype) {
+		return text, []string{}, nil
 	}
 
-	// if u.Gophertype == "h" {
-		// if res, tf := isWebLink(u.Resource); tf && strings.ToUpper(openhttp) == "TRUE" {
-			// err := OpenBrowser(res)
-			// if err != nil {
-				// return View{}, err
-			// }
-//
-			// return View{}, fmt.Errorf("")
-		// }
-	// }
-
-	text, err := Retrieve(u)
-	if err != nil {
-		return View{}, err
+	if gophertype == "1" {
+		text, links = parseMap(text)
 	}
 
-	var pageContent []string
-	if u.IsBinary && u.Gophertype != "7" {
-		pageContent = []string{string(text)}
-	} else {
-		pageContent = strings.Split(string(text), "\n")
-	}
-
-	return MakeView(u, pageContent), nil
+	return text, links, nil
 }
 
 func getType(t string) string {
@@ -126,4 +111,52 @@ func isWebLink(resource string) (string, bool) {
 		return split[1], true
 	}
 	return "", false
+}
+
+// TODO Make sure when parsing maps that links have the correct
+// protocol rather than 'gopher', where applicable (telnet, gemini, etc).
+func parseMap(text string) (string, []string)  {
+	splitContent := strings.Split(text, "\n")
+	links := make([]string, 0, 10)
+
+	for i, e := range splitContent {
+		e = strings.Trim(e, "\r\n")
+		if e == "." {
+			splitContent[i] = ""
+			continue
+		}
+
+		line := strings.Split(e, "\t")
+		var title string
+		// TODO REFACTOR LINE == HERE
+		// - - - - - - - - - - - - - -
+		if len(line[0]) > 1 {
+			title = line[0][1:]
+		} else {
+			title = ""
+		}
+		if len(line) > 1 && len(line[0]) > 0 && string(line[0][0]) == "i" {
+			splitContent[i] = "           " + string(title)
+		} else if len(line) >= 4 {
+			fulllink := fmt.Sprintf("%s://%s:%s/%s%s", "protocol" ,line[2], line[3], string(line[0][0]), line[1])
+			links = append(links, fulllink)
+			linktext := fmt.Sprintf("(%s) %2d   %s", getType(string(line[0][0])), len(links), title)
+			splitContent[i] = linktext
+		}
+	}
+	return "", links
+}
+
+// Returns false for all text formats (including html
+// even though it may link out. Things like telnet
+// should never make it into the retrieve call for
+// this module, having been handled in the client
+// based on their protocol.
+func IsDownloadOnly(gophertype string) bool {
+	switch gophertype {
+	case "0", "1", "3", "7", "h":
+		return false
+	default:
+		return true
+	}
 }
