@@ -37,11 +37,11 @@ type Url struct {
 // an error (or nil).
 func MakeUrl(u string) (Url, error) {
 	var out Url
-	re := regexp.MustCompile(`^((?P<scheme>gopher|http|https|gemini):\/\/)?(?P<host>[\w\-\.\d]+)(?::(?P<port>\d+)?)?(?:/(?P<type>[01345679gIhisp])?)?(?P<resource>.*)?$`)
+	re := regexp.MustCompile(`^((?P<scheme>gopher|telnet|http|https|gemini):\/\/)?(?P<host>[\w\-\.\d]+)(?::(?P<port>\d+)?)?(?:/(?P<type>[01345679gIhisp])?)?(?P<resource>.*)?$`)
 	match := re.FindStringSubmatch(u)
 
 	if valid := re.MatchString(u); !valid {
-		return out, fmt.Errorf("Invalid url/unable to parse")
+		return out, fmt.Errorf("Invalid url, unable to parse")
 	}
 
 	for i, name := range re.SubexpNames() {

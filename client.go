@@ -15,7 +15,7 @@ import (
 	"tildegit.org/sloum/bombadillo/cmdparse"
 	"tildegit.org/sloum/bombadillo/cui"
 	// "tildegit.org/sloum/bombadillo/gemini"
-	// "tildegit.org/sloum/bombadillo/gopher"
+	"tildegit.org/sloum/bombadillo/gopher"
 	"tildegit.org/sloum/bombadillo/http"
 	"tildegit.org/sloum/bombadillo/telnet"
 )
@@ -68,10 +68,30 @@ func (c *client) GetSize() {
 }
 
 func (c *client) Draw() {
-	// TODO build this out.
-	// It should call all of the renders
-	// and add them to the a string buffer
-	// It should then print the buffer
+	var screen strings.Builder
+	screen.Grow(c.Height * c.Width)
+	screen.WriteString(c.TopBar.Render(c.Width, "This is a test"))
+	screen.WriteString("\n")
+	pageContent := c.PageState.Render(c.Height)
+	if c.BookMarks.IsOpen {
+		bm := c.BookMarks.Render(c.Width, c.Height)
+		bmWidth := len([]rune(bm[0]))
+		for i, ln := range pageContent {
+			screen.WriteString(ln[:len(ln) - bmWidth])
+			screen.WriteString(bm[i])
+			screen.WriteString("\n")
+		}
+	} else {
+		for _, ln := range pageContent {
+			screen.WriteString(ln)
+			screen.WriteString("\n")
+		}
+	}
+	screen.WriteString("\n") // for the input line
+	screen.WriteString(c.FootBar.Render(c.Width))
+	cui.Clear("screen")
+	cui.MoveCursorTo(0,0)
+	fmt.Print(screen.String())
 }
 
 func (c *client) TakeControlInput() {
@@ -131,6 +151,7 @@ func (c *client) TakeControlInput() {
 		// Process a command
 		c.ClearMessage()
 		c.ClearMessageLine()
+		cui.MoveCursorTo(c.Height-2, 0)
 		entry, err := cui.GetLine()
 		c.ClearMessageLine()
 		if err != nil {
@@ -460,9 +481,26 @@ func (c *client) Visit(url string) {
 
 	switch u.Scheme {
 	case "gopher":
-		// TODO send over to gopher request
+		u, err := MakeUrl(url)
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+			return
+		}
+		content, links, err := gopher.Visit(u.Mime, u.Host, u.Port, u.Resource)
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+			return
+		}
+		pg := MakePage(u, content, links)
+		pg.WrapContent(c.Width)
+		c.PageState.Add(pg)
+		c.Draw()
 	case "gemini":
 		// TODO send over to gemini request
+		c.SetMessage("Gemini is not currently supported", false)
+		c.DrawMessage()
 	case "telnet":
 		c.SetMessage("Attempting to start telnet session", false)
 		c.DrawMessage()
@@ -512,7 +550,6 @@ func MakeClient(name string) *client {
 		"configlocation": userinfo.HomeDir,
 	}
 	c := client{0, 0, options, "", MakePages(), MakeBookmarks(), MakeHeadbar(name), MakeFootbar()}
-	c.GetSize()
 	return &c
 }
 

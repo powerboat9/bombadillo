@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-var shapes = map[string]string{
+var Shapes = map[string]string{
 	"wall":     "╵",
 	"ceiling":  "╴",
 	"tl":       "┌",
@@ -25,7 +25,7 @@ var shapes = map[string]string{
 }
 
 func drawShape(shape string) {
-	if val, ok := shapes[shape]; ok {
+	if val, ok := Shapes[shape]; ok {
 		fmt.Printf("%s", val)
 	} else {
 		fmt.Print("x")

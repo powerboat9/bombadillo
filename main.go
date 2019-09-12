@@ -174,8 +174,8 @@ func initClient() error {
 }
 
 func main() {
-	cui.HandleAlternateScreen("smcup")
-	defer cui.Exit()
+	// cui.HandleAlternateScreen("smcup")
+	// defer cui.Exit()
 	err := initClient()
 	if err != nil {
 		// if we can't initialize we should bail out
@@ -189,12 +189,12 @@ func main() {
 		// If a url was passed, move it down the line
 		// Goroutine so keypresses can be made during
 		// page load
-		go bombadillo.Visit(os.Args[1])
+		bombadillo.Visit(os.Args[1])
 	} else {
 		// Otherwise, load the homeurl
 		// Goroutine so keypresses can be made during
 		// page load
-		go bombadillo.Visit(bombadillo.Options["homeurl"])
+		bombadillo.Visit(bombadillo.Options["homeurl"])
 	}
 
 	// Loop indefinitely on user input

@@ -81,14 +81,17 @@ func Retrieve(host, port, resource string) ([]byte, error) {
 // the correct information to the client
 func Visit(gophertype, host, port, resource string) (string, []string, error) {
 	resp, err := Retrieve(host, port, resource)
+	if err != nil {
+		return "", []string{}, err
+	} 
+	
 	text := string(resp)
 	links := []string{}
 
-	if err != nil {
-		return "", []string{}, err
-	} else if IsDownloadOnly(gophertype) {
+	if IsDownloadOnly(gophertype) {
 		return text, []string{}, nil
 	}
+
 
 	if gophertype == "1" {
 		text, links = parseMap(text)
@@ -113,8 +116,6 @@ func isWebLink(resource string) (string, bool) {
 	return "", false
 }
 
-// TODO Make sure when parsing maps that links have the correct
-// protocol rather than 'gopher', where applicable (telnet, gemini, etc).
 func parseMap(text string) (string, []string)  {
 	splitContent := strings.Split(text, "\n")
 	links := make([]string, 0, 10)
@@ -128,23 +129,23 @@ func parseMap(text string) (string, []string)  {
 
 		line := strings.Split(e, "\t")
 		var title string
-		// TODO REFACTOR LINE == HERE
-		// - - - - - - - - - - - - - -
+
 		if len(line[0]) > 1 {
 			title = line[0][1:]
 		} else {
 			title = ""
 		}
+		
 		if len(line) > 1 && len(line[0]) > 0 && string(line[0][0]) == "i" {
 			splitContent[i] = "           " + string(title)
 		} else if len(line) >= 4 {
-			fulllink := fmt.Sprintf("%s://%s:%s/%s%s", "protocol" ,line[2], line[3], string(line[0][0]), line[1])
-			links = append(links, fulllink)
+			link := buildLink(line[2], line[3], string(line[0][0]), line[1])
+			links = append(links, link)
 			linktext := fmt.Sprintf("(%s) %2d   %s", getType(string(line[0][0])), len(links), title)
 			splitContent[i] = linktext
 		}
 	}
-	return "", links
+	return strings.Join(splitContent, "\n"), links
 }
 
 // Returns false for all text formats (including html
@@ -158,5 +159,26 @@ func IsDownloadOnly(gophertype string) bool {
 		return false
 	default:
 		return true
+	}
+}
+
+func buildLink(host, port, gtype, resource string) string {
+	switch gtype {
+	case "8", "T":
+		return fmt.Sprintf("telnet://%s:%s", host, port)
+	case "G":
+		return fmt.Sprintf("gemini://%s:%s%s", host, port, resource)
+	case "h":
+		u, tf := isWebLink(resource)
+		if tf {
+			if len(u) > 4 && string(u[:5]) == "http" {
+				return u
+			} else {
+				return fmt.Sprintf("http://%s", u)
+			}
+		}
+		return fmt.Sprintf("gopher://%s:%s/h%s", host, port, resource)
+	default:
+		return fmt.Sprintf("gopher://%s:%s/%s%s", host, port, gtype, resource)
 	}
 }

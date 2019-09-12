@@ -1,5 +1,8 @@
 package main
 
+import (
+	"fmt"
+)
 
 //------------------------------------------------\\
 // + + +             T Y P E S               + + + \\
@@ -7,8 +10,6 @@ package main
 
 type Headbar struct {
 	title string
-	url string
-	content string
 }
 
 
@@ -16,13 +17,8 @@ type Headbar struct {
 // + + +           R E C E I V E R S         + + + \\
 //--------------------------------------------------\\
 
-func (h *Headbar) SetUrl(u string) {
-	h.url = u
-}
-
 func (h *Headbar) Build(width string) string {
 	// TODO Build out header to specified width
-	h.content = "" // This is a temp value to show intention
 	return ""
 }
 
@@ -31,9 +27,9 @@ func (h *Headbar) Draw() {
 	// without having to redraw everything else
 }
 
-func (h *Headbar) Render() string {
-	// TODO returns the content value
-	return ""
+func (h *Headbar) Render(width int, message string) string {
+	maxMsgWidth := width - len([]rune(h.title))
+	return fmt.Sprintf("\033[7m%s%-*.*s\033[0m", h.title, maxMsgWidth, maxMsgWidth, message)
 }
 
 
@@ -42,6 +38,6 @@ func (h *Headbar) Render() string {
 //--------------------------------------------------\\
 
 func MakeHeadbar(title string) Headbar {
-	return Headbar{title, "", title}
+	return Headbar{title}
 }
 

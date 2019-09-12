@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 //------------------------------------------------\\
@@ -31,16 +32,30 @@ func (p *Pages) NavigateHistory(qty int) error {
 	return nil
 }
 
-func (p *Pages) Add(pg Page) error {
-	// TODO add the given page onto the pages struct
-	// handling truncation of the history as needed.
-	return fmt.Errorf("")
+func (p *Pages) Add(pg Page) {
+	if p.Position == p.Length - 1 && p.Length < len(p.History) {
+		p.History[p.Length] = pg
+		p.Length++
+		p.Position++
+	} else if p.Position == p.Length - 1 && p.Length == 20 {
+		for x := 1; x < len(p.History); x++ {
+			p.History[x-1] = p.History[x]
+		}
+		p.History[len(p.History)-1] = pg
+	} else {
+		p.Position += 1
+		p.Length = p.Position + 1
+		p.History[p.Position] = pg
+	}
 }
 
-func (p *Pages) Render() ([]string, error) {
-	// TODO grab the current page as wrappedContent
-	// May need to handle spacing at end of lines.
-	return []string{}, fmt.Errorf("")
+func (p *Pages) Render(termHeight int) []string {
+	if p.Length < 1 {
+		msg := "Welcome to Bombadillo,\nif this is your first time here\ntype:\n\n:help\n(and then press enter)"
+		return strings.Split(msg, "\n")
+	}
+	beg, end := p.History[p.Position].ScrollPositionRange(termHeight)
+	return p.History[p.Position].WrappedContent[beg:end]
 }
 
 //------------------------------------------------\\

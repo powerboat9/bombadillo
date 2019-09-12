@@ -9,9 +9,8 @@ import (
 //--------------------------------------------------\\
 
 type Footbar struct {
-	PercentRead string
+	PercentRead int
 	PageType string
-	Content string
 }
 
 
@@ -20,7 +19,7 @@ type Footbar struct {
 //--------------------------------------------------\\
 
 func (f *Footbar) SetPercentRead(p int) {
-	f.PercentRead = fmt.Sprintf("%d%%", p)
+	f.PercentRead = p
 }
 
 func (f *Footbar) SetPageType(t string) {
@@ -32,15 +31,8 @@ func (f *Footbar) Draw() {
 	// without having to redraw everything else
 }
 
-func (f *Footbar) Build(width string) string {
-	// TODO Build out header to specified width
-	f.Content = "" // This is a temp value to show intention
-	return ""
-}
-
-func (f *Footbar) Render() string {
-	// TODO returns a full line
-	return ""
+func (f *Footbar) Render(termWidth int) string {
+	return fmt.Sprintf("\033[7m%-*.*s\033[0m", termWidth, termWidth, "")
 }
 
 
@@ -49,6 +41,6 @@ func (f *Footbar) Render() string {
 //--------------------------------------------------\\
 
 func MakeFootbar() Footbar {
-	return Footbar{"", "N/A", ""}
+	return Footbar{100, "N/A"}
 }
 

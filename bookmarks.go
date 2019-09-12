@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	"tildegit.org/sloum/bombadillo/cui"
 )
 
 //------------------------------------------------\\
@@ -81,16 +83,49 @@ func (b Bookmarks) List() []string {
 	return out
 }
 
-func (b Bookmarks) Render() ([]string, error) {
-	// TODO Use b.List() to get the necessary
-	// text and add on the correct border for
-	// rendering the focus. Use sprintf, left
-	// aligned: "| %-36.36s |" of the like.
-	return []string{}, nil
+func (b Bookmarks) Render(termwidth, termheight int) []string {
+	width := 40
+	termheight -= 3
+	var wall, ceil, tr, tl, br, bl string
+	if termwidth < 40 {
+		width = termwidth
+	} 
+	if b.IsFocused {
+		wall = cui.Shapes["awall"]
+		ceil = cui.Shapes["aceiling"]
+		tr = cui.Shapes["atr"]
+		br = cui.Shapes["abr"]
+		tl = cui.Shapes["atl"]
+		bl = cui.Shapes["abl"]
+	} else {
+		wall = cui.Shapes["wall"]
+		ceil = cui.Shapes["ceiling"]
+		tr = cui.Shapes["tr"]
+		br = cui.Shapes["br"]
+		tl = cui.Shapes["tl"]
+		bl = cui.Shapes["bl"]
+	}
+
+	out := make([]string, 5)
+	top := fmt.Sprintf("%s%s%s", tl, strings.Repeat(ceil, width-2), tr)
+	out = append(out, top)
+	marks := b.List()
+	contentWidth := termwidth - 2
+	for i := 0; i < termheight - 2; i++ {
+		if i + b.Position >= b.Length {
+			out = append(out, fmt.Sprintf("%s%-*.*s%s", wall, contentWidth, contentWidth, "", wall ))
+		} else {
+			out = append(out, fmt.Sprintf("%s%-*.*s%s", wall, contentWidth, contentWidth, marks[i + b.Position], wall ))
+		}
+	}
+
+	bottom := fmt.Sprintf("%s%s%s", bl, strings.Repeat(ceil, width-2), br)
+	out = append(out, bottom)
+	return out
 }
 
 // TODO handle scrolling of the bookmarks list
-// either here widh a scroll up/down or in the client
+// either here with a scroll up/down or in the client
 // code for scroll
 
 
