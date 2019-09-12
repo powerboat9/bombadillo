@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"unicode/utf8"
 )
 
 var shapes = map[string]string{
@@ -82,10 +81,14 @@ func Clear(dir string) {
 
 }
 
-// takes the document content (as a slice) and modifies any lines that are longer
-// than the specified console width, splitting them over two lines. returns the
-// amended document content as a slice.
-// word wrapping uses a "greedy" algorithm
+// Takes the document content (as a slice of strings) and wraps any lines that
+// are longer than the specified console width. returns the amended document
+// content as a slice of strings.
+// Word wrapping uses a "greedy" algorithm, where long lines are split in to
+// words, and then rebuilt word by word to fill the available space. any
+// leftover words overflow to the next line.
+// To offer some support for unicode, some lengths are calculated using a slice
+// of runes in the following way: len([]rune(string))
 func wrapLines(s []string, consolewidth int) []string {
 	out := []string{}
 	for _, ln := range s {
@@ -171,66 +174,4 @@ func HandleAlternateScreen(opt string) {
 	// that may not be available everywhere we expect
 	// to run
 	_ = cmd.Run()
-}
-
-func wrapLines2(s []string, consolewidth int) []string {
-	out := []string{}
-	for _, ln := range s {
-		if utf8.RuneCountInString(ln) <= consolewidth {
-			out = append(out, ln)
-		} else {
-			words := strings.SplitAfter(ln, " ")
-			var subout bytes.Buffer
-			for i, wd := range words {
-				sublen := subout.Len()
-				wdlen := utf8.RuneCountInString(wd)
-				if sublen+wdlen <= consolewidth {
-					subout.WriteString(wd)
-					if i == len(words)-1 {
-						out = append(out, subout.String())
-					}
-				} else {
-					out = append(out, subout.String())
-					subout.Reset()
-					subout.WriteString(wd)
-					if i == len(words)-1 {
-						out = append(out, subout.String())
-						subout.Reset()
-					}
-				}
-			}
-		}
-	}
-	return out
-}
-
-func wrapLines3(s []string, consolewidth int) []string {
-	out := []string{}
-	for _, ln := range s {
-		if len(ln) <= consolewidth {
-			out = append(out, ln)
-		} else {
-			words := strings.SplitAfter(ln, " ")
-			var subout bytes.Buffer
-			for i, wd := range words {
-				sublen := subout.Len()
-				wdlen := len(wd)
-				if sublen+wdlen <= consolewidth {
-					subout.WriteString(wd)
-					if i == len(words)-1 {
-						out = append(out, subout.String())
-					}
-				} else {
-					out = append(out, subout.String())
-					subout.Reset()
-					subout.WriteString(wd)
-					if i == len(words)-1 {
-						out = append(out, subout.String())
-						subout.Reset()
-					}
-				}
-			}
-		}
-	}
-	return out
 }
