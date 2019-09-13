@@ -59,32 +59,45 @@ func (c *client) GetSize() {
 		c.Height = h
 		c.Width = w
 
+
 		if redraw {
 			c.Draw()
 		}
 
-		time.Sleep(1 * time.Second)
+		time.Sleep(500 * time.Millisecond)
 	}
 }
 
 func (c *client) Draw() {
 	var screen strings.Builder
 	screen.Grow(c.Height * c.Width)
-	screen.WriteString(c.TopBar.Render(c.Width, "This is a test"))
+	screen.WriteString(c.TopBar.Render(c.Width))
 	screen.WriteString("\n")
-	pageContent := c.PageState.Render(c.Height)
+	pageContent := c.PageState.Render(c.Height, c.Width)
 	if c.BookMarks.IsOpen {
 		bm := c.BookMarks.Render(c.Width, c.Height)
-		bmWidth := len([]rune(bm[0]))
-		for i, ln := range pageContent {
-			screen.WriteString(ln[:len(ln) - bmWidth])
+		bmWidth := 40
+		for i := 0; i < c.Height - 3; i++ {
+			if c.Width > bmWidth {
+				contentWidth := c.Width - bmWidth - 1
+				if i < len(pageContent) - 1 {
+					screen.WriteString(fmt.Sprintf("%-*.*s", contentWidth, contentWidth, pageContent[i]))
+				} else {
+					screen.WriteString(fmt.Sprintf("%-*.*s", contentWidth, contentWidth, " "))
+				}
+			}
 			screen.WriteString(bm[i])
 			screen.WriteString("\n")
 		}
 	} else {
-		for _, ln := range pageContent {
-			screen.WriteString(ln)
-			screen.WriteString("\n")
+		for i := 0; i < c.Height - 3; i++ {
+			if i < len(pageContent) - 1 {
+				screen.WriteString(pageContent[i])
+				screen.WriteString("\n")
+			} else {
+				screen.WriteString(fmt.Sprintf("%*s", c.Width, " "))
+				screen.WriteString("\n")
+			}
 		}
 	}
 	screen.WriteString("\n") // for the input line
@@ -92,6 +105,7 @@ func (c *client) Draw() {
 	cui.Clear("screen")
 	cui.MoveCursorTo(0,0)
 	fmt.Print(screen.String())
+	c.DrawMessage()
 }
 
 func (c *client) TakeControlInput() {
@@ -100,34 +114,49 @@ func (c *client) TakeControlInput() {
 	switch input {
 	case 'j', 'J':
 		// scroll down one line
+		c.ClearMessage()
+		c.ClearMessageLine()
 		c.Scroll(1)
 	case 'k', 'K':
 		// scroll up one line
+		c.ClearMessage()
+		c.ClearMessageLine()
 		c.Scroll(-1)
 	case 'q', 'Q':
 		// quite bombadillo
 		cui.Exit()
 	case 'g':
 		// scroll to top
+		c.ClearMessage()
+		c.ClearMessageLine()
 		c.Scroll(-len(c.PageState.History[c.PageState.Position].WrappedContent))
 	case 'G':
 		// scroll to bottom
+		c.ClearMessage()
+		c.ClearMessageLine()
 		c.Scroll(len(c.PageState.History[c.PageState.Position].WrappedContent))
 	case 'd':
 		// scroll down 75%
+		c.ClearMessage()
+		c.ClearMessageLine()
 		distance := c.Height - c.Height / 4
 		c.Scroll(distance)
 	case 'u':
 		// scroll up 75%
+		c.ClearMessage()
+		c.ClearMessageLine()
 		distance := c.Height - c.Height / 4
 		c.Scroll(-distance)
 	case 'b':
 		// go back
+		c.ClearMessage()
+		c.ClearMessageLine()
 		err := c.PageState.NavigateHistory(-1)
 		if err != nil {
 			c.SetMessage(err.Error(), false)
 			c.DrawMessage()
 		} else {
+			c.SetHeaderUrl()
 			c.Draw()
 		}
 	case 'B':
@@ -136,11 +165,14 @@ func (c *client) TakeControlInput() {
 		c.Draw()
 	case 'f', 'F':
 		// go forward
+		c.ClearMessage()
+		c.ClearMessageLine()
 		err := c.PageState.NavigateHistory(1)
 		if err != nil {
 			c.SetMessage(err.Error(), false)
 			c.DrawMessage()
 		} else {
+			c.SetHeaderUrl()
 			c.Draw()
 		}
 	case '\t':
@@ -151,7 +183,6 @@ func (c *client) TakeControlInput() {
 		// Process a command
 		c.ClearMessage()
 		c.ClearMessageLine()
-		cui.MoveCursorTo(c.Height-2, 0)
 		entry, err := cui.GetLine()
 		c.ClearMessageLine()
 		if err != nil {
@@ -378,13 +409,13 @@ func (c *client) search() {
 
 func (c *client) Scroll(amount int) {
 	page := c.PageState.History[c.PageState.Position]
-	bottom := len(page.WrappedContent) - c.Height
+	bottom := len(page.WrappedContent) - c.Height + 3 // 3 for the three bars: top, msg, bottom
 	if amount < 0 && page.ScrollPosition == 0 {
 		c.SetMessage("You are already at the top", false)
 		c.DrawMessage()
 		fmt.Print("\a")
 		return
-	} else if amount > 0 && page.ScrollPosition == bottom || bottom < 0 {
+	} else if (amount > 0 && page.ScrollPosition == bottom) || bottom < 0 {
 		c.SetMessage("You are already at the bottom", false)
 		c.DrawMessage()
 		fmt.Print("\a")
@@ -398,7 +429,7 @@ func (c *client) Scroll(amount int) {
 		newScrollPosition = bottom
 	}
 
-	page.ScrollPosition = newScrollPosition
+	c.PageState.History[c.PageState.Position].ScrollPosition = newScrollPosition
 	c.Draw()
 }
 
@@ -464,9 +495,15 @@ func (c *client) goToLink(l string) {
 			return
 		}
 	}
+}
 
-	c.SetMessage(fmt.Sprintf("Invalid link id: %s", l), true)
-	c.DrawMessage()
+func (c *client) SetHeaderUrl() {
+	if c.PageState.Length > 0 {
+		u := c.PageState.History[c.PageState.Position].Location.Full
+		c.TopBar.url = u
+	} else {
+		c.TopBar.url = ""
+	}
 }
 
 func (c *client) Visit(url string) {
@@ -487,6 +524,8 @@ func (c *client) Visit(url string) {
 			c.DrawMessage()
 			return
 		}
+		c.SetMessage("Loading...", false)
+		c.DrawMessage()
 		content, links, err := gopher.Visit(u.Mime, u.Host, u.Port, u.Resource)
 		if err != nil {
 			c.SetMessage(err.Error(), true)
@@ -496,6 +535,9 @@ func (c *client) Visit(url string) {
 		pg := MakePage(u, content, links)
 		pg.WrapContent(c.Width)
 		c.PageState.Add(pg)
+		c.ClearMessage()
+		c.ClearMessageLine()
+		c.SetHeaderUrl()
 		c.Draw()
 	case "gemini":
 		// TODO send over to gemini request

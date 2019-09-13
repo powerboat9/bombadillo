@@ -10,6 +10,7 @@ import (
 
 type Headbar struct {
 	title string
+	url string
 }
 
 
@@ -27,9 +28,9 @@ func (h *Headbar) Draw() {
 	// without having to redraw everything else
 }
 
-func (h *Headbar) Render(width int, message string) string {
+func (h *Headbar) Render(width int) string {
 	maxMsgWidth := width - len([]rune(h.title))
-	return fmt.Sprintf("\033[7m%s%-*.*s\033[0m", h.title, maxMsgWidth, maxMsgWidth, message)
+	return fmt.Sprintf("\033[7m%s%-*.*s\033[0m", h.title, maxMsgWidth, maxMsgWidth, h.url)
 }
 
 
@@ -38,6 +39,6 @@ func (h *Headbar) Render(width int, message string) string {
 //--------------------------------------------------\\
 
 func MakeHeadbar(title string) Headbar {
-	return Headbar{title}
+	return Headbar{title, ""}
 }
 

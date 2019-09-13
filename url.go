@@ -78,7 +78,7 @@ func MakeUrl(u string) (Url, error) {
 	}
 
 	if out.Scheme == "gopher" && out.Mime == "" {
-		out.Mime = "0"
+		out.Mime = "1"
 	}
 
 	if out.Mime == "" && (out.Resource == "" || out.Resource == "/") && out.Scheme == "gopher" {

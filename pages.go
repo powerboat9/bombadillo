@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 )
 
 //------------------------------------------------\\
@@ -49,13 +48,32 @@ func (p *Pages) Add(pg Page) {
 	}
 }
 
-func (p *Pages) Render(termHeight int) []string {
+func (p *Pages) Render(termHeight, termWidth int) []string {
 	if p.Length < 1 {
-		msg := "Welcome to Bombadillo,\nif this is your first time here\ntype:\n\n:help\n(and then press enter)"
-		return strings.Split(msg, "\n")
+		return []string{""}
 	}
-	beg, end := p.History[p.Position].ScrollPositionRange(termHeight)
-	return p.History[p.Position].WrappedContent[beg:end]
+	pos := p.History[p.Position].ScrollPosition
+	prev := len(p.History[p.Position].WrappedContent)
+	p.History[p.Position].WrapContent(termWidth)
+	now := len(p.History[p.Position].WrappedContent)
+	if prev > now {
+		diff := prev - now
+		pos = pos - diff
+	} else if prev < now {
+		diff := now - prev
+		pos = pos + diff
+		if pos > now - termHeight {
+			pos = now - termHeight
+		}
+	}
+
+	if pos < 0 || now < termHeight - 3 {
+		pos = 0
+	}
+
+	p.History[p.Position].ScrollPosition = pos
+
+	return p.History[p.Position].WrappedContent[pos:]
 }
 
 //------------------------------------------------\\

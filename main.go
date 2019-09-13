@@ -163,6 +163,10 @@ func loadConfig() error {
 		}
 	}
 
+	for i, v := range settings.Bookmarks.Titles {
+		bombadillo.BookMarks.Add([]string{v, settings.Bookmarks.Links[i]})
+	}
+
 	return nil
 }
 
@@ -174,8 +178,8 @@ func initClient() error {
 }
 
 func main() {
-	// cui.HandleAlternateScreen("smcup")
-	// defer cui.Exit()
+	cui.HandleAlternateScreen("smcup")
+	defer cui.Exit()
 	err := initClient()
 	if err != nil {
 		// if we can't initialize we should bail out

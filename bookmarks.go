@@ -106,11 +106,11 @@ func (b Bookmarks) Render(termwidth, termheight int) []string {
 		bl = cui.Shapes["bl"]
 	}
 
-	out := make([]string, 5)
+	out := make([]string, 0, 5)
 	top := fmt.Sprintf("%s%s%s", tl, strings.Repeat(ceil, width-2), tr)
 	out = append(out, top)
 	marks := b.List()
-	contentWidth := termwidth - 2
+	contentWidth := width - 2
 	for i := 0; i < termheight - 2; i++ {
 		if i + b.Position >= b.Length {
 			out = append(out, fmt.Sprintf("%s%-*.*s%s", wall, contentWidth, contentWidth, "", wall ))
