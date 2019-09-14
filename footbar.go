@@ -2,14 +2,16 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 )
+
 
 //------------------------------------------------\\
 // + + +             T Y P E S               + + + \\
 //--------------------------------------------------\\
 
 type Footbar struct {
-	PercentRead int
+	PercentRead string
 	PageType string
 }
 
@@ -19,20 +21,25 @@ type Footbar struct {
 //--------------------------------------------------\\
 
 func (f *Footbar) SetPercentRead(p int) {
-	f.PercentRead = p
+	if p > 100 {
+		p = 100
+	} else if p < 0 {
+		p = 0
+	}
+	f.PercentRead = strconv.Itoa(p) + "%"
 }
 
 func (f *Footbar) SetPageType(t string) {
 	f.PageType = t
 }
 
-func (f *Footbar) Draw() {
-	// TODO this will actually draw the bar
-	// without having to redraw everything else
-}
-
-func (f *Footbar) Render(termWidth int) string {
-	return fmt.Sprintf("\033[7m%-*.*s\033[0m", termWidth, termWidth, "")
+func (f *Footbar) Render(termWidth, position int, theme string) string {
+	pre := fmt.Sprintf("HST: (%2.2d) - - - %4s Read ", position + 1, f.PercentRead)
+	out := "\033[0m%*.*s "
+	if theme == "inverse" {
+		out = "\033[7m%*.*s \033[0m"
+	}
+	return fmt.Sprintf(out, termWidth - 1, termWidth - 1, pre)
 }
 
 
@@ -41,6 +48,6 @@ func (f *Footbar) Render(termWidth int) string {
 //--------------------------------------------------\\
 
 func MakeFootbar() Footbar {
-	return Footbar{100, "N/A"}
+	return Footbar{"---", "N/A"}
 }
 

@@ -38,9 +38,11 @@ func (p *Page) ScrollPositionRange(termHeight int) (int, int) {
 	return p.ScrollPosition, end
 }
 
+// Performs a hard wrap to the requested
+// width and updates the WrappedContent
+// of the Page struct width a string slice
+// of the wrapped data
 func (p *Page) WrapContent(width int) {
-	// TODO this is a temporary wrapping function
-	// in order to test. Rebuild it.
 	counter := 0
 	var content strings.Builder
 	content.Grow(len(p.RawContent))
@@ -48,6 +50,18 @@ func (p *Page) WrapContent(width int) {
 		if ch == '\n' {
 			content.WriteRune(ch)
 			counter = 0
+		} else if ch == '\t' {
+			if counter + 4 < width {
+				content.WriteString("    ")
+				counter += 4
+			} else {
+				content.WriteRune('\n')
+				counter = 0
+			}
+		} else if ch == '\r' {
+			// This handles non-linux line endings...
+			// to some degree...
+			continue
 		} else {
 			if counter < width {
 				content.WriteRune(ch)

@@ -107,10 +107,10 @@ func (b Bookmarks) Render(termwidth, termheight int) []string {
 	}
 
 	out := make([]string, 0, 5)
-	top := fmt.Sprintf("%s%s%s", tl, strings.Repeat(ceil, width-2), tr)
+	contentWidth := width - 2
+	top := fmt.Sprintf("%s%s%s", tl, strings.Repeat(ceil, contentWidth), tr)
 	out = append(out, top)
 	marks := b.List()
-	contentWidth := width - 2
 	for i := 0; i < termheight - 2; i++ {
 		if i + b.Position >= b.Length {
 			out = append(out, fmt.Sprintf("%s%-*.*s%s", wall, contentWidth, contentWidth, "", wall ))
@@ -119,7 +119,7 @@ func (b Bookmarks) Render(termwidth, termheight int) []string {
 		}
 	}
 
-	bottom := fmt.Sprintf("%s%s%s", bl, strings.Repeat(ceil, width-2), br)
+	bottom := fmt.Sprintf("%s%s%s", bl, strings.Repeat(ceil, contentWidth), br)
 	out = append(out, bottom)
 	return out
 }

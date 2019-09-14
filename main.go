@@ -3,12 +3,10 @@ package main
 import (
 	"io/ioutil"
 	"os"
-	// "strconv"
 	"strings"
 
 	"tildegit.org/sloum/bombadillo/config"
 	"tildegit.org/sloum/bombadillo/cui"
-	// "tildegit.org/sloum/bombadillo/gopher"
 )
 
 var bombadillo *client
@@ -31,96 +29,6 @@ var settings config.Config
 	// return nil
 // }
 
-
-
-// func doLinkCommand(action, target string) error {
-	// num, err := strconv.Atoi(target)
-	// if err != nil {
-		// return fmt.Errorf("Expected number, got %q", target)
-	// }
-
-	// switch action {
-	// case "DELETE", "D":
-		// err := settings.Bookmarks.Del(num)
-		// if err != nil {
-			// return err
-		// }
-
-		// screen.Windows[1].Content = settings.Bookmarks.List()
-		// err = saveConfig()
-		// if err != nil {
-			// return err
-		// }
-
-		// screen.ReflashScreen(false)
-		// return nil
-	// case "BOOKMARKS", "B":
-		// if num > len(settings.Bookmarks.Links)-1 {
-			// return fmt.Errorf("There is no bookmark with ID %d", num)
-		// }
-		// err := goToURL(settings.Bookmarks.Links[num])
-		// return err
-	// }
-
-	// return fmt.Errorf("This method has not been built")
-// }
-
-
-// func doCommand(action string, values []string) error {
-	// if length := len(values); length != 1 {
-		// return fmt.Errorf("Expected 1 argument, received %d", length)
-	// }
-
-	// switch action {
-	// case "CHECK", "C":
-		// err := checkConfigValue(values[0])
-		// if err != nil {
-			// return err
-		// }
-		// return nil
-	// }
-	// return fmt.Errorf("Unknown command structure")
-// }
-
-// func doLinkCommandAs(action, target string, values []string) error {
-	// num, err := strconv.Atoi(target)
-	// if err != nil {
-		// return fmt.Errorf("Expected number, got %q", target)
-	// }
-
-	// links := history.Collection[history.Position].Links
-	// if num >= len(links) {
-		// return fmt.Errorf("Invalid link id: %s", target)
-	// }
-
-	// switch action {
-	// case "ADD", "A":
-		// newBookmark := append([]string{links[num-1]}, values...)
-		// err := settings.Bookmarks.Add(newBookmark)
-		// if err != nil {
-			// return err
-		// }
-
-		// screen.Windows[1].Content = settings.Bookmarks.List()
-
-		// err = saveConfig()
-		// if err != nil {
-			// return err
-		// }
-
-		// screen.ReflashScreen(false)
-		// return nil
-	// case "WRITE", "W":
-		// return saveFile(links[num-1], strings.Join(values, " "))
-	// }
-
-	// return fmt.Errorf("This method has not been built")
-// }
-
-// func updateMainContent() {
-	// screen.Windows[0].Content = history.Collection[history.Position].Content
-	// screen.Bars[0].SetMessage(history.Collection[history.Position].Address.Full)
-// }
 
 func saveConfig() error {
 	bkmrks := bombadillo.BookMarks.IniDump()
@@ -186,6 +94,9 @@ func main() {
 		panic(err)
 	}
 
+	// TODO find out why the loading message
+	// has disappeared on initial load...
+
 	// Start polling for terminal size changes
 	go bombadillo.GetSize()
 
@@ -193,12 +104,12 @@ func main() {
 		// If a url was passed, move it down the line
 		// Goroutine so keypresses can be made during
 		// page load
-		bombadillo.Visit(os.Args[1])
+		go bombadillo.Visit(os.Args[1])
 	} else {
 		// Otherwise, load the homeurl
 		// Goroutine so keypresses can be made during
 		// page load
-		bombadillo.Visit(bombadillo.Options["homeurl"])
+		go bombadillo.Visit(bombadillo.Options["homeurl"])
 	}
 
 	// Loop indefinitely on user input

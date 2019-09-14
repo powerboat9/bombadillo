@@ -28,9 +28,13 @@ func (h *Headbar) Draw() {
 	// without having to redraw everything else
 }
 
-func (h *Headbar) Render(width int) string {
-	maxMsgWidth := width - len([]rune(h.title))
-	return fmt.Sprintf("\033[7m%s%-*.*s\033[0m", h.title, maxMsgWidth, maxMsgWidth, h.url)
+func (h *Headbar) Render(width int, theme string) string {
+	maxMsgWidth := width - len([]rune(h.title)) - 2
+	if theme == "inverse" {
+		return fmt.Sprintf("\033[7m%s▟\033[27m %-*.*s\033[0m", h.title, maxMsgWidth, maxMsgWidth, h.url)
+	} else {
+		return fmt.Sprintf("%s▟\033[7m %-*.*s\033[0m", h.title, maxMsgWidth, maxMsgWidth, h.url)
+	}
 }
 
 

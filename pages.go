@@ -50,7 +50,7 @@ func (p *Pages) Add(pg Page) {
 
 func (p *Pages) Render(termHeight, termWidth int) []string {
 	if p.Length < 1 {
-		return []string{""}
+		return make([]string, 0)
 	}
 	pos := p.History[p.Position].ScrollPosition
 	prev := len(p.History[p.Position].WrappedContent)

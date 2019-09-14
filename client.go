@@ -6,7 +6,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
-	"os/user"
+	// "os/user"
 	"regexp"
 	"strconv"
 	"strings"
@@ -41,6 +41,8 @@ type client struct {
 //--------------------------------------------------\\
 
 func (c *client) GetSize() {
+	c.SetMessage("Initializing...", false)
+	c.DrawMessage()
 	for {
 		redraw := false
 		cmd := exec.Command("stty", "size")
@@ -71,28 +73,33 @@ func (c *client) GetSize() {
 func (c *client) Draw() {
 	var screen strings.Builder
 	screen.Grow(c.Height * c.Width)
-	screen.WriteString(c.TopBar.Render(c.Width))
+	screen.WriteString(c.TopBar.Render(c.Width, c.Options["theme"]))
 	screen.WriteString("\n")
 	pageContent := c.PageState.Render(c.Height, c.Width)
+  if c.Options["theme"] == "inverse" {
+		screen.WriteString("\033[7m")
+	}
 	if c.BookMarks.IsOpen {
 		bm := c.BookMarks.Render(c.Width, c.Height)
-		bmWidth := 40
+		// TODO remove this hard coded value
+		bmWidth := len([]rune(bm[0]))
 		for i := 0; i < c.Height - 3; i++ {
 			if c.Width > bmWidth {
-				contentWidth := c.Width - bmWidth - 1
-				if i < len(pageContent) - 1 {
+				contentWidth := c.Width - bmWidth
+				if i < len(pageContent)  {
 					screen.WriteString(fmt.Sprintf("%-*.*s", contentWidth, contentWidth, pageContent[i]))
 				} else {
 					screen.WriteString(fmt.Sprintf("%-*.*s", contentWidth, contentWidth, " "))
 				}
 			}
+			
 			screen.WriteString(bm[i])
 			screen.WriteString("\n")
 		}
 	} else {
 		for i := 0; i < c.Height - 3; i++ {
 			if i < len(pageContent) - 1 {
-				screen.WriteString(pageContent[i])
+				screen.WriteString(fmt.Sprintf("%-*.*s", c.Width, c.Width, pageContent[i]))
 				screen.WriteString("\n")
 			} else {
 				screen.WriteString(fmt.Sprintf("%*s", c.Width, " "))
@@ -100,8 +107,9 @@ func (c *client) Draw() {
 			}
 		}
 	}
+	screen.WriteString("\033[0m")
 	screen.WriteString("\n") // for the input line
-	screen.WriteString(c.FootBar.Render(c.Width))
+	screen.WriteString(c.FootBar.Render(c.Width, c.PageState.Position, c.Options["theme"]))
 	cui.Clear("screen")
 	cui.MoveCursorTo(0,0)
 	fmt.Print(screen.String())
@@ -183,6 +191,9 @@ func (c *client) TakeControlInput() {
 		// Process a command
 		c.ClearMessage()
 		c.ClearMessageLine()
+		if c.Options["theme"] == "normal" {
+			fmt.Printf("\033[7m%*.*s\r", c.Width, c.Width, "")
+		}
 		entry, err := cui.GetLine()
 		c.ClearMessageLine()
 		if err != nil {
@@ -190,6 +201,7 @@ func (c *client) TakeControlInput() {
 			c.DrawMessage()
 			break
 		} else if strings.TrimSpace(entry) == "" {
+			c.DrawMessage()
 			break
 		}
 
@@ -221,7 +233,7 @@ func (c *client) routeCommandInput(com *cmdparse.Command) error {
 	case cmdparse.DO:
 		c.doCommand(com.Action, com.Value)
 	case cmdparse.DOLINK:
-		// err = doLinkCommand(com.Action, com.Target)
+		c.doLinkCommand(com.Action, com.Target)
 	case cmdparse.DOAS:
 		c.doCommandAs(com.Action, com.Value)
 	case cmdparse.DOLINKAS:
@@ -337,7 +349,8 @@ func (c *client) doCommandAs(action string, values []string) {
 				c.SetMessage("Value set, but error saving config to file", true)
 				c.DrawMessage()
 			} else {
-				c.SetMessage(fmt.Sprintf("%s is now set to %q", values[0], c.Options[values[0]]), true)
+				c.Draw()
+				c.SetMessage(fmt.Sprintf("%s is now set to %q", values[0], c.Options[values[0]]), false)
 				c.DrawMessage()
 			}
 			return
@@ -371,6 +384,47 @@ func (c *client) saveFile(data []byte, name string) (string, error) {
 	}
 
 	return savePath, nil
+}
+
+func (c *client) doLinkCommand(action, target string) {
+	num, err := strconv.Atoi(target)
+	if err != nil {
+		c.SetMessage(fmt.Sprintf("Expected number, got %q", target), true)
+		c.DrawMessage()
+	}
+
+	switch action {
+	case "DELETE", "D":
+		msg, err := c.BookMarks.Delete(num)
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+			return
+		} else {
+			c.SetMessage(msg, false)
+			c.DrawMessage()
+		}
+
+		err = saveConfig()
+		if err != nil {
+			c.SetMessage("Error saving bookmark deletion to file", true)
+			c.DrawMessage()
+		}
+		if c.BookMarks.IsOpen {
+			c.Draw()
+		}
+	case "BOOKMARKS", "B":
+		if num > len(c.BookMarks.Links)-1 {
+			c.SetMessage(fmt.Sprintf("There is no bookmark with ID %d", num), true)
+			c.DrawMessage()
+			return
+		}
+		c.Visit(c.BookMarks.Links[num])
+	default:
+	  c.SetMessage(fmt.Sprintf("Action %q does not exist for target %q", action, target), true)
+		c.DrawMessage()
+	}
+
 }
 
 func (c *client) search() {
@@ -408,6 +462,7 @@ func (c *client) search() {
 }
 
 func (c *client) Scroll(amount int) {
+	var percentRead int
 	page := c.PageState.History[c.PageState.Position]
 	bottom := len(page.WrappedContent) - c.Height + 3 // 3 for the three bars: top, msg, bottom
 	if amount < 0 && page.ScrollPosition == 0 {
@@ -416,6 +471,7 @@ func (c *client) Scroll(amount int) {
 		fmt.Print("\a")
 		return
 	} else if (amount > 0 && page.ScrollPosition == bottom) || bottom < 0 {
+		c.FootBar.SetPercentRead(100)
 		c.SetMessage("You are already at the bottom", false)
 		c.DrawMessage()
 		fmt.Print("\a")
@@ -430,6 +486,14 @@ func (c *client) Scroll(amount int) {
 	}
 
 	c.PageState.History[c.PageState.Position].ScrollPosition = newScrollPosition
+
+	if len(page.WrappedContent) < c.Height - 3 {
+		percentRead = 100
+	} else {
+		percentRead = int(float32(newScrollPosition + c.Height - 3) / float32(len(page.WrappedContent)) * 100.0)
+	}
+	c.FootBar.SetPercentRead(percentRead)
+
 	c.Draw()
 }
 
@@ -446,21 +510,30 @@ func (c *client) displayConfigValue(setting string) {
 func (c *client) SetMessage(msg string, isError bool) {
 	leadIn, leadOut := "", ""
 	if isError {
-		leadIn = "\033[31m"
+		leadIn = "\033[91m"
+		leadOut = "\033[0m"
+
+		if c.Options["theme"] == "normal" {
+			leadIn = "\033[101;7m"
+		}
+	}
+
+	if c.Options["theme"] == "normal" {
+		leadIn = "\033[7m"
 		leadOut = "\033[0m"
 	}
 
-	c.Message = fmt.Sprintf("%s%s%s", leadIn, msg, leadOut)
+	c.Message = fmt.Sprintf("%s%-*.*s%s", leadIn, c.Width, c.Width, msg, leadOut)
 }
 
 func (c *client) DrawMessage() {
 	c.ClearMessageLine()
 	cui.MoveCursorTo(c.Height-1, 0)
-	fmt.Print(c.Message)
+	fmt.Printf("%s", c.Message)
 }
 
 func (c *client) ClearMessage() {
-	c.Message = ""
+	c.SetMessage("", false)
 }
 
 func (c *client) ClearMessageLine() {
@@ -518,12 +591,6 @@ func (c *client) Visit(url string) {
 
 	switch u.Scheme {
 	case "gopher":
-		u, err := MakeUrl(url)
-		if err != nil {
-			c.SetMessage(err.Error(), true)
-			c.DrawMessage()
-			return
-		}
 		c.SetMessage("Loading...", false)
 		c.DrawMessage()
 		content, links, err := gopher.Visit(u.Mime, u.Host, u.Port, u.Resource)
@@ -535,13 +602,14 @@ func (c *client) Visit(url string) {
 		pg := MakePage(u, content, links)
 		pg.WrapContent(c.Width)
 		c.PageState.Add(pg)
+		c.Scroll(0) // to update percent read
 		c.ClearMessage()
 		c.ClearMessageLine()
 		c.SetHeaderUrl()
 		c.Draw()
 	case "gemini":
 		// TODO send over to gemini request
-		c.SetMessage("Gemini is not currently supported", false)
+		c.SetMessage("Bombadillo has not mastered Gemini yet, check back soon", false)
 		c.DrawMessage()
 	case "telnet":
 		c.SetMessage("Attempting to start telnet session", false)
@@ -582,16 +650,16 @@ func (c *client) Visit(url string) {
 //--------------------------------------------------\\
 
 func MakeClient(name string) *client {
-	var userinfo, _ = user.Current()
-	var options = map[string]string{
-		"homeurl":      "gopher://colorfield.space:70/1/bombadillo-info",
-		"savelocation": userinfo.HomeDir,
-		"searchengine": "gopher://gopher.floodgap.com:70/7/v2/vs",
-		"openhttp":     "false",
-		"httpbrowser":  "lynx",
-		"configlocation": userinfo.HomeDir,
-	}
-	c := client{0, 0, options, "", MakePages(), MakeBookmarks(), MakeHeadbar(name), MakeFootbar()}
+	// var userinfo, _ = user.Current()
+	// var options = map[string]string{
+		// "homeurl":      "gopher://colorfield.space:70/1/bombadillo-info",
+		// "savelocation": userinfo.HomeDir,
+		// "searchengine": "gopher://gopher.floodgap.com:70/7/v2/vs",
+		// "openhttp":     "false",
+		// "httpbrowser":  "lynx",
+		// "configlocation": userinfo.HomeDir,
+	// }
+	c := client{0, 0, defaultOptions, "", MakePages(), MakeBookmarks(), MakeHeadbar(name), MakeFootbar()}
 	return &c
 }
 
