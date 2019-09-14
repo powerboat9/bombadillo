@@ -1,5 +1,11 @@
 package main
 
+// Bombadillo is distributed under the "Non-Profit Open Source Software License 3.0"
+// The license is included with the source code in the file LICENSE. The basic
+// takeway: use, remix, and share this software for any purpose that is not a commercial
+// purpose as defined by the above mentioned license and is itself distributed udner
+// the terms of said license with said license file included.
+
 import (
 	"io/ioutil"
 	"os"
@@ -104,12 +110,12 @@ func main() {
 		// If a url was passed, move it down the line
 		// Goroutine so keypresses can be made during
 		// page load
-		go bombadillo.Visit(os.Args[1])
+		bombadillo.Visit(os.Args[1])
 	} else {
 		// Otherwise, load the homeurl
 		// Goroutine so keypresses can be made during
 		// page load
-		go bombadillo.Visit(bombadillo.Options["homeurl"])
+		bombadillo.Visit(bombadillo.Options["homeurl"])
 	}
 
 	// Loop indefinitely on user input

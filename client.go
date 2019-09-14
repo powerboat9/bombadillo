@@ -40,11 +40,26 @@ type client struct {
 // + + +           R E C E I V E R S         + + + \\
 //--------------------------------------------------\\
 
+func (c *client) GetSizeOnce() {
+	cmd := exec.Command("stty", "size")
+	cmd.Stdin = os.Stdin
+	out, err := cmd.Output()
+	if err != nil {
+		fmt.Println("Fatal error: Unable to retrieve terminal size")
+		os.Exit(5)
+	}
+	var h, w int
+	fmt.Sscan(string(out), &h, &w)
+	c.Height = h
+	c.Width = w
+}
+
 func (c *client) GetSize() {
-	c.SetMessage("Initializing...", false)
-	c.DrawMessage()
+	c.GetSizeOnce()
+	c.SetMessage("Loading...", false)
+	c.Draw()
+
 	for {
-		redraw := false
 		cmd := exec.Command("stty", "size")
 		cmd.Stdin = os.Stdin
 		out, err := cmd.Output()
@@ -55,14 +70,8 @@ func (c *client) GetSize() {
 		var h, w int
 		fmt.Sscan(string(out), &h, &w)
 		if h != c.Height || w != c.Width {
-			redraw = true
-		}
-
-		c.Height = h
-		c.Width = w
-
-
-		if redraw {
+			c.Height = h
+			c.Width = w
 			c.Draw()
 		}
 
@@ -81,7 +90,6 @@ func (c *client) Draw() {
 	}
 	if c.BookMarks.IsOpen {
 		bm := c.BookMarks.Render(c.Width, c.Height)
-		// TODO remove this hard coded value
 		bmWidth := len([]rune(bm[0]))
 		for i := 0; i < c.Height - 3; i++ {
 			if c.Width > bmWidth {
@@ -108,12 +116,12 @@ func (c *client) Draw() {
 		}
 	}
 	screen.WriteString("\033[0m")
+	screen.WriteString(c.Message)
 	screen.WriteString("\n") // for the input line
 	screen.WriteString(c.FootBar.Render(c.Width, c.PageState.Position, c.Options["theme"]))
 	cui.Clear("screen")
 	cui.MoveCursorTo(0,0)
 	fmt.Print(screen.String())
-	c.DrawMessage()
 }
 
 func (c *client) TakeControlInput() {
@@ -123,12 +131,10 @@ func (c *client) TakeControlInput() {
 	case 'j', 'J':
 		// scroll down one line
 		c.ClearMessage()
-		c.ClearMessageLine()
 		c.Scroll(1)
 	case 'k', 'K':
 		// scroll up one line
 		c.ClearMessage()
-		c.ClearMessageLine()
 		c.Scroll(-1)
 	case 'q', 'Q':
 		// quite bombadillo
@@ -136,29 +142,24 @@ func (c *client) TakeControlInput() {
 	case 'g':
 		// scroll to top
 		c.ClearMessage()
-		c.ClearMessageLine()
 		c.Scroll(-len(c.PageState.History[c.PageState.Position].WrappedContent))
 	case 'G':
 		// scroll to bottom
 		c.ClearMessage()
-		c.ClearMessageLine()
 		c.Scroll(len(c.PageState.History[c.PageState.Position].WrappedContent))
 	case 'd':
 		// scroll down 75%
 		c.ClearMessage()
-		c.ClearMessageLine()
 		distance := c.Height - c.Height / 4
 		c.Scroll(distance)
 	case 'u':
 		// scroll up 75%
 		c.ClearMessage()
-		c.ClearMessageLine()
 		distance := c.Height - c.Height / 4
 		c.Scroll(-distance)
 	case 'b':
 		// go back
 		c.ClearMessage()
-		c.ClearMessageLine()
 		err := c.PageState.NavigateHistory(-1)
 		if err != nil {
 			c.SetMessage(err.Error(), false)
@@ -174,7 +175,6 @@ func (c *client) TakeControlInput() {
 	case 'f', 'F':
 		// go forward
 		c.ClearMessage()
-		c.ClearMessageLine()
 		err := c.PageState.NavigateHistory(1)
 		if err != nil {
 			c.SetMessage(err.Error(), false)
@@ -349,9 +349,8 @@ func (c *client) doCommandAs(action string, values []string) {
 				c.SetMessage("Value set, but error saving config to file", true)
 				c.DrawMessage()
 			} else {
-				c.Draw()
 				c.SetMessage(fmt.Sprintf("%s is now set to %q", values[0], c.Options[values[0]]), false)
-				c.DrawMessage()
+				c.Draw()
 			}
 			return
 		}
@@ -527,7 +526,7 @@ func (c *client) SetMessage(msg string, isError bool) {
 }
 
 func (c *client) DrawMessage() {
-	c.ClearMessageLine()
+	// c.ClearMessageLine()
 	cui.MoveCursorTo(c.Height-1, 0)
 	fmt.Printf("%s", c.Message)
 }
@@ -580,8 +579,9 @@ func (c *client) SetHeaderUrl() {
 }
 
 func (c *client) Visit(url string) {
-	// TODO both gemini and gopher should return a string
-	// The wrap lines function in cui needs to be rewritten
+	c.SetMessage("Loading...", false)
+	c.DrawMessage()
+
 	u, err := MakeUrl(url)
 	if err != nil {
 		c.SetMessage(err.Error(), true)
@@ -591,8 +591,6 @@ func (c *client) Visit(url string) {
 
 	switch u.Scheme {
 	case "gopher":
-		c.SetMessage("Loading...", false)
-		c.DrawMessage()
 		content, links, err := gopher.Visit(u.Mime, u.Host, u.Port, u.Resource)
 		if err != nil {
 			c.SetMessage(err.Error(), true)
@@ -604,7 +602,6 @@ func (c *client) Visit(url string) {
 		c.PageState.Add(pg)
 		c.Scroll(0) // to update percent read
 		c.ClearMessage()
-		c.ClearMessageLine()
 		c.SetHeaderUrl()
 		c.Draw()
 	case "gemini":

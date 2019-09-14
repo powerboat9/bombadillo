@@ -101,6 +101,10 @@ func MakeUrl(u string) (Url, error) {
 		out.Mime = ""
 	}
 
+	if out.Scheme == "http" || out.Scheme == "https" {
+		out.Mime = ""
+	}
+
 	out.Full = out.Scheme + "://" + out.Host + ":" + out.Port + "/" + out.Mime + out.Resource
 
 	return out, nil
