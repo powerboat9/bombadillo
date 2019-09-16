@@ -82,7 +82,8 @@ func (c *client) GetSize() {
 
 func (c *client) Draw() {
 	var screen strings.Builder
-	screen.Grow(c.Height * c.Width)
+	screen.Grow(c.Height * c.Width + c.Width)
+	screen.WriteString("\033[0m")
 	screen.WriteString(c.TopBar.Render(c.Width, c.Options["theme"]))
 	screen.WriteString("\n")
 	pageContent := c.PageState.Render(c.Height, c.Width)
@@ -121,7 +122,7 @@ func (c *client) Draw() {
 	screen.WriteString(c.RenderMessage())
 	screen.WriteString("\n") // for the input line
 	screen.WriteString(c.FootBar.Render(c.Width, c.PageState.Position, c.Options["theme"]))
-	cui.Clear("screen")
+	// cui.Clear("screen")
 	cui.MoveCursorTo(0,0)
 	fmt.Print(screen.String())
 }
@@ -216,7 +217,7 @@ func (c *client) TakeControlInput() {
 			err := c.routeCommandInput(p)
 			if err != nil {
 				c.SetMessage(err.Error(), true)
-				c.DrawMessage()
+				c.Draw()
 			}
 		}
 	}
@@ -261,6 +262,7 @@ func (c *client) simpleCommand(action string) {
 		}
 	case "B", "BOOKMARKS":
 		c.BookMarks.ToggleOpen()
+		c.Draw()
 	case "SEARCH":
 		c.search()
 	case "HELP", "?":
