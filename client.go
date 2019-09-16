@@ -563,23 +563,8 @@ func (c *client) SetMessage(msg string, isError bool) {
 }
 
 func (c *client) DrawMessage() {
-	leadIn, leadOut := "", ""
-	if c.Options["theme"] == "normal" {
-		leadIn = "\033[7m"
-		leadOut = "\033[0m"
-	}
-
-	if c.MessageIsErr {
-		leadIn = "\033[31;1m"
-		leadOut = "\033[0m"
-
-		if c.Options["theme"] == "normal" {
-			leadIn = "\033[41;1;7m"
-		}
-	}
-
 	cui.MoveCursorTo(c.Height-1, 0)
-	fmt.Printf("%s%-*.*s%s", leadIn, c.Width, c.Width, c.Message, leadOut)
+	fmt.Print(c.RenderMessage())
 }
 
 func (c *client) RenderMessage() string {
