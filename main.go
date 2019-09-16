@@ -37,17 +37,19 @@ var settings config.Config
 
 
 func saveConfig() error {
+	var opts strings.Builder
 	bkmrks := bombadillo.BookMarks.IniDump()
-	// TODO opts becomes a string builder rather than concat
-	opts := "\n[SETTINGS]\n"
+
+	opts.WriteString(bkmrks)
+	opts.WriteString("\n[SETTINGS]\n")
 	for k, v := range bombadillo.Options {
-		opts += k
-		opts += "="
-		opts += v
-		opts += "\n"
+		opts.WriteString(k)
+		opts.WriteRune('=')
+		opts.WriteString(v)
+		opts.WriteRune('\n')
 	}
 
-	return ioutil.WriteFile(bombadillo.Options["configlocation"] + "/.bombadillo.ini", []byte(bkmrks+opts), 0644)
+	return ioutil.WriteFile(bombadillo.Options["configlocation"] + "/.bombadillo.ini", []byte(opts.String()), 0644)
 }
 
 func loadConfig() error {
@@ -99,9 +101,6 @@ func main() {
 		// if we can't initialize we should bail out
 		panic(err)
 	}
-
-	// TODO find out why the loading message
-	// has disappeared on initial load...
 
 	// Start polling for terminal size changes
 	go bombadillo.GetSize()

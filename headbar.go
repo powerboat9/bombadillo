@@ -18,16 +18,6 @@ type Headbar struct {
 // + + +           R E C E I V E R S         + + + \\
 //--------------------------------------------------\\
 
-func (h *Headbar) Build(width string) string {
-	// TODO Build out header to specified width
-	return ""
-}
-
-func (h *Headbar) Draw() {
-	// TODO this will actually draw the bar
-	// without having to redraw everything else
-}
-
 func (h *Headbar) Render(width int, theme string) string {
 	maxMsgWidth := width - len([]rune(h.title)) - 2
 	if theme == "inverse" {

@@ -29,6 +29,7 @@ type client struct {
 	Width int
 	Options map[string]string
 	Message string
+	MessageIsErr bool
 	PageState Pages
 	BookMarks Bookmarks
 	TopBar Headbar
@@ -116,7 +117,8 @@ func (c *client) Draw() {
 		}
 	}
 	screen.WriteString("\033[0m")
-	screen.WriteString(c.Message)
+	// TODO using message here breaks on resize, must regenerate
+	screen.WriteString(c.RenderMessage())
 	screen.WriteString("\n") // for the input line
 	screen.WriteString(c.FootBar.Render(c.Width, c.PageState.Position, c.Options["theme"]))
 	cui.Clear("screen")
@@ -237,7 +239,7 @@ func (c *client) routeCommandInput(com *cmdparse.Command) error {
 	case cmdparse.DOAS:
 		c.doCommandAs(com.Action, com.Value)
 	case cmdparse.DOLINKAS:
-		// err = doLinkCommandAs(com.Action, com.Target, com.Value)
+		c.doLinkCommandAs(com.Action, com.Target, com.Value)
 	default:
 		return fmt.Errorf("Unknown command entry!")
 	}
@@ -361,6 +363,52 @@ func (c *client) doCommandAs(action string, values []string) {
 	c.SetMessage(fmt.Sprintf("Unknown command structure"), true)
 }
 
+func (c *client) doLinkCommandAs(action, target string, values []string) {
+	num, err := strconv.Atoi(target)
+	if err != nil {
+		c.SetMessage(fmt.Sprintf("Expected link number, got %q", target), true)
+		c.DrawMessage()
+		return
+	}
+
+	switch action {
+	case "ADD", "A":
+		links := c.PageState.History[c.PageState.Position].Links
+		if num >= len(links) {
+			c.SetMessage(fmt.Sprintf("Invalid link id: %s", target), true)
+			c.DrawMessage()
+			return
+		}
+		bm := make([]string, 0, 5)
+		bm = append(bm, links[num-1])
+		bm = append(bm, values...)
+		msg, err := c.BookMarks.Add(bm)
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+			return
+		} else {
+			c.SetMessage(msg, false)
+			c.DrawMessage()
+		}
+
+		err = saveConfig()
+		if err != nil {
+			c.SetMessage("Error saving bookmark to file", true)
+			c.DrawMessage()
+		}
+		if c.BookMarks.IsOpen {
+			c.Draw()
+		}
+	case "WRITE", "W":
+		// TODO get file writing working in some semblance of universal way
+		// return saveFile(links[num-1], strings.Join(values, " "))
+	default:
+		c.SetMessage(fmt.Sprintf("Unknown command structure"), true)
+	}
+}
+
+
 func (c *client) getCurrentPageUrl() (string, error) {
 	if c.PageState.Length < 1 {
 		return "", fmt.Errorf("There are no pages in history")
@@ -429,6 +477,9 @@ func (c *client) doLinkCommand(action, target string) {
 func (c *client) search() {
 	c.ClearMessage()
 	c.ClearMessageLine()
+	// TODO handle keeping the full command bar here
+	// like was done for regular command entry
+	// maybe split into separate function
 	fmt.Print("?")
 	entry, err := cui.GetLine()
 	c.ClearMessageLine()
@@ -439,9 +490,9 @@ func (c *client) search() {
 	} else if strings.TrimSpace(entry) == "" {
 		return
 	}
-	u, err := MakeUrl(c.Options["searchurl"])
+	u, err := MakeUrl(c.Options["searchengine"])
 	if err != nil {
-		c.SetMessage("'searchurl' is not set to a valid url", true)
+		c.SetMessage("'searchengine' is not set to a valid url", true)
 		c.DrawMessage()
 		return
 	}
@@ -507,28 +558,47 @@ func (c *client) displayConfigValue(setting string) {
 }
 
 func (c *client) SetMessage(msg string, isError bool) {
+	c.MessageIsErr = isError
+	c.Message = msg
+}
+
+func (c *client) DrawMessage() {
 	leadIn, leadOut := "", ""
-	if isError {
-		leadIn = "\033[91m"
-		leadOut = "\033[0m"
-
-		if c.Options["theme"] == "normal" {
-			leadIn = "\033[101;7m"
-		}
-	}
-
 	if c.Options["theme"] == "normal" {
 		leadIn = "\033[7m"
 		leadOut = "\033[0m"
 	}
 
-	c.Message = fmt.Sprintf("%s%-*.*s%s", leadIn, c.Width, c.Width, msg, leadOut)
+	if c.MessageIsErr {
+		leadIn = "\033[31;1m"
+		leadOut = "\033[0m"
+
+		if c.Options["theme"] == "normal" {
+			leadIn = "\033[41;1;7m"
+		}
+	}
+
+	cui.MoveCursorTo(c.Height-1, 0)
+	fmt.Printf("%s%-*.*s%s", leadIn, c.Width, c.Width, c.Message, leadOut)
 }
 
-func (c *client) DrawMessage() {
-	// c.ClearMessageLine()
-	cui.MoveCursorTo(c.Height-1, 0)
-	fmt.Printf("%s", c.Message)
+func (c *client) RenderMessage() string {
+	leadIn, leadOut := "", ""
+	if c.Options["theme"] == "normal" {
+		leadIn = "\033[7m"
+		leadOut = "\033[0m"
+	}
+
+	if c.MessageIsErr {
+		leadIn = "\033[31;1m"
+		leadOut = "\033[0m"
+
+		if c.Options["theme"] == "normal" {
+			leadIn = "\033[41;1;7m"
+		}
+	}
+
+	return fmt.Sprintf("%s%-*.*s%s", leadIn, c.Width, c.Width, c.Message, leadOut)
 }
 
 func (c *client) ClearMessage() {
@@ -656,7 +726,7 @@ func MakeClient(name string) *client {
 		// "httpbrowser":  "lynx",
 		// "configlocation": userinfo.HomeDir,
 	// }
-	c := client{0, 0, defaultOptions, "", MakePages(), MakeBookmarks(), MakeHeadbar(name), MakeFootbar()}
+	c := client{0, 0, defaultOptions, "", false, MakePages(), MakeBookmarks(), MakeHeadbar(name), MakeFootbar()}
 	return &c
 }
 
