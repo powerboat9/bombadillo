@@ -102,8 +102,21 @@ func (c *client) Draw() {
 					screen.WriteString(fmt.Sprintf("%-*.*s", contentWidth, contentWidth, " "))
 				}
 			}
+
+			if c.Options["theme"] == "inverse" && !c.BookMarks.IsFocused {
+				screen.WriteString("\033[2;7m")
+			} else if !c.BookMarks.IsFocused {
+				screen.WriteString("\033[2m")
+			}
 			
 			screen.WriteString(bm[i])
+
+			if c.Options["theme"] == "inverse" && !c.BookMarks.IsFocused {
+				screen.WriteString("\033[7;22m")
+			} else if !c.BookMarks.IsFocused {
+				screen.WriteString("\033[0m")
+			}
+
 			screen.WriteString("\n")
 		}
 	} else {
@@ -514,39 +527,63 @@ func (c *client) search() {
 }
 
 func (c *client) Scroll(amount int) {
-	var percentRead int
-	page := c.PageState.History[c.PageState.Position]
-	bottom := len(page.WrappedContent) - c.Height + 3 // 3 for the three bars: top, msg, bottom
-	if amount < 0 && page.ScrollPosition == 0 {
-		c.SetMessage("You are already at the top", false)
-		c.DrawMessage()
-		fmt.Print("\a")
-		return
-	} else if (amount > 0 && page.ScrollPosition == bottom) || bottom < 0 {
-		c.FootBar.SetPercentRead(100)
-		c.SetMessage("You are already at the bottom", false)
-		c.DrawMessage()
-		fmt.Print("\a")
-		return
-	}
+	if c.BookMarks.IsFocused {
+		bottom := len(c.BookMarks.Titles) - c.Height + 5 // 3 for the three bars: top, msg, bottom
+		if amount < 0 && c.BookMarks.Position == 0 {
+			c.SetMessage("The bookmark ladder does not go up any further", false)
+			c.DrawMessage()
+			fmt.Print("\a")
+			return
+		} else if (amount > 0 && c.BookMarks.Position == bottom) || bottom < 0 {
+			c.SetMessage("Feel the ground beneath your bookmarks", false)
+			c.DrawMessage()
+			fmt.Print("\a")
+			return
+		}
 
-	newScrollPosition := page.ScrollPosition + amount
-	if newScrollPosition < 0 {
-		newScrollPosition = 0
-	} else if newScrollPosition > bottom {
-		newScrollPosition = bottom
-	}
+		newScrollPosition := c.BookMarks.Position + amount
+		if newScrollPosition < 0 {
+			newScrollPosition = 0
+		} else if newScrollPosition > bottom {
+			newScrollPosition = bottom
+		}
 
-	c.PageState.History[c.PageState.Position].ScrollPosition = newScrollPosition
-
-	if len(page.WrappedContent) < c.Height - 3 {
-		percentRead = 100
+		c.BookMarks.Position = newScrollPosition
+		c.Draw()
 	} else {
-		percentRead = int(float32(newScrollPosition + c.Height - 3) / float32(len(page.WrappedContent)) * 100.0)
-	}
-	c.FootBar.SetPercentRead(percentRead)
+		var percentRead int
+		page := c.PageState.History[c.PageState.Position]
+		bottom := len(page.WrappedContent) - c.Height + 3 // 3 for the three bars: top, msg, bottom
+		if amount < 0 && page.ScrollPosition == 0 {
+			c.SetMessage("You are already at the top", false)
+			c.DrawMessage()
+			fmt.Print("\a")
+			return
+		} else if (amount > 0 && page.ScrollPosition == bottom) || bottom < 0 {
+			c.FootBar.SetPercentRead(100)
+			c.SetMessage("You are already at the bottom", false)
+			c.DrawMessage()
+			fmt.Print("\a")
+			return
+		}
 
-	c.Draw()
+		newScrollPosition := page.ScrollPosition + amount
+		if newScrollPosition < 0 {
+			newScrollPosition = 0
+		} else if newScrollPosition > bottom {
+			newScrollPosition = bottom
+		}
+
+		c.PageState.History[c.PageState.Position].ScrollPosition = newScrollPosition
+
+		if len(page.WrappedContent) < c.Height - 3 {
+			percentRead = 100
+		} else {
+			percentRead = int(float32(newScrollPosition + c.Height - 3) / float32(len(page.WrappedContent)) * 100.0)
+		}
+		c.FootBar.SetPercentRead(percentRead)
+		c.Draw()
+	}
 }
 
 func (c *client) displayConfigValue(setting string) {

@@ -10,18 +10,22 @@ import (
 )
 
 var Shapes = map[string]string{
-	"wall":     "╵",
-	"ceiling":  "╴",
-	"tl":       "┌",
-	"tr":       "┐",
-	"bl":       "└",
-	"br":       "┘",
-	"awall":    "║",
-	"aceiling": "═",
-	"atl":      "╔",
-	"atr":      "╗",
-	"abl":      "╚",
-	"abr":      "╝",
+	"walll":    "╎",
+	"wallr":    " ",
+	"ceiling":  " ",
+	"floor":    " ",
+	"tl":       "╎",
+	"tr":       " ",
+	"bl":       "╎",
+	"br":       " ",
+	"awalll":   "▌",
+	"awallr":   "▐",
+	"aceiling": "▀",
+	"afloor":   "▄",
+	"atl":      "▞",
+	"atr":      "▜",
+	"abl":      "▚",
+	"abr":      "▟",
 }
 
 func drawShape(shape string) {

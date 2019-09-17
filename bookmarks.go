@@ -86,20 +86,24 @@ func (b Bookmarks) List() []string {
 func (b Bookmarks) Render(termwidth, termheight int) []string {
 	width := 40
 	termheight -= 3
-	var wall, ceil, tr, tl, br, bl string
+	var walll, wallr, floor, ceil, tr, tl, br, bl string
 	if termwidth < 40 {
 		width = termwidth
 	} 
 	if b.IsFocused {
-		wall = cui.Shapes["awall"]
+		walll = cui.Shapes["awalll"]
+		wallr = cui.Shapes["awallr"]
 		ceil = cui.Shapes["aceiling"]
+		floor = cui.Shapes["afloor"]
 		tr = cui.Shapes["atr"]
 		br = cui.Shapes["abr"]
 		tl = cui.Shapes["atl"]
 		bl = cui.Shapes["abl"]
 	} else {
-		wall = cui.Shapes["wall"]
+		walll = cui.Shapes["walll"]
+		wallr = cui.Shapes["wallr"]
 		ceil = cui.Shapes["ceiling"]
+		floor = cui.Shapes["floor"]
 		tr = cui.Shapes["tr"]
 		br = cui.Shapes["br"]
 		tl = cui.Shapes["tl"]
@@ -112,14 +116,14 @@ func (b Bookmarks) Render(termwidth, termheight int) []string {
 	out = append(out, top)
 	marks := b.List()
 	for i := 0; i < termheight - 2; i++ {
-		if i + b.Position >= b.Length {
-			out = append(out, fmt.Sprintf("%s%-*.*s%s", wall, contentWidth, contentWidth, "", wall ))
+		if i + b.Position >= len(b.Titles) {
+			out = append(out, fmt.Sprintf("%s%-*.*s%s", walll, contentWidth, contentWidth, "", wallr))
 		} else {
-			out = append(out, fmt.Sprintf("%s%-*.*s%s", wall, contentWidth, contentWidth, marks[i + b.Position], wall ))
+			out = append(out, fmt.Sprintf("%s%-*.*s%s", walll, contentWidth, contentWidth, marks[i + b.Position], wallr))
 		}
 	}
 
-	bottom := fmt.Sprintf("%s%s%s", bl, strings.Repeat(ceil, contentWidth), br)
+	bottom := fmt.Sprintf("%s%s%s", bl, strings.Repeat(floor, contentWidth), br)
 	out = append(out, bottom)
 	return out
 }
