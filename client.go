@@ -386,16 +386,19 @@ func (c *client) doLinkCommandAs(action, target string, values []string) {
 		return
 	}
 
+	num -= 1
+
+	links := c.PageState.History[c.PageState.Position].Links
+	if num >= len(links) || num < 0 {
+		c.SetMessage(fmt.Sprintf("Invalid link id: %s", target), true)
+		c.DrawMessage()
+		return
+	}
+
 	switch action {
 	case "ADD", "A":
-		links := c.PageState.History[c.PageState.Position].Links
-		if num >= len(links) {
-			c.SetMessage(fmt.Sprintf("Invalid link id: %s", target), true)
-			c.DrawMessage()
-			return
-		}
 		bm := make([]string, 0, 5)
-		bm = append(bm, links[num-1])
+		bm = append(bm, links[num])
 		bm = append(bm, values...)
 		msg, err := c.BookMarks.Add(bm)
 		if err != nil {
@@ -455,6 +458,7 @@ func (c *client) doLinkCommand(action, target string) {
 		c.DrawMessage()
 	}
 
+
 	switch action {
 	case "DELETE", "D":
 		msg, err := c.BookMarks.Delete(num)
@@ -482,6 +486,18 @@ func (c *client) doLinkCommand(action, target string) {
 			return
 		}
 		c.Visit(c.BookMarks.Links[num])
+	case "CHECK", "C":
+		num -= 1
+
+		links := c.PageState.History[c.PageState.Position].Links
+		if num >= len(links) || num < 0 {
+			c.SetMessage(fmt.Sprintf("Invalid link id: %s", target), true)
+			c.DrawMessage()
+			return
+		}
+		link := links[num]
+		c.SetMessage(fmt.Sprintf("[%d] %s", num + 1, link), false)
+		c.DrawMessage()
 	default:
 	  c.SetMessage(fmt.Sprintf("Action %q does not exist for target %q", action, target), true)
 		c.DrawMessage()
