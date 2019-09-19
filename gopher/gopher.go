@@ -171,7 +171,7 @@ func buildLink(host, port, gtype, resource string) string {
 	case "h":
 		u, tf := isWebLink(resource)
 		if tf {
-			if len(u) > 4 && string(u[:4]) == "http" {
+			if strings.Index(u, "://") > 0 {
 				return u
 			} else {
 				return fmt.Sprintf("http://%s", u)
