@@ -131,19 +131,26 @@ func parseGemini(b, rootUrl string) (string, []string) {
 	for i, ln := range splitContent {
 		splitContent[i] = strings.Trim(ln, "\r\n")
 		if len([]rune(ln)) > 3 && ln[:2] == "=>" {
-			trimmedSubLn := strings.Trim(ln[2:], "\r\n\t \a")
-			lineSplit := strings.SplitN(trimmedSubLn, " ", 2)
-			if len(lineSplit) != 2 {
-				lineSplit = append(lineSplit, lineSplit[0])
+			var link, decorator string
+			subLn := strings.Trim(ln[2:], "\r\n\t \a")
+			splitPoint := strings.IndexAny(subLn, " \t")
+
+			if splitPoint < 0 || len([]rune(subLn)) - 1 <= splitPoint {
+				link = subLn
+				decorator = subLn
+			} else {
+				link = strings.Trim(subLn[:splitPoint], "\t\n\r \a")
+				decorator = strings.Trim(subLn[splitPoint:], "\t\n\r \a")
 			}
-			lineSplit[0] = strings.Trim(lineSplit[0], "\t\n\r \a")
-			lineSplit[1] = strings.Trim(lineSplit[1], "\t\n\r \a")
-			if len(lineSplit[0]) > 0 && lineSplit[0][0] == '/' {
-				lineSplit[0] = fmt.Sprintf("%s%s", rootUrl, lineSplit[0])
+
+			if len(link) > 0 && link[0] == '/' {
+				link = fmt.Sprintf("%s%s", rootUrl, link)
+			} else if len(link) > 0 && strings.Index(link, "://") < 0 {
+				link = fmt.Sprintf("%s/%s", rootUrl, link)
 			}
-			links = append(links, lineSplit[0])
+			links = append(links, link)
 			linknum := fmt.Sprintf("[%d]", len(links))
-			splitContent[i] = fmt.Sprintf("%-5s %s", linknum, lineSplit[1])
+			splitContent[i] = fmt.Sprintf("%-5s %s", linknum, decorator)
 		}
 	}
 	return strings.Join(splitContent, "\n"), links

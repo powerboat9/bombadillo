@@ -277,7 +277,7 @@ func (c *client) simpleCommand(action string) {
 		c.BookMarks.ToggleOpen()
 		c.Draw()
 	case "SEARCH":
-		c.search()
+		c.search("")
 	case "HELP", "?":
 		go c.Visit(helplocation)
 	default:
@@ -296,6 +296,8 @@ func (c *client) doCommand(action string, values []string) {
 	switch action {
 	case "CHECK", "C":
 		c.displayConfigValue(values[0])
+	case "SEARCH":
+		c.search(strings.Join(values, " "))
 	default:
 	  c.SetMessage(fmt.Sprintf("Unknown action %q", action), true)
 		c.DrawMessage()
@@ -505,21 +507,27 @@ func (c *client) doLinkCommand(action, target string) {
 
 }
 
-func (c *client) search() {
-	c.ClearMessage()
-	c.ClearMessageLine()
-	// TODO handle keeping the full command bar here
-	// like was done for regular command entry
-	// maybe split into separate function
-	fmt.Print("?")
-	entry, err := cui.GetLine()
-	c.ClearMessageLine()
-	if err != nil {
-		c.SetMessage(err.Error(), true)
-		c.DrawMessage()
-		return
-	} else if strings.TrimSpace(entry) == "" {
-		return
+func (c *client) search(q string) {
+	var entry string
+	var err error
+	if q == "" {
+		c.ClearMessage()
+		c.ClearMessageLine()
+		if c.Options["theme"] == "normal" {
+			fmt.Printf("\033[7m%*.*s\r", c.Width, c.Width, "")
+		}
+		fmt.Print("?")
+		entry, err = cui.GetLine()
+		c.ClearMessageLine()
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+			return
+		} else if strings.TrimSpace(entry) == "" {
+			return
+		}
+	} else {
+		entry = q
 	}
 	u, err := MakeUrl(c.Options["searchengine"])
 	if err != nil {
@@ -614,7 +622,7 @@ func (c *client) displayConfigValue(setting string) {
 
 func (c *client) SetMessage(msg string, isError bool) {
 	c.MessageIsErr = isError
-	c.Message = msg
+	c.Message = strings.ReplaceAll(msg, "\t", "%09")
 }
 
 func (c *client) DrawMessage() {
@@ -682,7 +690,7 @@ func (c *client) goToLink(l string) {
 func (c *client) SetHeaderUrl() {
 	if c.PageState.Length > 0 {
 		u := c.PageState.History[c.PageState.Position].Location.Full
-		c.TopBar.url = u
+		c.TopBar.url = strings.ReplaceAll(u, "\t", "%09")
 	} else {
 		c.TopBar.url = ""
 	}
@@ -692,6 +700,7 @@ func (c *client) Visit(url string) {
 	c.SetMessage("Loading...", false)
 	c.DrawMessage()
 
+	url = strings.ReplaceAll(url, "%09", "\t")
 	u, err := MakeUrl(url)
 	if err != nil {
 		c.SetMessage(err.Error(), true)
@@ -741,9 +750,6 @@ func (c *client) Visit(url string) {
 				c.DrawMessage()
 			}
 		}
-
-		// c.SetMessage("Bombadillo has not mastered Gemini yet, check back soon", false)
-		// c.DrawMessage()
 	case "telnet":
 		c.SetMessage("Attempting to start telnet session", false)
 		c.DrawMessage()
