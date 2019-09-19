@@ -14,7 +14,7 @@ import (
 
 	"tildegit.org/sloum/bombadillo/cmdparse"
 	"tildegit.org/sloum/bombadillo/cui"
-	// "tildegit.org/sloum/bombadillo/gemini"
+	"tildegit.org/sloum/bombadillo/gemini"
 	"tildegit.org/sloum/bombadillo/gopher"
 	"tildegit.org/sloum/bombadillo/http"
 	"tildegit.org/sloum/bombadillo/telnet"
@@ -715,9 +715,35 @@ func (c *client) Visit(url string) {
 		c.SetHeaderUrl()
 		c.Draw()
 	case "gemini":
-		// TODO send over to gemini request
-		c.SetMessage("Bombadillo has not mastered Gemini yet, check back soon", false)
-		c.DrawMessage()
+		capsule, err := gemini.Visit(u.Host, u.Port, u.Resource)
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+			return
+		}
+		switch capsule.Status {
+		case 2:
+			pg := MakePage(u, capsule.Content, capsule.Links)
+			pg.WrapContent(c.Width)
+			c.PageState.Add(pg)
+			c.Scroll(0)
+			c.ClearMessage()
+			c.SetHeaderUrl()
+			c.Draw()
+		case 3:
+			c.SetMessage("[3] Redirect. Follow redirect? y or any other key for no", false)
+			c.DrawMessage()
+			ch := cui.Getch()
+			if ch == 'y' || ch == 'Y' {
+				c.Visit(capsule.Content)
+			} else {
+				c.SetMessage("Redirect aborted", false)
+				c.DrawMessage()
+			}
+		}
+
+		// c.SetMessage("Bombadillo has not mastered Gemini yet, check back soon", false)
+		// c.DrawMessage()
 	case "telnet":
 		c.SetMessage("Attempting to start telnet session", false)
 		c.DrawMessage()
