@@ -101,6 +101,7 @@ func (c *client) Draw() {
 				} else {
 					screen.WriteString(fmt.Sprintf("%-*.*s", contentWidth, contentWidth, " "))
 				}
+				screen.WriteString("\033[500C\033[39D")
 			}
 
 			if c.Options["theme"] == "inverse" && !c.BookMarks.IsFocused {
@@ -125,7 +126,7 @@ func (c *client) Draw() {
 				screen.WriteString(fmt.Sprintf("%-*.*s", c.Width, c.Width, pageContent[i]))
 				screen.WriteString("\n")
 			} else {
-				screen.WriteString(fmt.Sprintf("%*s", c.Width, " "))
+				screen.WriteString(fmt.Sprintf("%*.*s", c.Width, c.Width, " "))
 				screen.WriteString("\n")
 			}
 		}
@@ -182,6 +183,7 @@ func (c *client) TakeControlInput() {
 			c.DrawMessage()
 		} else {
 			c.SetHeaderUrl()
+			c.SetPercentRead()
 			c.Draw()
 		}
 	case 'B':
@@ -197,6 +199,7 @@ func (c *client) TakeControlInput() {
 			c.DrawMessage()
 		} else {
 			c.SetHeaderUrl()
+			c.SetPercentRead()
 			c.Draw()
 		}
 	case '\t':
@@ -608,6 +611,17 @@ func (c *client) Scroll(amount int) {
 		c.FootBar.SetPercentRead(percentRead)
 		c.Draw()
 	}
+}
+
+func (c *client) SetPercentRead() {
+	page := c.PageState.History[c.PageState.Position]
+	var percentRead int
+	if len(page.WrappedContent) < c.Height - 3 {
+		percentRead = 100
+	} else {
+		percentRead = int(float32(page.ScrollPosition + c.Height - 3) / float32(len(page.WrappedContent)) * 100.0)
+	}
+	c.FootBar.SetPercentRead(percentRead)
 }
 
 func (c *client) displayConfigValue(setting string) {
