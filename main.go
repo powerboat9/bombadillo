@@ -7,6 +7,8 @@ package main
 // the terms of said license with said license file included.
 
 import (
+	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -14,6 +16,8 @@ import (
 	"tildegit.org/sloum/bombadillo/config"
 	"tildegit.org/sloum/bombadillo/cui"
 )
+
+const version = "2.0.0"
 
 var bombadillo *client
 var helplocation string = "gopher://colorfield.space:70/1/bombadillo-info"
@@ -94,8 +98,16 @@ func initClient() error {
 }
 
 func main() {
-	cui.HandleAlternateScreen("rmam")
-	cui.HandleAlternateScreen("smcup")
+	getVersion := flag.Bool("v", false, "See version number")
+	flag.Parse()
+	if *getVersion {
+		fmt.Printf("Bombadillo v%s\n", version)
+		os.Exit(0)
+	}
+	args := flag.Args()
+
+	cui.Tput("rmam") // turn off line wrapping
+	cui.Tput("smcup") // use alternate screen
 	defer cui.Exit()
 	err := initClient()
 	if err != nil {
@@ -106,11 +118,11 @@ func main() {
 	// Start polling for terminal size changes
 	go bombadillo.GetSize()
 
-	if len(os.Args) > 1 {
+	if len(args) > 0 {
 		// If a url was passed, move it down the line
 		// Goroutine so keypresses can be made during
 		// page load
-		bombadillo.Visit(os.Args[1])
+		bombadillo.Visit(args[0])
 	} else {
 		// Otherwise, load the homeurl
 		// Goroutine so keypresses can be made during

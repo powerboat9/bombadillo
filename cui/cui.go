@@ -65,8 +65,8 @@ func Exit() {
 
 	fmt.Print("\n")
 	fmt.Print("\033[?25h")
-	HandleAlternateScreen("smam")
-	HandleAlternateScreen("rmcup")
+	Tput("smam") // turn off line wrap
+	Tput("rmcup") // use alternate screen
 	os.Exit(0)
 }
 
@@ -178,7 +178,7 @@ func SetLineMode() {
 	}
 }
 
-func HandleAlternateScreen(opt string) {
+func Tput(opt string) {
 	cmd := exec.Command("tput", opt)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
