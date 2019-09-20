@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"net"
 	"os"
 	"os/exec"
 	// "os/user"
@@ -73,7 +72,8 @@ func (c *client) GetSize() {
 		if h != c.Height || w != c.Width {
 			c.Height = h
 			c.Width = w
-			c.Scroll(0)
+			c.SetPercentRead()
+			c.Draw()
 		}
 
 		time.Sleep(500 * time.Millisecond)
@@ -86,7 +86,7 @@ func (c *client) Draw() {
 	screen.WriteString("\033[0m")
 	screen.WriteString(c.TopBar.Render(c.Width, c.Options["theme"]))
 	screen.WriteString("\n")
-	pageContent := c.PageState.Render(c.Height, c.Width)
+	pageContent := c.PageState.Render(c.Height, c.Width - 1)
   if c.Options["theme"] == "inverse" {
 		screen.WriteString("\033[7m")
 	}
@@ -122,11 +122,11 @@ func (c *client) Draw() {
 		}
 	} else {
 		for i := 0; i < c.Height - 3; i++ {
-			if i < len(pageContent) - 1 {
-				screen.WriteString(fmt.Sprintf("%-*.*s", c.Width, c.Width, pageContent[i]))
+			if i < len(pageContent) {
+				screen.WriteString(fmt.Sprintf("%-*.*s", c.Width - 1, c.Width - 1, pageContent[i]))
 				screen.WriteString("\n")
 			} else {
-				screen.WriteString(fmt.Sprintf("%*.*s", c.Width, c.Width, " "))
+				screen.WriteString(fmt.Sprintf("%-*.*s", c.Width, c.Width, " "))
 				screen.WriteString("\n")
 			}
 		}
@@ -301,6 +301,28 @@ func (c *client) doCommand(action string, values []string) {
 		c.displayConfigValue(values[0])
 	case "SEARCH":
 		c.search(strings.Join(values, " "))
+	case "WRITE", "W":
+		if values[0] == "." {
+			values[0] = c.PageState.History[c.PageState.Position].Location.Full
+		}
+		u, err := MakeUrl(values[0])
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+			return
+		}
+		fns := strings.Split(u.Resource, "/")
+		var fn string
+		if len(fns) > 0 {
+			fn = strings.Trim(fns[len(fns) - 1], "\t\r\n \a\f\v")
+		} else {
+			fn = "index"
+		}
+		if fn == "" {
+			fn = "index"
+		}
+		c.saveFile(u, fn)
+
 	default:
 	  c.SetMessage(fmt.Sprintf("Unknown action %q", action), true)
 		c.DrawMessage()
@@ -340,28 +362,15 @@ func (c *client) doCommandAs(action string, values []string) {
 		}
 
 	case "WRITE", "W":
-		// TODO figure out how best to handle file
-		// writing... it will depend on request model
-		// using fetch would be best
-		// - - - - - - - - - - - - - - - - - - - - -
-		// var data []byte
-		// if values[0] == "." {
-			// d, err := c.getCurrentPageRawData()
-			// if err != nil {
-				// c.SetMessage(err.Error(), true)
-				// c.DrawMessage()
-				// return
-			// }
-			// data = []byte(d)
-		// }
-		// fp, err := c.saveFile(data, strings.Join(values[1:], " "))
-		// if err != nil {
-			// c.SetMessage(err.Error(), true)
-			// c.DrawMessage()
-			// return
-		// }
-		// c.SetMessage(fmt.Sprintf("File saved to: %s", fp), false)
-		// c.DrawMessage()
+		u, err := MakeUrl(values[0])
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+			return
+		}
+		fileName := strings.Join(values[1:], "-")
+		fileName = strings.Trim(fileName, " \t\r\n\a\f\v")
+		c.saveFile(u, fileName)
 
 	case "SET", "S":
 		if _, ok := c.Options[values[0]]; ok {
@@ -424,8 +433,10 @@ func (c *client) doLinkCommandAs(action, target string, values []string) {
 			c.Draw()
 		}
 	case "WRITE", "W":
-		// TODO get file writing working in some semblance of universal way
-		// return saveFile(links[num-1], strings.Join(values, " "))
+		out := make([]string, 0, len(values) + 1)
+		out = append(out, links[num])
+		out = append(out, values...)
+		c.doCommandAs(action, out)
 	default:
 		c.SetMessage(fmt.Sprintf("Unknown command structure"), true)
 	}
@@ -446,14 +457,35 @@ func (c *client) getCurrentPageRawData() (string, error) {
 	return c.PageState.History[c.PageState.Position].RawContent, nil
 }
 
-func (c *client) saveFile(data []byte, name string) (string, error) {
-	savePath := c.Options["savelocation"] + name
-	err := ioutil.WriteFile(savePath, data, 0644)
-	if err != nil {
-		return "", err
+func (c *client) saveFile(u Url, name string) {
+	var file []byte
+	var err error
+	switch u.Scheme {
+	case "gopher":
+		file, err = gopher.Retrieve(u.Host, u.Port, u.Resource)
+	case "gemini":
+		file, err = gemini.Fetch(u.Host, u.Port, u.Resource)
+	default:
+		c.SetMessage(fmt.Sprintf("Saving files over %s is not supported", u.Scheme), true)
+		c.DrawMessage()
+		return
 	}
 
-	return savePath, nil
+	if err != nil {
+		c.SetMessage(err.Error(), true)
+		c.DrawMessage()
+		return
+	}
+	savePath := c.Options["savelocation"] + name
+	err = ioutil.WriteFile(savePath, file, 0644)
+	if err != nil {
+		c.SetMessage("Error writing file to disk", true)
+		c.DrawMessage()
+		return
+	}
+
+	c.SetMessage(fmt.Sprintf("File saved to: %s", savePath), false)
+	c.DrawMessage()
 }
 
 func (c *client) doLinkCommand(action, target string) {
@@ -503,6 +535,30 @@ func (c *client) doLinkCommand(action, target string) {
 		link := links[num]
 		c.SetMessage(fmt.Sprintf("[%d] %s", num + 1, link), false)
 		c.DrawMessage()
+	case "WRITE", "W":
+		links := c.PageState.History[c.PageState.Position].Links
+		if len(links) < num || num < 1 {
+			c.SetMessage("Invalid link ID", true)
+			c.DrawMessage()
+			return
+		}
+		u, err := MakeUrl(links[num-1])
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+			return
+		}
+		fns := strings.Split(u.Resource, "/")
+		var fn string
+		if len(fns) > 0 {
+			fn = strings.Trim(fns[len(fns) - 1], "\t\r\n \a\f\v")
+		} else {
+			fn = "index"
+		}
+		if fn == "" {
+			fn = "index"
+		}
+		c.saveFile(u, fn)
 	default:
 	  c.SetMessage(fmt.Sprintf("Action %q does not exist for target %q", action, target), true)
 		c.DrawMessage()
@@ -576,7 +632,6 @@ func (c *client) Scroll(amount int) {
 		}
 
 		c.BookMarks.Position = newScrollPosition
-		c.Draw()
 	} else {
 		var percentRead int
 		page := c.PageState.History[c.PageState.Position]
@@ -609,8 +664,8 @@ func (c *client) Scroll(amount int) {
 			percentRead = int(float32(newScrollPosition + c.Height - 3) / float32(len(page.WrappedContent)) * 100.0)
 		}
 		c.FootBar.SetPercentRead(percentRead)
-		c.Draw()
 	}
+	c.Draw()
 }
 
 func (c *client) SetPercentRead() {
@@ -731,9 +786,9 @@ func (c *client) Visit(url string) {
 			return
 		}
 		pg := MakePage(u, content, links)
-		pg.WrapContent(c.Width)
+		pg.WrapContent(c.Width - 1)
 		c.PageState.Add(pg)
-		c.Scroll(0) // to update percent read
+		c.SetPercentRead()
 		c.ClearMessage()
 		c.SetHeaderUrl()
 		c.Draw()
@@ -748,9 +803,9 @@ func (c *client) Visit(url string) {
 		case 2:
 			if capsule.MimeMaj == "text" {
 				pg := MakePage(u, capsule.Content, capsule.Links)
-				pg.WrapContent(c.Width)
+				pg.WrapContent(c.Width - 1)
 				c.PageState.Add(pg)
-				c.Scroll(0)
+				c.SetPercentRead()
 				c.ClearMessage()
 				c.SetHeaderUrl()
 				c.Draw()
@@ -808,51 +863,7 @@ func (c *client) Visit(url string) {
 //--------------------------------------------------\\
 
 func MakeClient(name string) *client {
-	// var userinfo, _ = user.Current()
-	// var options = map[string]string{
-		// "homeurl":      "gopher://colorfield.space:70/1/bombadillo-info",
-		// "savelocation": userinfo.HomeDir,
-		// "searchengine": "gopher://gopher.floodgap.com:70/7/v2/vs",
-		// "openhttp":     "false",
-		// "httpbrowser":  "lynx",
-		// "configlocation": userinfo.HomeDir,
-	// }
 	c := client{0, 0, defaultOptions, "", false, MakePages(), MakeBookmarks(), MakeHeadbar(name), MakeFootbar()}
 	return &c
 }
 
-// Retrieve a byte slice of raw response dataa 
-// from a url string
-func Fetch(url string) ([]byte, error) {
-	u, err := MakeUrl(url)
-	if err != nil {
-		return []byte(""), err
-	}
-
-	timeOut := time.Duration(5) * time.Second
-
-	if u.Host == "" || u.Port == "" {
-		return []byte(""), fmt.Errorf("Incomplete request url")
-	}
-
-	addr := u.Host + ":" + u.Port
-
-	conn, err := net.DialTimeout("tcp", addr, timeOut)
-	if err != nil {
-		return []byte(""), err
-	}
-
-	send := u.Resource + "\n"
-
-	_, err = conn.Write([]byte(send))
-	if err != nil {
-		return []byte(""), err
-	}
-
-	result, err := ioutil.ReadAll(conn)
-	if err != nil {
-		return []byte(""), err
-	}
-
-	return result, err
-}

@@ -106,7 +106,7 @@ func main() {
 	}
 	args := flag.Args()
 
-	cui.Tput("rmam") // turn off line wrapping
+ 	cui.Tput("rmam") // turn off line wrapping
 	cui.Tput("smcup") // use alternate screen
 	defer cui.Exit()
 	err := initClient()

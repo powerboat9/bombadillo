@@ -56,6 +56,53 @@ func Retrieve(host, port, resource string) (string, error) {
 	return string(result), nil
 }
 
+func Fetch(host, port, resource string) ([]byte, error) {
+	rawResp, err := Retrieve(host, port, resource)
+	if err != nil {
+		return make([]byte, 0), err
+	} 
+
+	resp := strings.SplitN(rawResp, "\r\n", 2)
+	if len(resp) != 2 {
+		if err != nil {
+			return make([]byte, 0), fmt.Errorf("Invalid response from server")
+		} 
+	}
+	header := strings.SplitN(resp[0], " ", 2)
+	if len([]rune(header[0])) != 2 {
+		header = strings.SplitN(resp[0], "\t", 2)
+		if len([]rune(header[0])) != 2 {
+			return make([]byte,0), fmt.Errorf("Invalid response format from server")
+		} 
+	} 
+
+	// Get status code single digit form
+	status, err := strconv.Atoi(string(header[0][0]))
+	if err != nil {
+		return make([]byte, 0), fmt.Errorf("Invalid status response from server")
+	}
+
+	if status != 2 {
+		switch status {
+		case 1:
+			return make([]byte, 0), fmt.Errorf("[1] Queries cannot be saved.")
+		case 3:
+			return make([]byte, 0), fmt.Errorf("[3] Redirects cannot be saved.")
+		case 4:
+			return make([]byte, 0), fmt.Errorf("[4] Temporary Failure.")
+		case 5:
+			return make([]byte, 0), fmt.Errorf("[5] Permanent Failure.")
+		case 6:
+			return make([]byte, 0), fmt.Errorf("[6] Client Certificate Required (Not supported by Bombadillo)")
+		default:
+			return make([]byte, 0), fmt.Errorf("Invalid response status from server")
+		}
+	}
+
+	return []byte(resp[1]), nil
+
+}
+
 func Visit(host, port, resource string) (Capsule, error) {
 	capsule := MakeCapsule()
 	rawResp, err := Retrieve(host, port, resource)

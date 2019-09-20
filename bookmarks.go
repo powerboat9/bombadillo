@@ -50,6 +50,7 @@ func (b *Bookmarks) ToggleOpen() {
 		b.IsFocused = true
 	} else {
 		b.IsFocused = false
+		cui.Clear("screen")
 	}
 }
 
