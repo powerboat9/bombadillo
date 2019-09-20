@@ -73,7 +73,7 @@ func (c *client) GetSize() {
 		if h != c.Height || w != c.Width {
 			c.Height = h
 			c.Width = w
-			c.Draw()
+			c.Scroll(0)
 		}
 
 		time.Sleep(500 * time.Millisecond)
@@ -732,13 +732,18 @@ func (c *client) Visit(url string) {
 		}
 		switch capsule.Status {
 		case 2:
-			pg := MakePage(u, capsule.Content, capsule.Links)
-			pg.WrapContent(c.Width)
-			c.PageState.Add(pg)
-			c.Scroll(0)
-			c.ClearMessage()
-			c.SetHeaderUrl()
-			c.Draw()
+			if capsule.MimeMaj == "text" {
+				pg := MakePage(u, capsule.Content, capsule.Links)
+				pg.WrapContent(c.Width)
+				c.PageState.Add(pg)
+				c.Scroll(0)
+				c.ClearMessage()
+				c.SetHeaderUrl()
+				c.Draw()
+			} else {
+				c.SetMessage("Still mulling how to handle binary files... come back soon", false)
+				c.DrawMessage()
+			}
 		case 3:
 			c.SetMessage("[3] Redirect. Follow redirect? y or any other key for no", false)
 			c.DrawMessage()

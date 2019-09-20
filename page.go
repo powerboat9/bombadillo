@@ -46,7 +46,7 @@ func (p *Page) WrapContent(width int) {
 	counter := 0
 	var content strings.Builder
 	content.Grow(len(p.RawContent))
-	for _, ch := range p.RawContent {
+	for _, ch := range []rune(p.RawContent) {
 		if ch == '\n' {
 			content.WriteRune(ch)
 			counter = 0
@@ -58,9 +58,8 @@ func (p *Page) WrapContent(width int) {
 				content.WriteRune('\n')
 				counter = 0
 			}
-		} else if ch == '\r' {
-			// This handles non-linux line endings...
-			// to some degree...
+		} else if ch == '\r' || ch == '\v' || ch == '\b' || ch == '\f' || ch == 27 {
+			// Get rid of control characters we dont want
 			continue
 		} else {
 			if counter < width {

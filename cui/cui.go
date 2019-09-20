@@ -65,6 +65,7 @@ func Exit() {
 
 	fmt.Print("\n")
 	fmt.Print("\033[?25h")
+	HandleAlternateScreen("smam")
 	HandleAlternateScreen("rmcup")
 	os.Exit(0)
 }

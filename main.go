@@ -94,6 +94,7 @@ func initClient() error {
 }
 
 func main() {
+	cui.HandleAlternateScreen("rmam")
 	cui.HandleAlternateScreen("smcup")
 	defer cui.Exit()
 	err := initClient()
