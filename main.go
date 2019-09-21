@@ -15,6 +15,7 @@ import (
 
 	"tildegit.org/sloum/bombadillo/config"
 	"tildegit.org/sloum/bombadillo/cui"
+	"tildegit.org/sloum/mailcap"
 )
 
 const version = "2.0.0"
@@ -22,23 +23,7 @@ const version = "2.0.0"
 var bombadillo *client
 var helplocation string = "gopher://colorfield.space:70/1/bombadillo-info"
 var settings config.Config
-
-
-// func saveFileFromData(v gopher.View) error {
-	// quickMessage("Saving file...", false)
-	// urlsplit := strings.Split(v.Address.Full, "/")
-	// filename := urlsplit[len(urlsplit)-1]
-	// saveMsg := fmt.Sprintf("Saved file as %q", options["savelocation"]+filename)
-	// err := ioutil.WriteFile(options["savelocation"]+filename, []byte(strings.Join(v.Content, "")), 0644)
-	// if err != nil {
-		// quickMessage("Saving file...", true)
-		// return err
-	// }
-
-	// quickMessage(saveMsg, false)
-	// return nil
-// }
-
+var mc *mailcap.Mailcap
 
 func saveConfig() error {
 	var opts strings.Builder
@@ -105,6 +90,10 @@ func main() {
 		os.Exit(0)
 	}
 	args := flag.Args()
+
+	// Build the mailcap db
+	// So that we can open files from gemini
+	mc = mailcap.NewMailcap()
 
  	cui.Tput("rmam") // turn off line wrapping
 	cui.Tput("smcup") // use alternate screen

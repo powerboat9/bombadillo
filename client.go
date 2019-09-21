@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	// "os/user"
 	"regexp"
 	"strconv"
 	"strings"
@@ -17,6 +16,7 @@ import (
 	"tildegit.org/sloum/bombadillo/gopher"
 	"tildegit.org/sloum/bombadillo/http"
 	"tildegit.org/sloum/bombadillo/telnet"
+	// "tildegit.org/sloum/mailcap"
 )
 
 //------------------------------------------------\\
@@ -460,6 +460,8 @@ func (c *client) getCurrentPageRawData() (string, error) {
 func (c *client) saveFile(u Url, name string) {
 	var file []byte
 	var err error
+	c.SetMessage(fmt.Sprintf("Saving %s ...", name), false)
+	c.DrawMessage()
 	switch u.Scheme {
 	case "gopher":
 		file, err = gopher.Retrieve(u.Host, u.Port, u.Resource)
@@ -478,6 +480,22 @@ func (c *client) saveFile(u Url, name string) {
 	}
 	savePath := c.Options["savelocation"] + name
 	err = ioutil.WriteFile(savePath, file, 0644)
+	if err != nil {
+		c.SetMessage("Error writing file to disk", true)
+		c.DrawMessage()
+		return
+	}
+
+	c.SetMessage(fmt.Sprintf("File saved to: %s", savePath), false)
+	c.DrawMessage()
+}
+
+func (c *client) saveFileFromData(d, name string) {
+	data := []byte(d)
+	c.SetMessage(fmt.Sprintf("Saving %s ...", name), false)
+	c.DrawMessage()
+	savePath := c.Options["savelocation"] + name
+	err := ioutil.WriteFile(savePath, data, 0644)
 	if err != nil {
 		c.SetMessage("Error writing file to disk", true)
 		c.DrawMessage()
@@ -779,19 +797,29 @@ func (c *client) Visit(url string) {
 
 	switch u.Scheme {
 	case "gopher":
-		content, links, err := gopher.Visit(u.Mime, u.Host, u.Port, u.Resource)
-		if err != nil {
-			c.SetMessage(err.Error(), true)
-			c.DrawMessage()
-			return
+		if u.DownloadOnly {
+			nameSplit := strings.Split(u.Resource, "/")
+			filename := nameSplit[len(nameSplit) - 1]
+			filename = strings.Trim(filename, " \t\r\n\v\f\a")
+			if filename == "" {
+				filename = "gopherfile"
+			}
+			c.saveFile(u, filename)
+		} else {
+			content, links, err := gopher.Visit(u.Mime, u.Host, u.Port, u.Resource)
+			if err != nil {
+				c.SetMessage(err.Error(), true)
+				c.DrawMessage()
+				return
+			}
+			pg := MakePage(u, content, links)
+			pg.WrapContent(c.Width - 1)
+			c.PageState.Add(pg)
+			c.SetPercentRead()
+			c.ClearMessage()
+			c.SetHeaderUrl()
+			c.Draw()
 		}
-		pg := MakePage(u, content, links)
-		pg.WrapContent(c.Width - 1)
-		c.PageState.Add(pg)
-		c.SetPercentRead()
-		c.ClearMessage()
-		c.SetHeaderUrl()
-		c.Draw()
 	case "gemini":
 		capsule, err := gemini.Visit(u.Host, u.Port, u.Resource)
 		if err != nil {
@@ -810,8 +838,59 @@ func (c *client) Visit(url string) {
 				c.SetHeaderUrl()
 				c.Draw()
 			} else {
-				c.SetMessage("Still mulling how to handle binary files... come back soon", false)
+				c.SetMessage("The file is non-text: (o)pen or (w)rite to disk", false)
 				c.DrawMessage()
+				var ch rune
+				for {
+					ch = cui.Getch()
+					if ch == 'o' || ch == 'w' {
+						break
+					}
+				}
+				switch ch {
+				case 'o':
+					mime := fmt.Sprintf("%s/%s", capsule.MimeMaj, capsule.MimeMin)
+					var term bool
+					if c.Options["terminalonly"] == "true" {
+						term = true
+					} else {
+						term = false
+					}
+					mcEntry, err := mc.FindMatch(mime, "view", term)
+					if err != nil {
+						c.SetMessage(err.Error(), true)
+						c.DrawMessage()
+						return
+					}
+					file, err := ioutil.TempFile("/tmp/", "bombadillo-*.tmp")
+					if err != nil {
+						c.SetMessage("Unable to create temporary file for opening, aborting file open", true)
+						c.DrawMessage()
+						return
+					}
+					// defer os.Remove(file.Name())
+					file.Write([]byte(capsule.Content))
+					com, e := mcEntry.Command(file.Name())
+					if e != nil {
+						c.SetMessage(e.Error(), true)
+						c.DrawMessage()
+						return
+					}
+					com.Stdin = os.Stdin
+					com.Stdout = os.Stdout
+					com.Stderr = os.Stderr
+					if c.Options["terminalonly"] == "true" {
+						cui.Clear("screen")
+					}
+					com.Run()
+					c.SetMessage("File opened by an appropriate program", true)
+					c.DrawMessage()
+					c.Draw()
+				case 'w':
+					nameSplit := strings.Split(u.Resource, "/")
+					filename := nameSplit[len(nameSplit) - 1]
+					c.saveFileFromData(capsule.Content, filename)
+				}
 			}
 		case 3:
 			c.SetMessage("[3] Redirect. Follow redirect? y or any other key for no", false)

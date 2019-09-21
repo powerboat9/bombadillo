@@ -17,5 +17,6 @@ var defaultOptions = map[string]string{
 	"telnetcommand": "telnet",
 	"configlocation": userinfo.HomeDir,
 	"theme": "normal", // "normal", "inverted"
+	"terminalonly": "true",
 }
 
