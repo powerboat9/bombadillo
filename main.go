@@ -32,6 +32,10 @@ func saveConfig() error {
 	opts.WriteString(bkmrks)
 	opts.WriteString("\n[SETTINGS]\n")
 	for k, v := range bombadillo.Options {
+		if k == "theme" && v != "normal" && v != "inverse" {
+			v = "normal"
+			bombadillo.Options["theme"] = "normal"
+		}
 		opts.WriteString(k)
 		opts.WriteRune('=')
 		opts.WriteString(v)
@@ -64,6 +68,9 @@ func loadConfig() error {
 		}
 
 		if _, ok := bombadillo.Options[lowerkey]; ok {
+			if lowerkey == "theme" && v.Value != "normal" && v.Value != "inverse" {
+				v.Value = "normal"
+			}
 			bombadillo.Options[lowerkey] = v.Value
 		}
 	}

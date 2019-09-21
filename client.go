@@ -374,7 +374,13 @@ func (c *client) doCommandAs(action string, values []string) {
 
 	case "SET", "S":
 		if _, ok := c.Options[values[0]]; ok {
-			c.Options[values[0]] = strings.Join(values[1:], " ")
+			val := strings.Join(values[1:], " ")
+			if values[0] == "theme" && val != "normal" && val != "inverse" {
+				c.SetMessage("Theme can only be set to 'normal' or 'inverse'", true)
+				c.DrawMessage()
+				return
+			}
+			c.Options[values[0]] = val
 			err := saveConfig()
 			if err != nil {
 				c.SetMessage("Value set, but error saving config to file", true)
