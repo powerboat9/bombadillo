@@ -151,9 +151,12 @@ func Visit(host, port, resource string) (Capsule, error) {
 		if capsule.MimeMaj == "text" && capsule.MimeMin == "gemini" {
 			if len(resource) > 0 && resource[0] != '/' {
 				resource = fmt.Sprintf("/%s", resource)
+			} else if resource == "" {
+				resource = "/"
 			}
-			rootUrl := fmt.Sprintf("gemini://%s:%s%s", host, port, resource)
-			capsule.Content, capsule.Links = parseGemini(body, rootUrl)
+			currentUrl := fmt.Sprintf("gemini://%s:%s%s", host, port, resource)
+			rootUrl := fmt.Sprintf("gemini://%s:%s", host, port)
+			capsule.Content, capsule.Links = parseGemini(body, rootUrl, currentUrl)
 		} else {
 			capsule.Content = body
 		}
@@ -174,7 +177,7 @@ func Visit(host, port, resource string) (Capsule, error) {
 	}
 }
 
-func parseGemini(b, rootUrl string) (string, []string) {
+func parseGemini(b, rootUrl, currentUrl string) (string, []string) {
 	splitContent := strings.Split(b, "\n")
 	links := make([]string, 0, 10)
 
@@ -193,15 +196,34 @@ func parseGemini(b, rootUrl string) (string, []string) {
 				decorator = strings.Trim(subLn[splitPoint:], "\t\n\r \a")
 			}
 
-			if strings.Index(link, "://") < 0 {
-				link = fmt.Sprintf("%s%s", rootUrl, link)
+			if strings.Index(link, "://") < 0  {
+				link = handleRelativeUrl(link, rootUrl, currentUrl)
 			}
+
 			links = append(links, link)
 			linknum := fmt.Sprintf("[%d]", len(links))
 			splitContent[i] = fmt.Sprintf("%-5s %s", linknum, decorator)
 		}
 	}
 	return strings.Join(splitContent, "\n"), links
+}
+
+func handleRelativeUrl(u, root, current string) string {
+	if len(u) < 1 {
+		return u
+	}
+
+	if u[0] == '/' {
+		return fmt.Sprintf("%s%s", root, u)
+	}
+
+	ind := strings.LastIndex(current, "/")
+	if ind < 10 {
+		return fmt.Sprintf("%s/%s", root, u)
+	}
+
+	current = current[:ind + 1]
+	return fmt.Sprintf("%s%s", current, u)
 }
 
 
