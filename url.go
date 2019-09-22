@@ -97,8 +97,8 @@ func MakeUrl(u string) (Url, error) {
 			out.DownloadOnly = true
 		}
 	} else {
-		out.Mime = ""
 		out.Resource = fmt.Sprintf("%s%s", out.Mime, out.Resource)
+		out.Mime = ""
 	}
 
 	if out.Scheme == "http" || out.Scheme == "https" {

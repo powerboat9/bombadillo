@@ -137,8 +137,8 @@ func Visit(host, port, resource string) (Capsule, error) {
 
 	switch capsule.Status {
 	case 1:
-		// handle search
-		return capsule, fmt.Errorf("Gemini input not yet supported")
+		capsule.Content = header[1]
+		return capsule, nil
 	case 2:
 		mimeAndCharset := strings.Split(header[1], ";")
 		meta = mimeAndCharset[0]
@@ -149,7 +149,10 @@ func Visit(host, port, resource string) (Capsule, error) {
 		capsule.MimeMaj = minMajMime[0]
 		capsule.MimeMin = minMajMime[1]
 		if capsule.MimeMaj == "text" && capsule.MimeMin == "gemini" {
-			rootUrl := fmt.Sprintf("gemini://%s:%s", host, port)
+			if len(resource) > 0 && resource[0] != '/' {
+				resource = fmt.Sprintf("/%s", resource)
+			}
+			rootUrl := fmt.Sprintf("gemini://%s:%s%s", host, port, resource)
 			capsule.Content, capsule.Links = parseGemini(body, rootUrl)
 		} else {
 			capsule.Content = body
@@ -190,10 +193,8 @@ func parseGemini(b, rootUrl string) (string, []string) {
 				decorator = strings.Trim(subLn[splitPoint:], "\t\n\r \a")
 			}
 
-			if len(link) > 0 && link[0] == '/' {
+			if strings.Index(link, "://") < 0 {
 				link = fmt.Sprintf("%s%s", rootUrl, link)
-			} else if len(link) > 0 && strings.Index(link, "://") < 0 {
-				link = fmt.Sprintf("%s/%s", rootUrl, link)
 			}
 			links = append(links, link)
 			linknum := fmt.Sprintf("[%d]", len(links))

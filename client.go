@@ -280,7 +280,7 @@ func (c *client) simpleCommand(action string) {
 		c.BookMarks.ToggleOpen()
 		c.Draw()
 	case "SEARCH":
-		c.search("")
+		c.search("", "", "?")
 	case "HELP", "?":
 		go c.Visit(helplocation)
 	default:
@@ -300,7 +300,7 @@ func (c *client) doCommand(action string, values []string) {
 	case "CHECK", "C":
 		c.displayConfigValue(values[0])
 	case "SEARCH":
-		c.search(strings.Join(values, " "))
+		c.search(strings.Join(values, " "), "", "")
 	case "WRITE", "W":
 		if values[0] == "." {
 			values[0] = c.PageState.History[c.PageState.Position].Location.Full
@@ -590,16 +590,16 @@ func (c *client) doLinkCommand(action, target string) {
 
 }
 
-func (c *client) search(q string) {
+func (c *client) search(query, url, question string) {
 	var entry string
 	var err error
-	if q == "" {
+	if query == "" {
 		c.ClearMessage()
 		c.ClearMessageLine()
 		if c.Options["theme"] == "normal" {
 			fmt.Printf("\033[7m%*.*s\r", c.Width, c.Width, "")
 		}
-		fmt.Print("?")
+		fmt.Print(question)
 		entry, err = cui.GetLine()
 		c.ClearMessageLine()
 		if err != nil {
@@ -610,11 +610,14 @@ func (c *client) search(q string) {
 			return
 		}
 	} else {
-		entry = q
+		entry = query
 	}
-	u, err := MakeUrl(c.Options["searchengine"])
+	if url == "" {
+		url = c.Options["searchengine"]
+	}
+	u, err := MakeUrl(url)
 	if err != nil {
-		c.SetMessage("'searchengine' is not set to a valid url", true)
+		c.SetMessage("The search url is not a valid url", true)
 		c.DrawMessage()
 		return
 	}
@@ -811,6 +814,8 @@ func (c *client) Visit(url string) {
 				filename = "gopherfile"
 			}
 			c.saveFile(u, filename)
+		} else if u.Mime == "7" {
+			c.search("", u.Full, "?")
 		} else {
 			content, links, err := gopher.Visit(u.Mime, u.Host, u.Port, u.Resource)
 			if err != nil {
@@ -834,6 +839,8 @@ func (c *client) Visit(url string) {
 			return
 		}
 		switch capsule.Status {
+		case 1:
+			c.search("", u.Full, capsule.Content)
 		case 2:
 			if capsule.MimeMaj == "text" {
 				pg := MakePage(u, capsule.Content, capsule.Links)
