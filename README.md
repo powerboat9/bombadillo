@@ -49,7 +49,7 @@ Lastly, but perhaps most importantly, a manpage is now included in the repo as `
 
 ## Contributing
 
-Bombadillo development is largely handled by Sloum, with help from jboverf and some community input. If you would like to get involved, please reach out or submit an issue. At present the developers use the tildegit issues system to discuss new features, track bugs, and communicate with users about hopes and/or issues for/with the software.
+Bombadillo development is largely handled by Sloum, with help from jboverf, asdf, and some community input. If you would like to get involved, please reach out or submit an issue. At present the developers use the tildegit issues system to discuss new features, track bugs, and communicate with users about hopes and/or issues for/with the software. If you have forked and would like to make a pull request, please make the pull request into `develop` where it will be reviewed by one of the maintainers. That said, a heads up or comment/issue somewhere is advised.
 
 ## License
 
