@@ -2,30 +2,32 @@ package cui
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 )
 
-var shapes = map[string]string{
-	"wall":     "╵",
-	"ceiling":  "╴",
-	"tl":       "┌",
-	"tr":       "┐",
-	"bl":       "└",
-	"br":       "┘",
-	"awall":    "║",
-	"aceiling": "═",
-	"atl":      "╔",
-	"atr":      "╗",
-	"abl":      "╚",
-	"abr":      "╝",
+var Shapes = map[string]string{
+	"walll":    "╎",
+	"wallr":    " ",
+	"ceiling":  " ",
+	"floor":    " ",
+	"tl":       "╎",
+	"tr":       " ",
+	"bl":       "╎",
+	"br":       " ",
+	"awalll":   "▌",
+	"awallr":   "▐",
+	"aceiling": "▀",
+	"afloor":   "▄",
+	"atl":      "▞",
+	"atr":      "▜",
+	"abl":      "▚",
+	"abr":      "▟",
 }
 
 func drawShape(shape string) {
-	if val, ok := shapes[shape]; ok {
+	if val, ok := Shapes[shape]; ok {
 		fmt.Printf("%s", val)
 	} else {
 		fmt.Print("x")
@@ -61,7 +63,8 @@ func Exit() {
 
 	fmt.Print("\n")
 	fmt.Print("\033[?25h")
-	HandleAlternateScreen("rmcup")
+	Tput("smam") // turn off line wrap
+	Tput("rmcup") // use alternate screen
 	os.Exit(0)
 }
 
@@ -79,41 +82,6 @@ func Clear(dir string) {
 		fmt.Print(val)
 	}
 
-}
-
-// takes the document content (as a slice) and modifies any lines that are longer
-// than the specified console width, splitting them over two lines. returns the
-// amended document content as a slice.
-// word wrapping uses a "greedy" algorithm
-func wrapLines(s []string, consolewidth int) []string {
-	out := []string{}
-	for _, ln := range s {
-		if len(ln) <= consolewidth {
-			out = append(out, ln)
-		} else {
-			words := strings.SplitAfter(ln, " ")
-			var subout bytes.Buffer
-			for i, wd := range words {
-				sublen := subout.Len()
-				wdlen := len(wd)
-				if sublen+wdlen <= consolewidth {
-					subout.WriteString(wd)
-					if i == len(words)-1 {
-						out = append(out, subout.String())
-					}
-				} else {
-					out = append(out, subout.String())
-					subout.Reset()
-					subout.WriteString(wd)
-					if i == len(words)-1 {
-						out = append(out, subout.String())
-						subout.Reset()
-					}
-				}
-			}
-		}
-	}
-	return out
 }
 
 func Getch() rune {
@@ -161,7 +129,7 @@ func SetLineMode() {
 	}
 }
 
-func HandleAlternateScreen(opt string) {
+func Tput(opt string) {
 	cmd := exec.Command("tput", opt)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
