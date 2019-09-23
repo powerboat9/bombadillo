@@ -39,13 +39,13 @@ If you would prefer to download a binary for your system, rather than build from
 
 ### Documentation
 
-Bombadillo has documentation available in three places currently. The first is the [Bombadillo homepage](https://rawtext.club/~sloum/bombadillo.html#docs), which has lots of information about the program, links to places around Gopher, and documentation of the commands and configuration options.
+Bombadillo has documentation available in four places currently. The first is the [Bombadillo homepage](https://rawtext.club/~sloum/bombadillo.html#docs), which has lots of information about the program, links to places around Gopher, and documentation of the commands and configuration options.
 
 Secondly, and possibly more importantly, documentation is available via Gopher from within Bombadillo. When a user launches Bombadillo for the first time, their `homeurl` is set to the help file. As such they will have access to all of the key bindings, commands, and configuration from the first run. A user can also type `:?` or `:help` at any time to return to the documentation. Remember that Bombadillo uses vim-like key bindings, so scroll with `j` and `k` to view the docs file.
 
-Lastly, this repo contains a file `bombadillo-info`. This is a duplicate of the help file that is hosted over gopher mentioned above. Per user request it has been added to the repo so that pull requests can be created with updates to the documentation.
+Thirdly, this repo contains a file `bombadillo-info`. This is a duplicate of the help file that is hosted over gopher mentioned above. Per user request it has been added to the repo so that pull requests can be created with updates to the documentation.
 
-The longterm hope is to create an installer of some sort that will move bombadillo onto a users path (compiling if need be) and installing a man file (yet to be created) onto their system. There is also talk about being able to open local files and use bombadillo as a pager, which would enable linking in the included help file.
+Lastly, but perhaps most importantly, a manpage is now included in the repo as `bombadillo.1`. Current efforts are underway to automate the install of both bombadillo and this manpgage.
 
 ## Contributing
 
@@ -54,4 +54,8 @@ Bombadillo development is largely handled by Sloum, with help from jboverf and s
 ## License
 
 This project is licensed under the GNU GPL version 3- see the [LICENSE](LICENSE) file for details.
+
+## Releases
+
+Starting with v2.0.0 releases into `master` will be version-tagged. Work done toward the next release will be created on work branches named for what they are doing and then merged into `develop` to be combined with other ongoing efforts before a release is merged into `master`. At present there is no specific release schedule. It will depend on the urgency of the work that makes its way into develop and will but up to the project maintainers' judgement when to release from `develop`.
 
