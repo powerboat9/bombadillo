@@ -375,12 +375,12 @@ func (c *client) doCommandAs(action string, values []string) {
 	case "SET", "S":
 		if _, ok := c.Options[values[0]]; ok {
 			val := strings.Join(values[1:], " ")
-			if values[0] == "theme" && val != "normal" && val != "inverse" {
-				c.SetMessage("Theme can only be set to 'normal' or 'inverse'", true)
+			if !validateOpt(values[0], val) {
+				c.SetMessage(fmt.Sprintf("Invalid setting for %q", values[0]), true)
 				c.DrawMessage()
 				return
 			}
-			c.Options[values[0]] = val
+			c.Options[values[0]] = lowerCaseOpt(values[0], val)
 			err := saveConfig()
 			if err != nil {
 				c.SetMessage("Value set, but error saving config to file", true)

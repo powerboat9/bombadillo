@@ -56,6 +56,37 @@ func saveConfig() error {
 	return ioutil.WriteFile(bombadillo.Options["configlocation"] + "/.bombadillo.ini", []byte(opts.String()), 0644)
 }
 
+func validateOpt(opt, val string) bool {
+	var validOpts = map[string][]string{
+		"openhttp": []string{"true", "false"},
+		"theme": []string{"normal", "inverse"},
+		"terminalonly": []string{"true", "false"},
+	}
+
+	opt = strings.ToLower(opt)
+	val = strings.ToLower(val)
+
+	if _, ok := validOpts[opt]; ok {
+		for _, item := range validOpts[opt] {
+			if item == val {
+				return true
+			}
+		}
+		return false
+	} else {
+		return true
+	}
+}
+
+func lowerCaseOpt(opt, val string) string {
+	switch opt {
+	case "openhttp", "theme", "terminalonly":
+		return strings.ToLower(val)
+	default:
+		return val
+	}
+}
+
 func loadConfig() error {
 	file, err := os.Open(bombadillo.Options["configlocation"] + "/.bombadillo.ini")
 	if err != nil {
@@ -79,10 +110,11 @@ func loadConfig() error {
 		}
 
 		if _, ok := bombadillo.Options[lowerkey]; ok {
-			if lowerkey == "theme" && v.Value != "normal" && v.Value != "inverse" {
-				v.Value = "normal"
+			if validateOpt(lowerkey, v.Value)  {
+				bombadillo.Options[lowerkey] = v.Value
+			} else {
+				bombadillo.Options[lowerkey] = defaultOptions[lowerkey]
 			}
-			bombadillo.Options[lowerkey] = v.Value
 		}
 	}
 
