@@ -6,9 +6,9 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
-
-	// "tildegit.org/sloum/mailcap"
+	"time"
 )
+
 
 type Capsule struct {
 	MimeMaj	string
@@ -17,6 +17,50 @@ type Capsule struct {
 	Content	string
 	Links []string
 }
+
+type TofuDigest struct {
+	db  map[string][]map[string]string
+}
+
+//------------------------------------------------\\
+// + + +          R E C E I V E R S          + + + \\
+//--------------------------------------------------\\
+
+func (t *TofuDigest) Remove(host string, indexToRemove int) error {
+	if _, ok := t.db[host]; ok {
+		if indexToRemove < 0 || indexToRemove >= len(t.db[host]) {
+			return fmt.Errorf("Invalid index")
+		} else if len(t.db[host]) > indexToRemove {
+			t.db[host] = append(t.db[host][:indexToRemove], t.db[host][indexToRemove+1:]...)
+		} else if len(t.db[host]) - 1 == indexToRemove {
+			t.db[host] = t.db[host][:indexToRemove]
+		}
+		return nil
+	}
+	return fmt.Errorf("Invalid host")
+}
+
+func (t *TofuDigest) Add(host, hash string, start, end int64) {
+	s := strconv.FormatInt(start, 10)
+	e := strconv.FormatInt(end, 10)
+	added := strconv.FormatInt(time.Now().Unix(), 10)
+	entry := map[string]string{"hash": hash, "start": s, "end": e, "added": added}
+	t.db[host] = append(t.db[host], entry)
+}
+
+// Removes all entries that are expired
+func (t *TofuDigest) Clean() {
+	now := time.Now()
+	for host, slice := range t.db {
+		for index, entry := range slice {
+			intFromStringTime, err := strconv.ParseInt(entry["end"], 10, 64)
+			if err != nil || now.After(time.Unix(intFromStringTime, 0)) {
+				t.Remove(host, index)
+			}
+		}
+	}
+}
+
 
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\
@@ -40,6 +84,24 @@ func Retrieve(host, port, resource string) (string, error) {
 	}
 
 	defer conn.Close()
+
+	// Verify that the handshake ahs completed and that
+	// the hostname on the certificate(s) from the server
+	// is the hostname we have requested
+	connState := conn.ConnectionState()
+	if connState.HandshakeComplete {
+		if len(connState.PeerCertificates) > 0 {
+			for _, cert := range connState.PeerCertificates {
+				if err = cert.VerifyHostname(host); err == nil {
+					break
+				} 
+			}
+			if err != nil {
+				return "", err
+			}
+		}
+	}
+
 
 	send := "gemini://" + addr + "/" + resource + "\r\n"
 
