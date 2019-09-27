@@ -61,7 +61,7 @@ func (b *Bookmarks) ToggleFocused() {
 }
 
 func (b Bookmarks) IniDump() string {
-	if len(b.Titles) < 0 {
+	if len(b.Titles) < 1 {
 		return ""
 	}
 	out := "[BOOKMARKS]\n"

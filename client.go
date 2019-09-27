@@ -16,7 +16,6 @@ import (
 	"tildegit.org/sloum/bombadillo/gopher"
 	"tildegit.org/sloum/bombadillo/http"
 	"tildegit.org/sloum/bombadillo/telnet"
-	// "tildegit.org/sloum/mailcap"
 )
 
 //------------------------------------------------\\
@@ -33,6 +32,7 @@ type client struct {
 	BookMarks Bookmarks
 	TopBar Headbar
 	FootBar Footbar
+	Certs gemini.TofuDigest
 }
 
 
@@ -154,7 +154,7 @@ func (c *client) TakeControlInput() {
 		c.ClearMessage()
 		c.Scroll(-1)
 	case 'q', 'Q':
-		// quite bombadillo
+		// quit bombadillo
 		cui.Exit()
 	case 'g':
 		// scroll to top
@@ -472,7 +472,7 @@ func (c *client) saveFile(u Url, name string) {
 	case "gopher":
 		file, err = gopher.Retrieve(u.Host, u.Port, u.Resource)
 	case "gemini":
-		file, err = gemini.Fetch(u.Host, u.Port, u.Resource)
+		file, err = gemini.Fetch(u.Host, u.Port, u.Resource, &c.Certs)
 	default:
 		c.SetMessage(fmt.Sprintf("Saving files over %s is not supported", u.Scheme), true)
 		c.DrawMessage()
@@ -832,7 +832,8 @@ func (c *client) Visit(url string) {
 			c.Draw()
 		}
 	case "gemini":
-		capsule, err := gemini.Visit(u.Host, u.Port, u.Resource)
+		capsule, err := gemini.Visit(u.Host, u.Port, u.Resource, &c.Certs)
+		go saveConfig()
 		if err != nil {
 			c.SetMessage(err.Error(), true)
 			c.DrawMessage()
@@ -955,7 +956,7 @@ func (c *client) Visit(url string) {
 //--------------------------------------------------\\
 
 func MakeClient(name string) *client {
-	c := client{0, 0, defaultOptions, "", false, MakePages(), MakeBookmarks(), MakeHeadbar(name), MakeFootbar()}
+	c := client{0, 0, defaultOptions, "", false, MakePages(), MakeBookmarks(), MakeHeadbar(name), MakeFootbar(), gemini.MakeTofuDigest()}
 	return &c
 }
 

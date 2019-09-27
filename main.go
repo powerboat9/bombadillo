@@ -24,6 +24,7 @@ import (
 	"os"
 	"strings"
 
+	_ "tildegit.org/sloum/bombadillo/gemini"
 	"tildegit.org/sloum/bombadillo/config"
 	"tildegit.org/sloum/bombadillo/cui"
 	"tildegit.org/sloum/mailcap"
@@ -39,8 +40,8 @@ var mc *mailcap.Mailcap
 func saveConfig() error {
 	var opts strings.Builder
 	bkmrks := bombadillo.BookMarks.IniDump()
+	certs := bombadillo.Certs.IniDump()
 
-	opts.WriteString(bkmrks)
 	opts.WriteString("\n[SETTINGS]\n")
 	for k, v := range bombadillo.Options {
 		if k == "theme" && v != "normal" && v != "inverse" {
@@ -52,6 +53,10 @@ func saveConfig() error {
 		opts.WriteString(v)
 		opts.WriteRune('\n')
 	}
+
+	opts.WriteString(bkmrks)
+
+	opts.WriteString(certs)
 
 	return ioutil.WriteFile(bombadillo.Options["configlocation"] + "/.bombadillo.ini", []byte(opts.String()), 0644)
 }
@@ -120,6 +125,10 @@ func loadConfig() error {
 
 	for i, v := range settings.Bookmarks.Titles {
 		bombadillo.BookMarks.Add([]string{v, settings.Bookmarks.Links[i]})
+	}
+
+	for _, v := range settings.Certs {
+		bombadillo.Certs.Add(v.Key, v.Value)
 	}
 
 	return nil

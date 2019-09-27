@@ -1,6 +1,8 @@
 package gemini
 
 import (
+	"bytes"
+	"crypto/sha1"
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
@@ -15,58 +17,78 @@ type Capsule struct {
 	MimeMin string
 	Status	int
 	Content	string
-	Links []string
+	Links   []string
 }
 
+
 type TofuDigest struct {
-	db  map[string][]map[string]string
+	certs  map[string]string
 }
+
 
 //------------------------------------------------\\
 // + + +          R E C E I V E R S          + + + \\
 //--------------------------------------------------\\
 
-func (t *TofuDigest) Remove(host string, indexToRemove int) error {
-	if _, ok := t.db[host]; ok {
-		if indexToRemove < 0 || indexToRemove >= len(t.db[host]) {
-			return fmt.Errorf("Invalid index")
-		} else if len(t.db[host]) > indexToRemove {
-			t.db[host] = append(t.db[host][:indexToRemove], t.db[host][indexToRemove+1:]...)
-		} else if len(t.db[host]) - 1 == indexToRemove {
-			t.db[host] = t.db[host][:indexToRemove]
-		}
+func (t *TofuDigest) Remove(host string) error {
+	if _, ok := t.certs[strings.ToLower(host)]; ok {
+		delete(t.certs, host)
 		return nil
 	}
 	return fmt.Errorf("Invalid host")
 }
 
-func (t *TofuDigest) Add(host, hash string, start, end int64) {
-	s := strconv.FormatInt(start, 10)
-	e := strconv.FormatInt(end, 10)
-	added := strconv.FormatInt(time.Now().Unix(), 10)
-	entry := map[string]string{"hash": hash, "start": s, "end": e, "added": added}
-	t.db[host] = append(t.db[host], entry)
+func (t *TofuDigest) Add(host, hash string) {
+	t.certs[strings.ToLower(host)] = hash
 }
 
-// Removes all entries that are expired
-func (t *TofuDigest) Clean() {
-	now := time.Now()
-	for host, slice := range t.db {
-		for index, entry := range slice {
-			intFromStringTime, err := strconv.ParseInt(entry["end"], 10, 64)
-			if err != nil || now.After(time.Unix(intFromStringTime, 0)) {
-				t.Remove(host, index)
-			}
-		}
+func (t *TofuDigest) Exists(host string) bool {
+	if _, ok := t.certs[strings.ToLower(host)]; ok {
+		return true
 	}
+	return false
 }
+
+func (t *TofuDigest) Find(host string) (string, error) {
+	if hash, ok := t.certs[strings.ToLower(host)]; ok {
+		return hash, nil
+	}
+	return "", fmt.Errorf("Invalid hostname, no key saved")
+}
+
+func (t *TofuDigest) Match(host, hash string) bool {
+	host = strings.ToLower(host)
+	if _, ok := t.certs[host]; !ok {
+		return false
+	}
+	if t.certs[host] == hash {
+		return true
+	}
+	return false
+}
+
+func (t *TofuDigest) IniDump() string {
+	if len(t.certs) < 1 {
+		return ""
+	}
+	var out strings.Builder
+	out.WriteString("[CERTS]\n")
+	for k, v := range t.certs {
+		out.WriteString(k)
+		out.WriteString("=")
+		out.WriteString(v)
+		out.WriteString("\n")
+	}
+	return out.String()
+}
+
 
 
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\
 //--------------------------------------------------\\
 
-func Retrieve(host, port, resource string) (string, error) {
+func Retrieve(host, port, resource string, td *TofuDigest) (string, error) {
 	if host == "" || port == "" {
 		return "", fmt.Errorf("Incomplete request url")
 	}
@@ -83,25 +105,54 @@ func Retrieve(host, port, resource string) (string, error) {
 		return "", err
 	}
 
+	now := time.Now()
+
 	defer conn.Close()
 
 	// Verify that the handshake ahs completed and that
 	// the hostname on the certificate(s) from the server
 	// is the hostname we have requested
 	connState := conn.ConnectionState()
-	if connState.HandshakeComplete {
-		if len(connState.PeerCertificates) > 0 {
-			for _, cert := range connState.PeerCertificates {
-				if err = cert.VerifyHostname(host); err == nil {
-					break
-				} 
+	if len(connState.PeerCertificates) < 0 {
+		return "", fmt.Errorf("Insecure, no certificates offered by server")
+	}
+	hostCertExists := td.Exists(host)
+	matched := false
+
+	for _, cert := range connState.PeerCertificates {
+		if hostCertExists {
+			if td.Match(host, hashCert(cert.Raw)) {
+				matched = true
+				if now.Before(cert.NotBefore) {
+					return "", fmt.Errorf("Server certificate error: certificate not valid yet")
+				}
+
+				if now.After(cert.NotAfter) {
+					return "", fmt.Errorf("Server certificate error: certificate expired")
+				}
+
+				if err = cert.VerifyHostname(host); err != nil {
+					return "", fmt.Errorf("Server certificate error: %s", err)
+				}
+				break
+			} 
+		} else {
+			if now.Before(cert.NotBefore) || now.After(cert.NotAfter) {
+				continue
 			}
-			if err != nil {
-				return "", err
+
+			if err = cert.VerifyHostname(host); err != nil {
+				return "", fmt.Errorf("Server certificate error: %s", err)
 			}
+
+			td.Add(host, hashCert(cert.Raw))
+			matched = true
 		}
 	}
 
+	if !matched {
+		return "", fmt.Errorf("Server certificate error: No matching certificate provided")
+	}
 
 	send := "gemini://" + addr + "/" + resource + "\r\n"
 
@@ -118,8 +169,8 @@ func Retrieve(host, port, resource string) (string, error) {
 	return string(result), nil
 }
 
-func Fetch(host, port, resource string) ([]byte, error) {
-	rawResp, err := Retrieve(host, port, resource)
+func Fetch(host, port, resource string, td *TofuDigest) ([]byte, error) {
+	rawResp, err := Retrieve(host, port, resource, td)
 	if err != nil {
 		return make([]byte, 0), err
 	} 
@@ -165,9 +216,9 @@ func Fetch(host, port, resource string) ([]byte, error) {
 
 }
 
-func Visit(host, port, resource string) (Capsule, error) {
+func Visit(host, port, resource string, td *TofuDigest) (Capsule, error) {
 	capsule := MakeCapsule()
-	rawResp, err := Retrieve(host, port, resource)
+	rawResp, err := Retrieve(host, port, resource, td)
 	if err != nil {
 		return capsule, err
 	} 
@@ -288,8 +339,20 @@ func handleRelativeUrl(u, root, current string) string {
 	return fmt.Sprintf("%s%s", current, u)
 }
 
+func hashCert(cert []byte) string {
+	hash := sha1.Sum(cert)
+	hex := make([][]byte, len(hash))
+	for i, data := range hash {
+		hex[i] = []byte(fmt.Sprintf("%02X", data))
+	}
+	return fmt.Sprintf("%s", string(bytes.Join(hex, []byte("-"))))
+}
+
 
 func MakeCapsule() Capsule {
 	return Capsule{"", "", 0, "", make([]string, 0, 5)}
 }
 
+func MakeTofuDigest() TofuDigest {
+	return TofuDigest{make(map[string]string)}
+}
