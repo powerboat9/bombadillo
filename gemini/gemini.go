@@ -161,13 +161,14 @@ func Retrieve(host, port, resource string, td *TofuDigest) (string, error) {
 	}
 
 	if td.Exists(host) {
+		// See if we have a matching cert
 		err := td.Match(host, &connState) 
 		if err != nil && err.Error() != "EXP" {
-			// On any error other than EXP (expired), return the error
+			// If there is no match and it isnt because of an expiration
+			// just return the error
 			return "", err
-		} else if err.Error() == "EXP" {
-			// If the certificate we had was expired, check if they have
-			// offered a new valid cert and update the certificate
+		} else if err != nil {
+			// The cert expired, see if they are offering one that is valid...
 			err := td.newCert(host, &connState)
 			if err != nil {
 				// If there are no valid certs to offer, let the client know
