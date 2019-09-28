@@ -113,7 +113,7 @@ func Retrieve(host, port, resource string, td *TofuDigest) (string, error) {
 	// the hostname on the certificate(s) from the server
 	// is the hostname we have requested
 	connState := conn.ConnectionState()
-	if len(connState.PeerCertificates) < 0 {
+	if len(connState.PeerCertificates) < 1 {
 		return "", fmt.Errorf("Insecure, no certificates offered by server")
 	}
 	hostCertExists := td.Exists(host)

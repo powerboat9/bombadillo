@@ -833,12 +833,12 @@ func (c *client) Visit(url string) {
 		}
 	case "gemini":
 		capsule, err := gemini.Visit(u.Host, u.Port, u.Resource, &c.Certs)
-		go saveConfig()
 		if err != nil {
 			c.SetMessage(err.Error(), true)
 			c.DrawMessage()
 			return
 		}
+		go saveConfig()
 		switch capsule.Status {
 		case 1:
 			c.search("", u.Full, capsule.Content)
