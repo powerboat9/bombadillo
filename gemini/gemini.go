@@ -30,12 +30,16 @@ type TofuDigest struct {
 // + + +          R E C E I V E R S          + + + \\
 //--------------------------------------------------\\
 
-func (t *TofuDigest) Remove(host string) error {
-	if _, ok := t.certs[strings.ToLower(host)]; ok {
+func (t *TofuDigest) Purge(host string) error {
+	host = strings.ToLower(host)
+	if host == "*" {
+		t.certs = make(map[string]string)
+		return nil
+	} else if _, ok := t.certs[strings.ToLower(host)]; ok {
 		delete(t.certs, host)
 		return nil
 	}
-	return fmt.Errorf("Invalid host")
+	return fmt.Errorf("Invalid host %q", host)
 }
 
 func (t *TofuDigest) Add(host, hash string) {

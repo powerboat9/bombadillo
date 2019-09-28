@@ -279,6 +279,8 @@ func (c *client) simpleCommand(action string) {
 	case "B", "BOOKMARKS":
 		c.BookMarks.ToggleOpen()
 		c.Draw()
+	case "R", "REFRESH":
+		// TODO build refresh code
 	case "SEARCH":
 		c.search("", "", "?")
 	case "HELP", "?":
@@ -299,8 +301,27 @@ func (c *client) doCommand(action string, values []string) {
 	switch action {
 	case "CHECK", "C":
 		c.displayConfigValue(values[0])
+	case "PURGE", "P":
+		err := c.Certs.Purge(values[0])
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+			return
+		}
+		if values[0] == "*" {
+			c.SetMessage("All certificates have been purged", false)
+			c.DrawMessage()
+		} else {
+			c.SetMessage(fmt.Sprintf("The certificate for %q has been purged", strings.ToLower(values[0])), false)
+			c.DrawMessage()
+		}
+		err = saveConfig()
+		if err != nil {
+			c.SetMessage("Error saving purge to file", true)
+			c.DrawMessage()
+		}
 	case "SEARCH":
-		c.search(strings.Join(values, " "), "", "")
+		c.search(values[0], "", "")
 	case "WRITE", "W":
 		if values[0] == "." {
 			values[0] = c.PageState.History[c.PageState.Position].Location.Full
@@ -360,7 +381,8 @@ func (c *client) doCommandAs(action string, values []string) {
 		if c.BookMarks.IsOpen {
 			c.Draw()
 		}
-
+	case "SEARCH":
+		c.search(strings.Join(values, " "), "", "")
 	case "WRITE", "W":
 		u, err := MakeUrl(values[0])
 		if err != nil {
