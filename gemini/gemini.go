@@ -56,15 +56,55 @@ func (t *TofuDigest) Find(host string) (string, error) {
 	return "", fmt.Errorf("Invalid hostname, no key saved")
 }
 
-func (t *TofuDigest) Match(host, hash string) bool {
+func (t *TofuDigest) Match(host string, cState *tls.ConnectionState) error {
 	host = strings.ToLower(host)
-	if _, ok := t.certs[host]; !ok {
-		return false
+	now := time.Now()
+
+	for _, cert := range cState.PeerCertificates {
+		if t.certs[host] != hashCert(cert.Raw) {
+			continue
+		}
+
+		if now.Before(cert.NotBefore) {
+			return fmt.Errorf("Certificate is not valid yet")
+		}
+
+		if now.After(cert.NotAfter) {
+			return fmt.Errorf("EXP")
+		}
+
+		if err := cert.VerifyHostname(host); err != nil {
+			return fmt.Errorf("Certificate error: %s", err)
+		}
+
+		return nil
 	}
-	if t.certs[host] == hash {
-		return true
+
+	return fmt.Errorf("No matching certificate was found for host %q", host)
+}
+
+func (t *TofuDigest) newCert(host string, cState *tls.ConnectionState) error {
+	host = strings.ToLower(host)
+	now := time.Now()
+
+	for _, cert := range cState.PeerCertificates {
+		if now.Before(cert.NotBefore) {
+			continue
+		}
+
+		if now.After(cert.NotAfter) {
+			continue
+		}
+
+		if err := cert.VerifyHostname(host); err != nil {
+			continue
+		}
+
+		t.Add(host, hashCert(cert.Raw))
+		return nil
 	}
-	return false
+
+	return fmt.Errorf("No valid certificates were offered by host %q", host)
 }
 
 func (t *TofuDigest) IniDump() string {
@@ -105,53 +145,37 @@ func Retrieve(host, port, resource string, td *TofuDigest) (string, error) {
 		return "", err
 	}
 
-	now := time.Now()
-
 	defer conn.Close()
 
-	// Verify that the handshake ahs completed and that
-	// the hostname on the certificate(s) from the server
-	// is the hostname we have requested
 	connState := conn.ConnectionState()
+
+	// Begin TOFU screening...
+
+	// If no certificates are offered, bail out
 	if len(connState.PeerCertificates) < 1 {
 		return "", fmt.Errorf("Insecure, no certificates offered by server")
 	}
-	hostCertExists := td.Exists(host)
-	matched := false
 
-	for _, cert := range connState.PeerCertificates {
-		if hostCertExists {
-			if td.Match(host, hashCert(cert.Raw)) {
-				matched = true
-				if now.Before(cert.NotBefore) {
-					return "", fmt.Errorf("Server certificate error: certificate not valid yet")
-				}
-
-				if now.After(cert.NotAfter) {
-					return "", fmt.Errorf("Server certificate error: certificate expired")
-				}
-
-				if err = cert.VerifyHostname(host); err != nil {
-					return "", fmt.Errorf("Server certificate error: %s", err)
-				}
-				break
-			} 
-		} else {
-			if now.Before(cert.NotBefore) || now.After(cert.NotAfter) {
-				continue
+	if td.Exists(host) {
+		err := td.Match(host, &connState) 
+		if err != nil && err.Error() != "EXP" {
+			// On any error other than EXP (expired), return the error
+			return "", err
+		} else if err.Error() == "EXP" {
+			// If the certificate we had was expired, check if they have
+			// offered a new valid cert and update the certificate
+			err := td.newCert(host, &connState)
+			if err != nil {
+				// If there are no valid certs to offer, let the client know
+				return "", err
 			}
-
-			if err = cert.VerifyHostname(host); err != nil {
-				return "", fmt.Errorf("Server certificate error: %s", err)
-			}
-
-			td.Add(host, hashCert(cert.Raw))
-			matched = true
 		}
-	}
-
-	if !matched {
-		return "", fmt.Errorf("Server certificate error: No matching certificate provided")
+	} else {
+		err = td.newCert(host, &connState)
+		if err != nil {
+			// If there are no valid certs to offer, let the client know
+			return "", err
+		}
 	}
 
 	send := "gemini://" + addr + "/" + resource + "\r\n"
@@ -345,7 +369,7 @@ func hashCert(cert []byte) string {
 	for i, data := range hash {
 		hex[i] = []byte(fmt.Sprintf("%02X", data))
 	}
-	return fmt.Sprintf("%s", string(bytes.Join(hex, []byte("-"))))
+	return fmt.Sprintf("%s", string(bytes.Join(hex, []byte(":"))))
 }
 
 
