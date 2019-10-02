@@ -1,28 +1,138 @@
 package gemini
 
 import (
+	"bytes"
+	"crypto/sha1"
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"strconv"
 	"strings"
-
-	// "tildegit.org/sloum/mailcap"
+	"time"
 )
+
 
 type Capsule struct {
 	MimeMaj	string
 	MimeMin string
 	Status	int
 	Content	string
-	Links []string
+	Links   []string
 }
+
+
+type TofuDigest struct {
+	certs  map[string]string
+}
+
+
+//------------------------------------------------\\
+// + + +          R E C E I V E R S          + + + \\
+//--------------------------------------------------\\
+
+func (t *TofuDigest) Purge(host string) error {
+	host = strings.ToLower(host)
+	if host == "*" {
+		t.certs = make(map[string]string)
+		return nil
+	} else if _, ok := t.certs[strings.ToLower(host)]; ok {
+		delete(t.certs, host)
+		return nil
+	}
+	return fmt.Errorf("Invalid host %q", host)
+}
+
+func (t *TofuDigest) Add(host, hash string) {
+	t.certs[strings.ToLower(host)] = hash
+}
+
+func (t *TofuDigest) Exists(host string) bool {
+	if _, ok := t.certs[strings.ToLower(host)]; ok {
+		return true
+	}
+	return false
+}
+
+func (t *TofuDigest) Find(host string) (string, error) {
+	if hash, ok := t.certs[strings.ToLower(host)]; ok {
+		return hash, nil
+	}
+	return "", fmt.Errorf("Invalid hostname, no key saved")
+}
+
+func (t *TofuDigest) Match(host string, cState *tls.ConnectionState) error {
+	host = strings.ToLower(host)
+	now := time.Now()
+
+	for _, cert := range cState.PeerCertificates {
+		if t.certs[host] != hashCert(cert.Raw) {
+			continue
+		}
+
+		if now.Before(cert.NotBefore) {
+			return fmt.Errorf("Certificate is not valid yet")
+		}
+
+		if now.After(cert.NotAfter) {
+			return fmt.Errorf("EXP")
+		}
+
+		if err := cert.VerifyHostname(host); err != nil {
+			return fmt.Errorf("Certificate error: %s", err)
+		}
+
+		return nil
+	}
+
+	return fmt.Errorf("No matching certificate was found for host %q", host)
+}
+
+func (t *TofuDigest) newCert(host string, cState *tls.ConnectionState) error {
+	host = strings.ToLower(host)
+	now := time.Now()
+
+	for _, cert := range cState.PeerCertificates {
+		if now.Before(cert.NotBefore) {
+			continue
+		}
+
+		if now.After(cert.NotAfter) {
+			continue
+		}
+
+		if err := cert.VerifyHostname(host); err != nil {
+			continue
+		}
+
+		t.Add(host, hashCert(cert.Raw))
+		return nil
+	}
+
+	return fmt.Errorf("No valid certificates were offered by host %q", host)
+}
+
+func (t *TofuDigest) IniDump() string {
+	if len(t.certs) < 1 {
+		return ""
+	}
+	var out strings.Builder
+	out.WriteString("[CERTS]\n")
+	for k, v := range t.certs {
+		out.WriteString(k)
+		out.WriteString("=")
+		out.WriteString(v)
+		out.WriteString("\n")
+	}
+	return out.String()
+}
+
+
 
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\
 //--------------------------------------------------\\
 
-func Retrieve(host, port, resource string) (string, error) {
+func Retrieve(host, port, resource string, td *TofuDigest) (string, error) {
 	if host == "" || port == "" {
 		return "", fmt.Errorf("Incomplete request url")
 	}
@@ -41,6 +151,38 @@ func Retrieve(host, port, resource string) (string, error) {
 
 	defer conn.Close()
 
+	connState := conn.ConnectionState()
+
+	// Begin TOFU screening...
+
+	// If no certificates are offered, bail out
+	if len(connState.PeerCertificates) < 1 {
+		return "", fmt.Errorf("Insecure, no certificates offered by server")
+	}
+
+	if td.Exists(host) {
+		// See if we have a matching cert
+		err := td.Match(host, &connState) 
+		if err != nil && err.Error() != "EXP" {
+			// If there is no match and it isnt because of an expiration
+			// just return the error
+			return "", err
+		} else if err != nil {
+			// The cert expired, see if they are offering one that is valid...
+			err := td.newCert(host, &connState)
+			if err != nil {
+				// If there are no valid certs to offer, let the client know
+				return "", err
+			}
+		}
+	} else {
+		err = td.newCert(host, &connState)
+		if err != nil {
+			// If there are no valid certs to offer, let the client know
+			return "", err
+		}
+	}
+
 	send := "gemini://" + addr + "/" + resource + "\r\n"
 
 	_, err = conn.Write([]byte(send))
@@ -56,8 +198,8 @@ func Retrieve(host, port, resource string) (string, error) {
 	return string(result), nil
 }
 
-func Fetch(host, port, resource string) ([]byte, error) {
-	rawResp, err := Retrieve(host, port, resource)
+func Fetch(host, port, resource string, td *TofuDigest) ([]byte, error) {
+	rawResp, err := Retrieve(host, port, resource, td)
 	if err != nil {
 		return make([]byte, 0), err
 	} 
@@ -103,9 +245,9 @@ func Fetch(host, port, resource string) ([]byte, error) {
 
 }
 
-func Visit(host, port, resource string) (Capsule, error) {
+func Visit(host, port, resource string, td *TofuDigest) (Capsule, error) {
 	capsule := MakeCapsule()
-	rawResp, err := Retrieve(host, port, resource)
+	rawResp, err := Retrieve(host, port, resource, td)
 	if err != nil {
 		return capsule, err
 	} 
@@ -226,8 +368,20 @@ func handleRelativeUrl(u, root, current string) string {
 	return fmt.Sprintf("%s%s", current, u)
 }
 
+func hashCert(cert []byte) string {
+	hash := sha1.Sum(cert)
+	hex := make([][]byte, len(hash))
+	for i, data := range hash {
+		hex[i] = []byte(fmt.Sprintf("%02X", data))
+	}
+	return fmt.Sprintf("%s", string(bytes.Join(hex, []byte(":"))))
+}
+
 
 func MakeCapsule() Capsule {
 	return Capsule{"", "", 0, "", make([]string, 0, 5)}
 }
 
+func MakeTofuDigest() TofuDigest {
+	return TofuDigest{make(map[string]string)}
+}

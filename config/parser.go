@@ -24,8 +24,8 @@ type Config struct {
 	Bookmarks	struct {
 		Titles, Links []string 
 	}
-	Colors    []KeyValue
 	Settings  []KeyValue
+	Certs     []KeyValue
 }
 
 type KeyValue struct {
@@ -90,8 +90,8 @@ func (p *Parser) Parse() (Config, error) {
 			case "BOOKMARKS":
 				c.Bookmarks.Titles = append(c.Bookmarks.Titles, keyval.Value)
 				c.Bookmarks.Links = append(c.Bookmarks.Links, keyval.Key)
-			case "COLORS":
-				c.Colors = append(c.Colors, keyval)
+			case "CERTS":
+				c.Certs = append(c.Certs, keyval)
 			case "SETTINGS":
 				c.Settings = append(c.Settings, keyval)
 			}

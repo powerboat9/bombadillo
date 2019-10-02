@@ -16,7 +16,6 @@ import (
 	"tildegit.org/sloum/bombadillo/gopher"
 	"tildegit.org/sloum/bombadillo/http"
 	"tildegit.org/sloum/bombadillo/telnet"
-	// "tildegit.org/sloum/mailcap"
 )
 
 //------------------------------------------------\\
@@ -33,6 +32,7 @@ type client struct {
 	BookMarks Bookmarks
 	TopBar Headbar
 	FootBar Footbar
+	Certs gemini.TofuDigest
 }
 
 
@@ -154,7 +154,7 @@ func (c *client) TakeControlInput() {
 		c.ClearMessage()
 		c.Scroll(-1)
 	case 'q', 'Q':
-		// quite bombadillo
+		// quit bombadillo
 		cui.Exit()
 	case 'g':
 		// scroll to top
@@ -279,6 +279,8 @@ func (c *client) simpleCommand(action string) {
 	case "B", "BOOKMARKS":
 		c.BookMarks.ToggleOpen()
 		c.Draw()
+	case "R", "REFRESH":
+		// TODO build refresh code
 	case "SEARCH":
 		c.search("", "", "?")
 	case "HELP", "?":
@@ -299,8 +301,27 @@ func (c *client) doCommand(action string, values []string) {
 	switch action {
 	case "CHECK", "C":
 		c.displayConfigValue(values[0])
+	case "PURGE", "P":
+		err := c.Certs.Purge(values[0])
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+			return
+		}
+		if values[0] == "*" {
+			c.SetMessage("All certificates have been purged", false)
+			c.DrawMessage()
+		} else {
+			c.SetMessage(fmt.Sprintf("The certificate for %q has been purged", strings.ToLower(values[0])), false)
+			c.DrawMessage()
+		}
+		err = saveConfig()
+		if err != nil {
+			c.SetMessage("Error saving purge to file", true)
+			c.DrawMessage()
+		}
 	case "SEARCH":
-		c.search(strings.Join(values, " "), "", "")
+		c.search(values[0], "", "")
 	case "WRITE", "W":
 		if values[0] == "." {
 			values[0] = c.PageState.History[c.PageState.Position].Location.Full
@@ -360,7 +381,8 @@ func (c *client) doCommandAs(action string, values []string) {
 		if c.BookMarks.IsOpen {
 			c.Draw()
 		}
-
+	case "SEARCH":
+		c.search(strings.Join(values, " "), "", "")
 	case "WRITE", "W":
 		u, err := MakeUrl(values[0])
 		if err != nil {
@@ -472,7 +494,7 @@ func (c *client) saveFile(u Url, name string) {
 	case "gopher":
 		file, err = gopher.Retrieve(u.Host, u.Port, u.Resource)
 	case "gemini":
-		file, err = gemini.Fetch(u.Host, u.Port, u.Resource)
+		file, err = gemini.Fetch(u.Host, u.Port, u.Resource, &c.Certs)
 	default:
 		c.SetMessage(fmt.Sprintf("Saving files over %s is not supported", u.Scheme), true)
 		c.DrawMessage()
@@ -551,7 +573,7 @@ func (c *client) doLinkCommand(action, target string) {
 		num -= 1
 
 		links := c.PageState.History[c.PageState.Position].Links
-		if num >= len(links) || num < 0 {
+		if num >= len(links) || num < 1 {
 			c.SetMessage(fmt.Sprintf("Invalid link id: %s", target), true)
 			c.DrawMessage()
 			return
@@ -832,12 +854,13 @@ func (c *client) Visit(url string) {
 			c.Draw()
 		}
 	case "gemini":
-		capsule, err := gemini.Visit(u.Host, u.Port, u.Resource)
+		capsule, err := gemini.Visit(u.Host, u.Port, u.Resource, &c.Certs)
 		if err != nil {
 			c.SetMessage(err.Error(), true)
 			c.DrawMessage()
 			return
 		}
+		go saveConfig()
 		switch capsule.Status {
 		case 1:
 			c.search("", u.Full, capsule.Content)
@@ -955,7 +978,7 @@ func (c *client) Visit(url string) {
 //--------------------------------------------------\\
 
 func MakeClient(name string) *client {
-	c := client{0, 0, defaultOptions, "", false, MakePages(), MakeBookmarks(), MakeHeadbar(name), MakeFootbar()}
+	c := client{0, 0, defaultOptions, "", false, MakePages(), MakeBookmarks(), MakeHeadbar(name), MakeFootbar(), gemini.MakeTofuDigest()}
 	return &c
 }
 
