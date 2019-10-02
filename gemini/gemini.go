@@ -157,7 +157,9 @@ func Retrieve(host, port, resource string, td *TofuDigest) (string, error) {
 	}
 
 	if td.UseClientCert {
-		conf.Certificates = []tls.Certificate{td.ClientCert}
+		conf.GetClientCertificate = func(*tls.CertificateRequestInfo) (*tls.Certificate, error) {
+			return &td.ClientCert, nil
+		}
 	}
 
 	conn, err := tls.Dial("tcp", addr, conf)
