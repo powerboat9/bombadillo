@@ -403,6 +403,9 @@ func (c *client) doCommandAs(action string, values []string) {
 				return
 			}
 			c.Options[values[0]] = lowerCaseOpt(values[0], val)
+			if values[0] == "tlskey" || values[0] == "tlscertificate" {
+				c.Certs.LoadCertificate(c.Options["tlscertificate"], c.Options["tlskey"])
+			}
 			err := saveConfig()
 			if err != nil {
 				c.SetMessage("Value set, but error saving config to file", true)

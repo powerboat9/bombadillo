@@ -24,7 +24,6 @@ type Capsule struct {
 type TofuDigest struct {
 	certs          map[string]string
 	ClientCert     tls.Certificate
-	UseClientCert  bool
 }
 
 
@@ -33,13 +32,12 @@ type TofuDigest struct {
 //--------------------------------------------------\\
 
 func (t *TofuDigest) LoadCertificate(cert, key string) {
-	validClientCert := true
 	certificate, err := tls.LoadX509KeyPair(cert, key)
 	if err != nil {
-		panic(err)
+		t.ClientCert = tls.Certificate{}
+		return
 	}
 	t.ClientCert = certificate
-	t.UseClientCert = validClientCert
 }
 
 func (t *TofuDigest) Purge(host string) error {
@@ -156,10 +154,8 @@ func Retrieve(host, port, resource string, td *TofuDigest) (string, error) {
 		InsecureSkipVerify: true,
 	}
 
-	if td.UseClientCert {
-		conf.GetClientCertificate = func(*tls.CertificateRequestInfo) (*tls.Certificate, error) {
-			return &td.ClientCert, nil
-		}
+	conf.GetClientCertificate = func(*tls.CertificateRequestInfo) (*tls.Certificate, error) {
+		return &td.ClientCert, nil
 	}
 
 	conn, err := tls.Dial("tcp", addr, conf)
@@ -401,5 +397,5 @@ func MakeCapsule() Capsule {
 }
 
 func MakeTofuDigest() TofuDigest {
-	return TofuDigest{make(map[string]string), tls.Certificate{}, false}
+	return TofuDigest{make(map[string]string), tls.Certificate{}}
 }
