@@ -130,3 +130,4 @@ func MakeUrl(u string) (Url, error) {
 
 	return out, nil
 }
+
