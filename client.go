@@ -187,6 +187,15 @@ func (c *client) TakeControlInput() {
 			c.SetPercentRead()
 			c.Draw()
 		}
+	case 'R':
+		c.ClearMessage()
+		err := c.ReloadPage()
+		if err != nil {
+			c.SetMessage(err.Error(), false)
+			c.DrawMessage()
+		} else {
+			c.Draw()
+		}
 	case 'B':
 		// open the bookmarks browser
 		c.BookMarks.ToggleOpen()
@@ -985,6 +994,21 @@ func (c *client) Visit(url string) {
 		c.SetMessage(fmt.Sprintf("%q is not a supported protocol", u.Scheme), true)
 		c.DrawMessage()
 	}
+}
+
+func (c *client) ReloadPage() error {
+	if c.PageState.Length < 1 {
+		return fmt.Errorf("There is no page to reload")
+	}
+	url := c.PageState.History[c.PageState.Position].Location.Full
+	err := c.PageState.NavigateHistory(-1)
+	if err != nil {
+		return err
+	}
+	length := c.PageState.Length
+	c.Visit(url)
+	c.PageState.Length = length
+	return nil
 }
 
 
