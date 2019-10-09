@@ -36,6 +36,13 @@ type Url struct {
 // representation of a url and returns a Url struct and
 // an error (or nil).
 func MakeUrl(u string) (Url, error) {
+	if len(u) < 1 {
+		return Url{}, fmt.Errorf("Invalid url, unable to parse")
+	}
+	if strings.HasPrefix(u, "finger://") {
+		return parseFinger(u)
+	}
+
 	var out Url
 	re := regexp.MustCompile(`^((?P<scheme>[a-zA-Z]+):\/\/)?(?P<host>[\w\-\.\d]+)(?::(?P<port>\d+)?)?(?:/(?P<type>[01345679gIhisp])?)?(?P<resource>.*)?$`)
 	match := re.FindStringSubmatch(u)
@@ -106,3 +113,32 @@ func MakeUrl(u string) (Url, error) {
 
 	return out, nil
 }
+
+func parseFinger(u string) (Url, error) {
+	var out Url
+	out.Scheme = "finger"
+	if len(u) < 10 {
+		return out, fmt.Errorf("Invalid finger address")
+	}
+	u = u[9:]
+	userPlusAddress := strings.Split(u, "@")
+	if len(userPlusAddress) > 1 {
+		out.Resource = userPlusAddress[0]
+		u = userPlusAddress[1]
+	} 
+	hostPort := strings.Split(u, ":")
+	if len(hostPort) < 2 {
+		out.Port = "79"
+	} else {
+		out.Port = hostPort[1]
+	}
+	out.Host = hostPort[0]
+	resource := ""
+	if out.Resource != "" {
+		resource = out.Resource + "@"
+	}
+	out.Full = fmt.Sprintf("%s://%s%s:%s", out.Scheme, resource, out.Host, out.Port)
+	return out, nil
+}
+
+

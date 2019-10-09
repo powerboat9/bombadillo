@@ -12,6 +12,7 @@ import (
 
 	"tildegit.org/sloum/bombadillo/cmdparse"
 	"tildegit.org/sloum/bombadillo/cui"
+	"tildegit.org/sloum/bombadillo/finger"
 	"tildegit.org/sloum/bombadillo/gemini"
 	"tildegit.org/sloum/bombadillo/gopher"
 	"tildegit.org/sloum/bombadillo/http"
@@ -966,6 +967,20 @@ func (c *client) Visit(url string) {
 			c.SetMessage("'openhttp' is not set to true, cannot open web link", false)
 			c.DrawMessage()
 		}
+	case "finger":
+		content, err := finger.Finger(u.Host, u.Port, u.Resource)
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+			return
+		}
+		pg := MakePage(u, content, []string{})
+		pg.WrapContent(c.Width - 1)
+		c.PageState.Add(pg)
+		c.SetPercentRead()
+		c.ClearMessage()
+		c.SetHeaderUrl()
+		c.Draw()
 	default:
 		c.SetMessage(fmt.Sprintf("%q is not a supported protocol", u.Scheme), true)
 		c.DrawMessage()
