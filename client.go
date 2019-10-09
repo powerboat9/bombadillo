@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -503,7 +504,8 @@ func (c *client) saveFile(u Url, name string) {
 		c.DrawMessage()
 		return
 	}
-	savePath := c.Options["savelocation"] + "/" + name
+
+	savePath := filepath.Join(c.Options["savelocation"], name)
 	err = ioutil.WriteFile(savePath, file, 0644)
 	if err != nil {
 		c.SetMessage("Error writing file: "+err.Error(), true)
@@ -519,10 +521,11 @@ func (c *client) saveFileFromData(d, name string) {
 	data := []byte(d)
 	c.SetMessage(fmt.Sprintf("Saving %s ...", name), false)
 	c.DrawMessage()
-	savePath := c.Options["savelocation"] + name
+
+	savePath := filepath.Join(c.Options["savelocation"], name)
 	err := ioutil.WriteFile(savePath, data, 0644)
 	if err != nil {
-		c.SetMessage("Error writing file to disk", true)
+		c.SetMessage("Error writing file: "+err.Error(), true)
 		c.DrawMessage()
 		return
 	}
