@@ -17,6 +17,7 @@ import (
 	"tildegit.org/sloum/bombadillo/gemini"
 	"tildegit.org/sloum/bombadillo/gopher"
 	"tildegit.org/sloum/bombadillo/http"
+	"tildegit.org/sloum/bombadillo/local"
 	"tildegit.org/sloum/bombadillo/telnet"
 )
 
@@ -185,6 +186,15 @@ func (c *client) TakeControlInput() {
 		} else {
 			c.SetHeaderUrl()
 			c.SetPercentRead()
+			c.Draw()
+		}
+	case 'R':
+		c.ClearMessage()
+		err := c.ReloadPage()
+		if err != nil {
+			c.SetMessage(err.Error(), false)
+			c.DrawMessage()
+		} else {
 			c.Draw()
 		}
 	case 'B':
@@ -969,6 +979,20 @@ func (c *client) Visit(url string) {
 			c.SetMessage("'openhttp' is not set to true, cannot open web link", false)
 			c.DrawMessage()
 		}
+	case "local":
+		content, err := local.Open(u.Resource)
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+			return
+		}
+		pg := MakePage(u, content, []string{})
+		pg.WrapContent(c.Width - 1)
+		c.PageState.Add(pg)
+		c.SetPercentRead()
+		c.ClearMessage()
+		c.SetHeaderUrl()
+		c.Draw()
 	case "finger":
 		content, err := finger.Finger(u.Host, u.Port, u.Resource)
 		if err != nil {
@@ -988,6 +1012,22 @@ func (c *client) Visit(url string) {
 		c.DrawMessage()
 	}
 }
+
+func (c *client) ReloadPage() error {
+	if c.PageState.Length < 1 {
+		return fmt.Errorf("There is no page to reload")
+	}
+	url := c.PageState.History[c.PageState.Position].Location.Full
+	err := c.PageState.NavigateHistory(-1)
+	if err != nil {
+		return err
+	}
+	length := c.PageState.Length
+	c.Visit(url)
+	c.PageState.Length = length
+	return nil
+}
+
 
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\

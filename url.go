@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -44,7 +46,29 @@ func MakeUrl(u string) (Url, error) {
 	}
 
 	var out Url
-	re := regexp.MustCompile(`^((?P<scheme>[a-zA-Z]+):\/\/)?(?P<host>[\w\-\.\d]+)(?::(?P<port>\d+)?)?(?:/(?P<type>[01345679gIhisp])?)?(?P<resource>.*)?$`)
+	if local := strings.HasPrefix(u, "local://"); u[0] == '/' || u[0] == '.' || u[0] == '~' || local {
+		if local && len(u) > 8 {
+			u = u[8:]
+		}
+		home, err := os.UserHomeDir()
+		if err != nil {
+			home = ""
+		}
+		u = strings.Replace(u, "~", home, 1)
+		res, err := filepath.Abs(u)
+		if err != nil {
+			return out, fmt.Errorf("Invalid path, unable to parse")
+		}
+		out.Scheme = "local"
+		out.Host = ""
+		out.Port = ""
+		out.Mime = ""
+		out.Resource = res
+		out.Full = out.Scheme + "://" + out.Resource
+		return out, nil
+	}
+
+	re := regexp.MustCompile(`^((?P<scheme>[a-zA-Z]+):\/\/)?(?P<host>[\w\-\.\d/]+)(?::(?P<port>\d+)?)?(?:/(?P<type>[01345679gIhisp])?)?(?P<resource>.*)?$`)
 	match := re.FindStringSubmatch(u)
 
 	if valid := re.MatchString(u); !valid {
