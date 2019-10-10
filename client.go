@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -12,6 +13,7 @@ import (
 
 	"tildegit.org/sloum/bombadillo/cmdparse"
 	"tildegit.org/sloum/bombadillo/cui"
+	"tildegit.org/sloum/bombadillo/finger"
 	"tildegit.org/sloum/bombadillo/gemini"
 	"tildegit.org/sloum/bombadillo/gopher"
 	"tildegit.org/sloum/bombadillo/http"
@@ -24,18 +26,17 @@ import (
 //--------------------------------------------------\\
 
 type client struct {
-	Height int
-	Width int
-	Options map[string]string
-	Message string
+	Height       int
+	Width        int
+	Options      map[string]string
+	Message      string
 	MessageIsErr bool
-	PageState Pages
-	BookMarks Bookmarks
-	TopBar Headbar
-	FootBar Footbar
-	Certs gemini.TofuDigest
+	PageState    Pages
+	BookMarks    Bookmarks
+	TopBar       Headbar
+	FootBar      Footbar
+	Certs        gemini.TofuDigest
 }
-
 
 //------------------------------------------------\\
 // + + +           R E C E I V E R S         + + + \\
@@ -83,21 +84,21 @@ func (c *client) GetSize() {
 
 func (c *client) Draw() {
 	var screen strings.Builder
-	screen.Grow(c.Height * c.Width + c.Width)
+	screen.Grow(c.Height*c.Width + c.Width)
 	screen.WriteString("\033[0m")
 	screen.WriteString(c.TopBar.Render(c.Width, c.Options["theme"]))
 	screen.WriteString("\n")
-	pageContent := c.PageState.Render(c.Height, c.Width - 1)
-  if c.Options["theme"] == "inverse" {
+	pageContent := c.PageState.Render(c.Height, c.Width-1)
+	if c.Options["theme"] == "inverse" {
 		screen.WriteString("\033[7m")
 	}
 	if c.BookMarks.IsOpen {
 		bm := c.BookMarks.Render(c.Width, c.Height)
 		bmWidth := len([]rune(bm[0]))
-		for i := 0; i < c.Height - 3; i++ {
+		for i := 0; i < c.Height-3; i++ {
 			if c.Width > bmWidth {
 				contentWidth := c.Width - bmWidth
-				if i < len(pageContent)  {
+				if i < len(pageContent) {
 					screen.WriteString(fmt.Sprintf("%-*.*s", contentWidth, contentWidth, pageContent[i]))
 				} else {
 					screen.WriteString(fmt.Sprintf("%-*.*s", contentWidth, contentWidth, " "))
@@ -110,7 +111,7 @@ func (c *client) Draw() {
 			} else if !c.BookMarks.IsFocused {
 				screen.WriteString("\033[2m")
 			}
-			
+
 			screen.WriteString(bm[i])
 
 			if c.Options["theme"] == "inverse" && !c.BookMarks.IsFocused {
@@ -122,9 +123,9 @@ func (c *client) Draw() {
 			screen.WriteString("\n")
 		}
 	} else {
-		for i := 0; i < c.Height - 3; i++ {
+		for i := 0; i < c.Height-3; i++ {
 			if i < len(pageContent) {
-				screen.WriteString(fmt.Sprintf("%-*.*s", c.Width - 1, c.Width - 1, pageContent[i]))
+				screen.WriteString(fmt.Sprintf("%-*.*s", c.Width-1, c.Width-1, pageContent[i]))
 				screen.WriteString("\n")
 			} else {
 				screen.WriteString(fmt.Sprintf("%-*.*s", c.Width, c.Width, " "))
@@ -138,7 +139,7 @@ func (c *client) Draw() {
 	screen.WriteString("\n") // for the input line
 	screen.WriteString(c.FootBar.Render(c.Width, c.PageState.Position, c.Options["theme"]))
 	// cui.Clear("screen")
-	cui.MoveCursorTo(0,0)
+	cui.MoveCursorTo(0, 0)
 	fmt.Print(screen.String())
 }
 
@@ -168,12 +169,12 @@ func (c *client) TakeControlInput() {
 	case 'd':
 		// scroll down 75%
 		c.ClearMessage()
-		distance := c.Height - c.Height / 4
+		distance := c.Height - c.Height/4
 		c.Scroll(distance)
 	case 'u':
 		// scroll up 75%
 		c.ClearMessage()
-		distance := c.Height - c.Height / 4
+		distance := c.Height - c.Height/4
 		c.Scroll(-distance)
 	case 'b':
 		// go back
@@ -249,7 +250,6 @@ func (c *client) TakeControlInput() {
 	}
 }
 
-
 func (c *client) routeCommandInput(com *cmdparse.Command) error {
 	var err error
 	switch com.Type {
@@ -296,7 +296,7 @@ func (c *client) simpleCommand(action string) {
 	case "HELP", "?":
 		go c.Visit(helplocation)
 	default:
-	  c.SetMessage(fmt.Sprintf("Unknown action %q", action), true)
+		c.SetMessage(fmt.Sprintf("Unknown action %q", action), true)
 		c.DrawMessage()
 	}
 }
@@ -345,7 +345,7 @@ func (c *client) doCommand(action string, values []string) {
 		fns := strings.Split(u.Resource, "/")
 		var fn string
 		if len(fns) > 0 {
-			fn = strings.Trim(fns[len(fns) - 1], "\t\r\n \a\f\v")
+			fn = strings.Trim(fns[len(fns)-1], "\t\r\n \a\f\v")
 		} else {
 			fn = "index"
 		}
@@ -355,7 +355,7 @@ func (c *client) doCommand(action string, values []string) {
 		c.saveFile(u, fn)
 
 	default:
-	  c.SetMessage(fmt.Sprintf("Unknown action %q", action), true)
+		c.SetMessage(fmt.Sprintf("Unknown action %q", action), true)
 		c.DrawMessage()
 	}
 }
@@ -413,6 +413,9 @@ func (c *client) doCommandAs(action string, values []string) {
 				return
 			}
 			c.Options[values[0]] = lowerCaseOpt(values[0], val)
+			if values[0] == "tlskey" || values[0] == "tlscertificate" {
+				c.Certs.LoadCertificate(c.Options["tlscertificate"], c.Options["tlskey"])
+			}
 			err := saveConfig()
 			if err != nil {
 				c.SetMessage("Value set, but error saving config to file", true)
@@ -471,7 +474,7 @@ func (c *client) doLinkCommandAs(action, target string, values []string) {
 			c.Draw()
 		}
 	case "WRITE", "W":
-		out := make([]string, 0, len(values) + 1)
+		out := make([]string, 0, len(values)+1)
 		out = append(out, links[num])
 		out = append(out, values...)
 		c.doCommandAs(action, out)
@@ -479,7 +482,6 @@ func (c *client) doLinkCommandAs(action, target string, values []string) {
 		c.SetMessage(fmt.Sprintf("Unknown command structure"), true)
 	}
 }
-
 
 func (c *client) getCurrentPageUrl() (string, error) {
 	if c.PageState.Length < 1 {
@@ -516,10 +518,11 @@ func (c *client) saveFile(u Url, name string) {
 		c.DrawMessage()
 		return
 	}
-	savePath := c.Options["savelocation"] + name
+
+	savePath := filepath.Join(c.Options["savelocation"], name)
 	err = ioutil.WriteFile(savePath, file, 0644)
 	if err != nil {
-		c.SetMessage("Error writing file to disk", true)
+		c.SetMessage("Error writing file: "+err.Error(), true)
 		c.DrawMessage()
 		return
 	}
@@ -532,10 +535,11 @@ func (c *client) saveFileFromData(d, name string) {
 	data := []byte(d)
 	c.SetMessage(fmt.Sprintf("Saving %s ...", name), false)
 	c.DrawMessage()
-	savePath := c.Options["savelocation"] + name
+
+	savePath := filepath.Join(c.Options["savelocation"], name)
 	err := ioutil.WriteFile(savePath, data, 0644)
 	if err != nil {
-		c.SetMessage("Error writing file to disk", true)
+		c.SetMessage("Error writing file: "+err.Error(), true)
 		c.DrawMessage()
 		return
 	}
@@ -550,7 +554,6 @@ func (c *client) doLinkCommand(action, target string) {
 		c.SetMessage(fmt.Sprintf("Expected number, got %q", target), true)
 		c.DrawMessage()
 	}
-
 
 	switch action {
 	case "DELETE", "D":
@@ -589,7 +592,7 @@ func (c *client) doLinkCommand(action, target string) {
 			return
 		}
 		link := links[num]
-		c.SetMessage(fmt.Sprintf("[%d] %s", num + 1, link), false)
+		c.SetMessage(fmt.Sprintf("[%d] %s", num+1, link), false)
 		c.DrawMessage()
 	case "WRITE", "W":
 		links := c.PageState.History[c.PageState.Position].Links
@@ -607,7 +610,7 @@ func (c *client) doLinkCommand(action, target string) {
 		fns := strings.Split(u.Resource, "/")
 		var fn string
 		if len(fns) > 0 {
-			fn = strings.Trim(fns[len(fns) - 1], "\t\r\n \a\f\v")
+			fn = strings.Trim(fns[len(fns)-1], "\t\r\n \a\f\v")
 		} else {
 			fn = "index"
 		}
@@ -616,7 +619,7 @@ func (c *client) doLinkCommand(action, target string) {
 		}
 		c.saveFile(u, fn)
 	default:
-	  c.SetMessage(fmt.Sprintf("Action %q does not exist for target %q", action, target), true)
+		c.SetMessage(fmt.Sprintf("Action %q does not exist for target %q", action, target), true)
 		c.DrawMessage()
 	}
 
@@ -655,11 +658,11 @@ func (c *client) search(query, url, question string) {
 	}
 	switch u.Scheme {
 	case "gopher":
-		go c.Visit(fmt.Sprintf("%s\t%s",u.Full,entry))
+		go c.Visit(fmt.Sprintf("%s\t%s", u.Full, entry))
 	case "gemini":
 		// TODO url escape the entry variable
 		escapedEntry := entry
-		go c.Visit(fmt.Sprintf("%s?%s",u.Full,escapedEntry))
+		go c.Visit(fmt.Sprintf("%s?%s", u.Full, escapedEntry))
 	case "http", "https":
 		c.Visit(u.Full)
 	default:
@@ -717,10 +720,10 @@ func (c *client) Scroll(amount int) {
 
 		c.PageState.History[c.PageState.Position].ScrollPosition = newScrollPosition
 
-		if len(page.WrappedContent) < c.Height - 3 {
+		if len(page.WrappedContent) < c.Height-3 {
 			percentRead = 100
 		} else {
-			percentRead = int(float32(newScrollPosition + c.Height - 3) / float32(len(page.WrappedContent)) * 100.0)
+			percentRead = int(float32(newScrollPosition+c.Height-3) / float32(len(page.WrappedContent)) * 100.0)
 		}
 		c.FootBar.SetPercentRead(percentRead)
 	}
@@ -730,10 +733,10 @@ func (c *client) Scroll(amount int) {
 func (c *client) SetPercentRead() {
 	page := c.PageState.History[c.PageState.Position]
 	var percentRead int
-	if len(page.WrappedContent) < c.Height - 3 {
+	if len(page.WrappedContent) < c.Height-3 {
 		percentRead = 100
 	} else {
-		percentRead = int(float32(page.ScrollPosition + c.Height - 3) / float32(len(page.WrappedContent)) * 100.0)
+		percentRead = int(float32(page.ScrollPosition+c.Height-3) / float32(len(page.WrappedContent)) * 100.0)
 	}
 	c.FootBar.SetPercentRead(percentRead)
 }
@@ -840,7 +843,7 @@ func (c *client) Visit(url string) {
 	case "gopher":
 		if u.DownloadOnly {
 			nameSplit := strings.Split(u.Resource, "/")
-			filename := nameSplit[len(nameSplit) - 1]
+			filename := nameSplit[len(nameSplit)-1]
 			filename = strings.Trim(filename, " \t\r\n\v\f\a")
 			if filename == "" {
 				filename = "gopherfile"
@@ -934,7 +937,7 @@ func (c *client) Visit(url string) {
 					c.Draw()
 				case 'w':
 					nameSplit := strings.Split(u.Resource, "/")
-					filename := nameSplit[len(nameSplit) - 1]
+					filename := nameSplit[len(nameSplit)-1]
 					c.saveFileFromData(capsule.Content, filename)
 				}
 			}
@@ -964,7 +967,7 @@ func (c *client) Visit(url string) {
 	case "http", "https":
 		c.SetMessage("Attempting to open in web browser", false)
 		c.DrawMessage()
-		if strings.ToUpper(c.Options["openhttp"]) == "TRUE"  {
+		if strings.ToUpper(c.Options["openhttp"]) == "TRUE" {
 			msg, err := http.OpenInBrowser(u.Full)
 			if err != nil {
 				c.SetMessage(err.Error(), true)
@@ -978,6 +981,20 @@ func (c *client) Visit(url string) {
 		}
 	case "local":
 		content, err := local.Open(u.Resource)
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+			return
+		}
+		pg := MakePage(u, content, []string{})
+		pg.WrapContent(c.Width - 1)
+		c.PageState.Add(pg)
+		c.SetPercentRead()
+		c.ClearMessage()
+		c.SetHeaderUrl()
+		c.Draw()
+	case "finger":
+		content, err := finger.Finger(u.Host, u.Port, u.Resource)
 		if err != nil {
 			c.SetMessage(err.Error(), true)
 			c.DrawMessage()
@@ -1020,4 +1037,3 @@ func MakeClient(name string) *client {
 	c := client{0, 0, defaultOptions, "", false, MakePages(), MakeBookmarks(), MakeHeadbar(name), MakeFootbar(), gemini.MakeTofuDigest()}
 	return &c
 }
-

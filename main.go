@@ -138,6 +138,9 @@ func initClient() error {
 	bombadillo = MakeClient("  ((( Bombadillo )))  ")
 	cui.SetCharMode()
 	err := loadConfig()
+	if bombadillo.Options["tlscertificate"] != "" && bombadillo.Options["tlskey"] != "" {
+		bombadillo.Certs.LoadCertificate(bombadillo.Options["tlscertificate"], bombadillo.Options["tlskey"])
+	}
 	return err
 }
 

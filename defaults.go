@@ -21,5 +21,7 @@ var defaultOptions = map[string]string{
 	"configlocation": userinfo.HomeDir,
 	"theme": "normal", // "normal", "inverted"
 	"terminalonly": "true",
+	"tlscertificate": "",
+	"tlskey": "",
 }
 
