@@ -125,7 +125,7 @@ func (c *client) Draw() {
 	} else {
 		for i := 0; i < c.Height-3; i++ {
 			if i < len(pageContent) {
-				screen.WriteString(fmt.Sprintf("%-*.*s", c.Width-1, c.Width-1, pageContent[i]))
+				screen.WriteString(fmt.Sprintf("%-*.*s", c.Width, c.Width, pageContent[i]))
 				screen.WriteString("\n")
 			} else {
 				screen.WriteString(fmt.Sprintf("%-*.*s", c.Width, c.Width, " "))
