@@ -146,15 +146,17 @@ func initClient() error {
 	return err
 }
 
-// On SIGCONT, ensure the terminal is still in the correct mode
-// Accepts the signal, does the work, then starts another instance
-// to handle any future occurences of SIGCONT
+// In the event of SIGCONT, ensure the display is shown correctly.  Accepts a
+// signal, blocking until it is received. Once not blocked, corrects terminal
+// display settings. Loops indefinitely, does not return.
 func handleSIGCONT(c <-chan os.Signal) {
-	<-c
-	cui.Tput("rmam")  // turn off line wrapping
-	cui.Tput("smcup") // use alternate screen
-	cui.SetCharMode()
-	go handleSIGCONT(c)
+	for {
+		<-c
+		cui.Tput("rmam")  // turn off line wrapping
+		cui.Tput("smcup") // use alternate screen
+		cui.SetCharMode()
+		bombadillo.Draw()
+	}
 }
 
 func main() {
@@ -165,11 +167,6 @@ func main() {
 		os.Exit(0)
 	}
 	args := flag.Args()
-
-	// buffered channel to capture SIGCONT for handling
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, syscall.SIGCONT)
-	go handleSIGCONT(c)
 
 	// Build the mailcap db
 	// So that we can open files from gemini
@@ -183,6 +180,11 @@ func main() {
 		// if we can't initialize we should bail out
 		panic(err)
 	}
+
+	// watch for SIGCONT, send it to be handled
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGCONT)
+	go handleSIGCONT(c)
 
 	// Start polling for terminal size changes
 	go bombadillo.GetSize()
