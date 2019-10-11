@@ -586,7 +586,7 @@ func (c *client) doLinkCommand(action, target string) {
 		num -= 1
 
 		links := c.PageState.History[c.PageState.Position].Links
-		if num >= len(links) || num < 1 {
+		if num >= len(links) || num < 0 {
 			c.SetMessage(fmt.Sprintf("Invalid link id: %s", target), true)
 			c.DrawMessage()
 			return
