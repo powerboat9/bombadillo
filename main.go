@@ -1,4 +1,5 @@
 package main
+
 // Bombadillo is a gopher and gemini client for the terminal of unix or unix-like systems.
 //
 // Copyright (C) 2019 Brian Evans
@@ -16,17 +17,18 @@ package main
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 import (
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
-	_ "tildegit.org/sloum/bombadillo/gemini"
 	"tildegit.org/sloum/bombadillo/config"
 	"tildegit.org/sloum/bombadillo/cui"
+	_ "tildegit.org/sloum/bombadillo/gemini"
 	"tildegit.org/sloum/mailcap"
 )
 
@@ -58,13 +60,13 @@ func saveConfig() error {
 
 	opts.WriteString(certs)
 
-	return ioutil.WriteFile(bombadillo.Options["configlocation"] + "/.bombadillo.ini", []byte(opts.String()), 0644)
+	return ioutil.WriteFile(bombadillo.Options["configlocation"]+"/.bombadillo.ini", []byte(opts.String()), 0644)
 }
 
 func validateOpt(opt, val string) bool {
 	var validOpts = map[string][]string{
-		"openhttp": []string{"true", "false"},
-		"theme": []string{"normal", "inverse"},
+		"openhttp":     []string{"true", "false"},
+		"theme":        []string{"normal", "inverse"},
 		"terminalonly": []string{"true", "false"},
 	}
 
@@ -115,7 +117,7 @@ func loadConfig() error {
 		}
 
 		if _, ok := bombadillo.Options[lowerkey]; ok {
-			if validateOpt(lowerkey, v.Value)  {
+			if validateOpt(lowerkey, v.Value) {
 				bombadillo.Options[lowerkey] = v.Value
 			} else {
 				bombadillo.Options[lowerkey] = defaultOptions[lowerkey]
@@ -144,6 +146,19 @@ func initClient() error {
 	return err
 }
 
+// In the event of SIGCONT, ensure the display is shown correctly.  Accepts a
+// signal, blocking until it is received. Once not blocked, corrects terminal
+// display settings. Loops indefinitely, does not return.
+func handleSIGCONT(c <-chan os.Signal) {
+	for {
+		<-c
+		cui.Tput("rmam")  // turn off line wrapping
+		cui.Tput("smcup") // use alternate screen
+		cui.SetCharMode()
+		bombadillo.Draw()
+	}
+}
+
 func main() {
 	getVersion := flag.Bool("v", false, "See version number")
 	flag.Parse()
@@ -157,7 +172,7 @@ func main() {
 	// So that we can open files from gemini
 	mc = mailcap.NewMailcap()
 
- 	cui.Tput("rmam") // turn off line wrapping
+	cui.Tput("rmam")  // turn off line wrapping
 	cui.Tput("smcup") // use alternate screen
 	defer cui.Exit()
 	err := initClient()
@@ -165,6 +180,11 @@ func main() {
 		// if we can't initialize we should bail out
 		panic(err)
 	}
+
+	// watch for SIGCONT, send it to be handled
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGCONT)
+	go handleSIGCONT(c)
 
 	// Start polling for terminal size changes
 	go bombadillo.GetSize()
