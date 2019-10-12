@@ -100,17 +100,24 @@ func (t *TofuDigest) Match(host string, cState *tls.ConnectionState) error {
 func (t *TofuDigest) newCert(host string, cState *tls.ConnectionState) error {
 	host = strings.ToLower(host)
 	now := time.Now()
+	var reasons strings.Builder
 
-	for _, cert := range cState.PeerCertificates {
+	for index, cert := range cState.PeerCertificates {
+		if index > 0 {
+			reasons.WriteString("; ")
+		}
 		if now.Before(cert.NotBefore) {
+			reasons.WriteString(fmt.Sprintf("Cert [%d] is not valid yet", index + 1))
 			continue
 		}
 
 		if now.After(cert.NotAfter) {
+			reasons.WriteString(fmt.Sprintf("Cert [%d] is expired", index + 1))
 			continue
 		}
 
 		if err := cert.VerifyHostname(host); err != nil {
+			reasons.WriteString(fmt.Sprintf("Cert [%d] hostname does not match", index + 1))
 			continue
 		}
 
@@ -118,7 +125,7 @@ func (t *TofuDigest) newCert(host string, cState *tls.ConnectionState) error {
 		return nil
 	}
 
-	return fmt.Errorf("No valid certificates were offered by host %q", host)
+	return fmt.Errorf(reasons.String())
 }
 
 func (t *TofuDigest) IniDump() string {
