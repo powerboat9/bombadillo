@@ -289,8 +289,15 @@ func (c *client) simpleCommand(action string) {
 	case "B", "BOOKMARKS":
 		c.BookMarks.ToggleOpen()
 		c.Draw()
-	case "R", "REFRESH":
-		// TODO build refresh code
+	case "R", "RELOAD":
+		c.ClearMessage()
+		err := c.ReloadPage()
+		if err != nil {
+			c.SetMessage(err.Error(), false)
+			c.DrawMessage()
+		} else {
+			c.Draw()
+		}
 	case "SEARCH":
 		c.search("", "", "?")
 	case "HELP", "?":
