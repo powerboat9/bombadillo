@@ -167,7 +167,7 @@ func Retrieve(host, port, resource string, td *TofuDigest) (string, error) {
 
 	conn, err := tls.Dial("tcp", addr, conf)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("TLS Dial Error: %s", err.Error())
 	}
 
 	defer conn.Close()
