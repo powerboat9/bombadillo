@@ -37,7 +37,7 @@ var build string
 var conf_path string
 
 var bombadillo *client
-var helplocation string = "gopher://colorfield.space:70/1/bombadillo-info"
+var helplocation string = "gopher://bombadillo.colorfield.space:70/1/user-guide.map"
 var settings config.Config
 var mc *mailcap.Mailcap
 
