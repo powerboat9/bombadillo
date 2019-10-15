@@ -171,7 +171,7 @@ func main() {
 	getVersion := flag.Bool("v", false, "See version number")
 	flag.Parse()
 	if *getVersion {
-		fmt.Printf("Bombadillo v%s\n", version)
+		fmt.Printf("Bombadillo %s\n", version)
 		os.Exit(0)
 	}
 	args := flag.Args()
