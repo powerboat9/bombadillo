@@ -34,7 +34,6 @@ import (
 
 var version string
 var build string
-var conf_path string
 
 var bombadillo *client
 var helplocation string = "gopher://bombadillo.colorfield.space:70/1/user-guide.map"
@@ -97,11 +96,6 @@ func lowerCaseOpt(opt, val string) string {
 }
 
 func loadConfig() error {
-  // If a compile time override exists for configlocation
-  // set it before loading the config.
-  if conf_path != "" {
-    bombadillo.Options["configlocation"] = conf_path
-  }
 	file, err := os.Open(bombadillo.Options["configlocation"] + "/.bombadillo.ini")
 	if err != nil {
 		err = saveConfig()

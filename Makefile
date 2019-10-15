@@ -15,13 +15,7 @@ ifndef VERSION
 	VERSION  := ${shell cat ./VERSION}
 endif
 
-# If an alternate configuration path is provided when make is run,
-# include it as an ldflag
-ifdef CONF_PATH
-	LDFLAGS  := -ldflags "-s -X main.version=${VERSION} -X main.build=${BUILD_TIME} -X main.conf_path=${CONF_PATH}"
-else
-	LDFLAGS  := -ldflags "-s -X main.version=${VERSION} -X main.build=${BUILD_TIME}"
-endif
+LDFLAGS  := -ldflags "-s -X main.version=${VERSION} -X main.build=${BUILD_TIME}"
 
 .PHONY: test
 test:
