@@ -216,27 +216,27 @@ The url that \fBbombadillo\fP navigates to when the program loads or when the \f
 .TP
 .B
 openhttp
-Tells the client whether or not to try to follow web (http/https) links. If set to \fItrue\fP, \fBbombadillo\fP will try to open a user's default web browser to the link in question. Any value other than \fItrue\fP is considered false. Defaults to \fIfalse\fP. Does not work in a terminal only environment.
+Tells the client whether or not to try to follow web (http/https) links. If set to \fItrue\fP, \fBbombadillo\fP will try to open a user's default web browser to the link in question. Any value other than \fItrue\fP is considered false.
 .TP
 .B
 savelocation
-The path to the folder that \fBbombadillo\fP should write files to. This should be a valid filepath for the system and should end in a \fI/\fP. Defaults to a user's home directory.
+The path to the folder that \fBbombadillo\fP should write files to. This should be a valid filepath for the system and should end in a \fI/\fP.
 .TP
 .B
 searchengine
-The url to use for the LINE COMMANDs \fI?\fP and \fIsearch\fP. Should be a valid search path that terms may be appended to. Defaults to \fIgopher://gopher.floodgap.com:70/7/v2/vs\fP.
+The url to use for the LINE COMMANDs \fI?\fP and \fIsearch\fP. Should be a valid search path that terms may be appended to.
 .TP
 .B
 telnetcommand
-Tells the client what command to use to start a telnet session. Should be a valid command, including any flags. The address being navigated to will be added to the end of the command. Defaults to \fItelnet\fP.
+Tells the client what command to use to start a telnet session. Should be a valid command, including any flags. The address being navigated to will be added to the end of the command.
 .TP
 .B
 terminalonly
-Sets whether or not to try to open non-text files served via gemini in gui programs or not. If set to \fItrue\fP, bombdaillo will only attempt to use terminal programs to open files. If set to anything else, \fBbombadillo\fP may choose graphical and terminal programs. Defaults to \fItrue\fP.
+Sets whether or not to try to open non-text files served via gemini in gui programs or not. If set to \fItrue\fP, bombdaillo will only attempt to use terminal programs to open files. If set to anything else, \fBbombadillo\fP may choose from the appropriate programs installed on the system, if one is present.
 .TP
 .B
 theme
-Can toggle between visual modes. Valid values are \fInormal\fP and \fIinverse\fP. When set to ivnerse, the terminal color mode is inversed. Defaults to \fInormal\fP.
+Can toggle between visual modes. Valid values are \fInormal\fP and \fIinverse\fP. When set to ivnerse, the terminal color mode is inversed.
 .TP
 .B
 tlscertificate
@@ -248,7 +248,7 @@ A path the a tls key that pairs with the tlscertificate setting, on a user's loc
 .SH BUGS
 There are very likely bugs. Many known bugs can be found in the issues section of \fBbombadillo\fP's software repository (see \fIlinks\fP).
 .SH LINKS
-\fBbombadillo\fP maintains a web presence in the following locations:
+\fBbombadillo\fP maintains a presence in the following locations:
 .TP
 .B
 Code Repository
