@@ -1,6 +1,12 @@
 # Bombadillo - a non-web client
 
-Bombadillo is a modern [Gopher](https://en.wikipedia.org/wiki/Gopher_(protocol)) client for the terminal, and functions as a pager/terminal UI. Bombadillo features vim-like keybindings, configurable settings, and a robust command selection. Bombadillo is under active development.
+Bombadillo is a non-web client for the terminal, and functions as a pager/terminal UI. Bombadillo features vim-like keybindings, configurable settings, and a robust command selection. Currently, Bombadillo supports the following protocols:
+- gopher
+- gemini
+- finger
+- local (a user's filesystem)
+- telnet (by opening links in a subprocess w/ a telnet application)
+- http/https links can be opened in a user's default web browser as an opt-in behavior
 
 
 ## Getting Started
@@ -9,32 +15,44 @@ These instructions will get a copy of the project up and running on your local m
 
 ### Prerequisites
 
-If building from source, you will need to have [Go](https://golang.org/) version >= 1.11.
+If building from source, you will need to have [Go](https://golang.org/) version >= 1.12.
 
-#### Optional
+### Building, Installing, Uninstalling
 
-[Lynx](https://lynx.invisible-island.net/), the text based web browser, can be used as a parsing engine for http/https. This is a totally optional item and Lynx is in no way required in order to compile or run Bombadillo. Having it available on the system can help create a richer experience by allowing users to navigate directly to web content in Bombadillo. Many users may wish to avoid this entirely, and the default configuration does not have this behavior turned on. To turn it on from within Bombadillo enter the command `set lynxmode true`.
+Bombadillo installation uses `make`. It is possible to just use the go compiler directly (`go install`) if you do not wish to have a man page installed and do not want a program to manage uninstalling and cleaning up.
 
-### Installing
+By default Bombadillo will try to install to `$GOBIN`. If it is not set it will try `$GOPATH/bin` (if `$GOPATH` is set), otherwise `~/go/bin`.
 
-Assuming you have all prerequisites installed, Bombadillo can be installed on your system using the following commands:
+#### Basic Installation
+
+Once you have `go` installed you can build a few different ways. Most users will want the following:
 
 ```
 git clone https://tildegit.org/sloum/bombadillo.git
 cd bombadillo
-sudo make install
+make install
 ```
 
-Once this is done, you should be able to start Bombadillo using the following command:
+Once that is done you should be able to run `bombadillo` (assuming that one of the default install locations exists and is on your path) or view the manual with `man bombadillo`.
+
+#### Custom Installation
+
+There are a number of default configuration options in the file `defaults.go`. These can all be set prior to building in order to have these defaults apply to all users of Bombadillo on a given system. That said, the basic configuration already present should be suitable for most users (and all settings but one can be changed from within a Bombadillo session).
+
+The installation location can be overridden at compile time, which can be very useful for administrators wanting to set up Bombadillo on a multi-user machine. If you wanted to install to, for example, `/usr/local/bin` you would do the following:
 
 ```
-bombadillo
-``` 
+git clone https://tildegit.org/sloum/bombadillo.git
+cd bombadillo
+make install BUILD_PATH=/usr/local/bin
+```
 
-#### Other installation options
+#### Uninstall
 
-If you only want to install Bombadillo for your own user account, you could try the following in the cloned repository:
+If you used the makefile to install Bombadillo then uninstalling is very simple. From the Bombadillo source folder run:
 
+```
+make uninstall
 ```
 make PREFIX=~ install
 ```
@@ -45,19 +63,7 @@ The `PREFIX` option can be used to install Bombadillo to any location different 
 
 #### Troubleshooting
 
-If you run `bombadillo` and get `bombadillo: command not found`, try running `make` from within the cloned repository. Next, try: `./bombadillo`. If this works, it means that the installation was not completed to an area in your `PATH`.
-
-Please feel free to [open an issue](https://tildegit.org/sloum/bombadillo/issues) if you experience any other issues with the installation.
-
-### Uninstalling
-
-To uninstall Bombadillo, simply run the following command from the cloned repository:
-
-```
-sudo make uninstall
-```
-
-Please note that directories created during the installation will not be removed.
+If you run `bombadillo` and get `bombadillo: command not found`, try running `make build` from within the cloned repo. Then try: `./bombadillo`. If that works it means that Go does not install to your path, or the custom path you selected is not on your path. Try the custom install from above to a location you know to be on your path.
 
 ### Downloading
 
@@ -65,21 +71,17 @@ If you would prefer to download a binary for your system, rather than build from
 
 ### Documentation
 
-Bombadillo has documentation available in four places currently. The first is the [Bombadillo homepage](https://rawtext.club/~sloum/bombadillo.html#docs), which has lots of information about the program, links to places around Gopher, and documentation of the commands and configuration options.
+Bombadillo's primary documentation can be found in the man entry that installs with Bombadillo. To access it run `man bombadillo` after first installing Bombadillo. If for some reason that does not work, the document can be accessed directly from the source folder with `man ./bombadillo.1`.
 
-Secondly, and possibly more importantly, documentation is available via Gopher from within Bombadillo. When a user launches Bombadillo for the first time, their `homeurl` is set to the help file. As such they will have access to all of the key bindings, commands, and configuration from the first run. A user can also type `:?` or `:help` at any time to return to the documentation. Remember that Bombadillo uses vim-like key bindings, so scroll with `j` and `k` to view the docs file.
-
-Thirdly, this repo contains a file `bombadillo-info`. This is a duplicate of the help file that is hosted over gopher mentioned above. Per user request it has been added to the repo so that pull requests can be created with updates to the documentation.
-
-Lastly, but perhaps most importantly, a manpage is now included in the repo as `bombadillo.1`. Current efforts are underway to automate the install of both bombadillo and this manpgage.
+In addition to the man page, users can get information on Bombadillo on the web @ [http://bombadillo.colorfield.space](http://bombadillo.colorfield.space). Running the command `help` inside Bombadillo will navigate a user to the gopher server hosted at [bombadillo.colorfield.space](gopher://bombadillo.colorfield.space), specifically the user guide.
 
 ## Contributing
 
-Bombadillo development is largely handled by Sloum, with help from jboverf, asdf, and some community input. If you would like to get involved, please reach out or submit an issue. At present the developers use the tildegit issues system to discuss new features, track bugs, and communicate with users about hopes and/or issues for/with the software. If you have forked and would like to make a pull request, please make the pull request into `develop` where it will be reviewed by one of the maintainers. That said, a heads up or comment/issue somewhere is advised.
+Bombadillo development is largely handled by Sloum, with help from asdf, jboverf, and some community input. If you would like to get involved, please reach out or submit an issue. At present the developers use the tildegit issues system to discuss new features, track bugs, and communicate with users about hopes and/or issues for/with the software. If you have forked and would like to make a pull request, please make the pull request into `develop` where it will be reviewed by one of the maintainers. That said, a heads up or comment/issue somewhere is advised. While input is always welcome, not all requests will be granted. That said, we do our best to make Bombadillo a useful piece of software for its users and in general want to help you out.
 
 ## License
 
-This project is licensed under the GNU GPL version 3- see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU GPL version 3. See the [LICENSE](LICENSE) file for details.
 
 ## Releases
 
