@@ -1,9 +1,6 @@
-BINARY      := bombadillo
-man1dir     := /usr/local/share/man/man1
-GOPATH      ?= ${HOME}/go
-GOBIN       ?= ${GOPATH}/bin
-BUILD_PATH  ?= ${GOBIN}
-UNINST_FROM := ${shell which bombadillo}
+BINARY := bombadillo
+PREFIX := /usr/local
+MANPREFIX := ${PREFIX}/share/man
 
 # Use a dateformat rather than -I flag since OSX
 # does not support -I. It also doesn't support 
@@ -18,23 +15,23 @@ endif
 
 LDFLAGS  := -ldflags "-s -X main.version=${VERSION} -X main.build=${BUILD_TIME}"
 
-.PHONY: install
-install: install-bin install-man clean
-
 .PHONY: build
 build:
 	go build ${LDFLAGS} -o ${BINARY}
 
+.PHONY: install
+install: install-bin install-man clean
+
 .PHONY: install-man
 install-man: bombadillo.1
 	gzip -k ./bombadillo.1
-	install -d ${man1dir}
-	install -m 0644 ./bombadillo.1.gz ${man1dir}
+	install -d ${DESTDIR}${MANPREFIX}/man1
+	install -m 0644 ./bombadillo.1.gz ${DESTDIR}${MANPREFIX}/man1
 
 .PHONY: install-bin
 install-bin: build
-	install -d ${BUILD_PATH}
-	install -m 0755 ./${BINARY} ${BUILD_PATH}/${BINARY}
+	install -d ${DESTDIR}${PREFIX}/bin
+	install -m 0755 ./${BINARY} ${DESTDIR}${PREFIX}/bin/${BINARY}
 
 .PHONY: clean
 clean: 
@@ -43,6 +40,6 @@ clean:
 
 .PHONY: uninstall
 uninstall: clean
-	rm -f ${man1dir}/bombadillo.1.gz
-	rm -f ${UNINST_FROM}
+	rm -f ${DESTDIR}${MANPREFIX}/man1/bombadillo.1.gz
+	rm -f ${DESTDIR}${PREFIX}/bin/${BINARY}
 
