@@ -178,7 +178,7 @@ Options:
 }
 
 func main() {
-	getVersion := flag.Bool("v", false, "Print version information and exit")
+	getVersion := flag.Bool("v", false, "Display version information and exit")
 	flag.Usage = printHelp
 	flag.Parse()
 	if *getVersion {
