@@ -43,7 +43,7 @@ The `PREFIX` option can be used to install Bombadillo to any location different 
 
 #### Troubleshooting
 
-If you run `bombadillo` and get `bombadillo: command not found`, try running `make` from within the cloned repository. Then try: `./bombadillo`. This means that Bombadillo is not being installed to a location in your `PATH`.
+If you run `bombadillo` and get `bombadillo: command not found`, try running `make` from within the cloned repository. Next, try: `./bombadillo`. If this works, it means that the installation was not completed to an area in your `PATH`.
 
 Please feel free to [open an issue](https://tildegit.org/sloum/bombadillo/issues) if you experience any other issues with the installation.
 
