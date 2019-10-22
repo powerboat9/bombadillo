@@ -1,4 +1,4 @@
-# Bombadillo
+# Bombadillo - a non-web client
 
 Bombadillo is a modern [Gopher](https://en.wikipedia.org/wiki/Gopher_(protocol)) client for the terminal, and functions as a pager/terminal UI. Bombadillo features vim-like keybindings, configurable settings, and a robust command selection. Bombadillo is under active development.
 

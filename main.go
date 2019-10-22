@@ -163,13 +163,13 @@ func handleSIGCONT(c <-chan os.Signal) {
 
 //printHelp produces a nice display message when the --help flag is used
 func printHelp() {
-	art := `Bombadillo
+	art := `Bombadillo - a non-web client
 
-Syntax:  bombadillo [url] 
-         bombadillo [options...]
+Syntax:   bombadillo [url] 
+          bombadillo [options...]
 
-Example: bombadillo gopher://bombadillo.colorfield.space
-         bombadillo -v
+Examples: bombadillo gopher://bombadillo.colorfield.space
+          bombadillo -v
 
 Options: 
 `
