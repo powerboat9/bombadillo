@@ -972,19 +972,41 @@ func (c *client) Visit(url string) {
 		}
 		c.Draw()
 	case "http", "https":
-		c.SetMessage("Attempting to open in web browser", false)
-		c.DrawMessage()
-		if strings.ToUpper(c.Options["openhttp"]) == "TRUE" {
-			msg, err := http.OpenInBrowser(u.Full)
-			if err != nil {
-				c.SetMessage(err.Error(), true)
-			} else {
-				c.SetMessage(msg, false)
-			}
-			c.DrawMessage()
-		} else {
+		if strings.ToUpper(c.Options["openhttp"]) != "TRUE" {
 			c.SetMessage("'openhttp' is not set to true, cannot open web link", false)
 			c.DrawMessage()
+			return
+		}
+		switch strings.ToUpper(c.Options["lynxmode"]) {
+		case "TRUE":
+			page, err := http.Visit(u.Full, c.Width - 1)
+			if err != nil {
+				c.SetMessage(fmt.Sprintf("Lynx error: %s", err.Error()), true)
+				c.DrawMessage()
+				return
+			}
+			pg := MakePage(u, page.Content, page.Links)
+			pg.WrapContent(c.Width - 1)
+			c.PageState.Add(pg)
+			c.SetPercentRead()
+			c.ClearMessage()
+			c.SetHeaderUrl()
+			c.Draw()
+		default:
+			if strings.ToUpper(c.Options["terminalonly"]) == "TRUE" {
+				c.SetMessage("'terminalonly' is set to true and 'lynxmode' is not enabled, cannot open web link", false)
+				c.DrawMessage()
+			} else {
+				c.SetMessage("Attempting to open in web browser", false)
+				c.DrawMessage()
+				msg, err := http.OpenInBrowser(u.Full)
+				if err != nil {
+					c.SetMessage(err.Error(), true)
+				} else {
+					c.SetMessage(msg, false)
+				}
+				c.DrawMessage()
+			}
 		}
 	case "local":
 		content, err := local.Open(u.Resource)

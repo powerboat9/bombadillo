@@ -1,6 +1,7 @@
 package main
 
-// Bombadillo is a gopher and gemini client for the terminal of unix or unix-like systems.
+// Bombadillo is an internet client for the terminal of unix or 
+// unix-like systems.
 //
 // Copyright (C) 2019 Brian Evans
 //
@@ -68,6 +69,7 @@ func validateOpt(opt, val string) bool {
 		"openhttp":     []string{"true", "false"},
 		"theme":        []string{"normal", "inverse"},
 		"terminalonly": []string{"true", "false"},
+		"lynxmode":     []string{"true", "false"},
 	}
 
 	opt = strings.ToLower(opt)

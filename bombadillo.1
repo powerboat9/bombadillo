@@ -215,8 +215,13 @@ homeurl
 The url that \fBbombadillo\fP navigates to when the program loads or when the \fIhome\fP or \fIh\fP LINE COMMAND is issued. This should be a valid url. If a scheme/protocol is not included, gopher will be assumed.
 .TP
 .B
+lynxmode
+Will use lynx as a rendering engine for http/https requests if lynx is installed and \fIopenhttp\fP is set to \fItrue\fP. Valid values are \fItrue\fP and \fIfalse\fP.
+.TP
+.B
 openhttp
-Tells the client whether or not to try to follow web (http/https) links. If set to \fItrue\fP, \fBbombadillo\fP will try to open a user's default web browser to the link in question. Any value other than \fItrue\fP is considered false.
+Tells the client whether or not to try to follow web (http/https) links. If set to \fItrue\fP, \fBbombadillo\fP will try to open a user's default web browser to the link in question. Valid values are \fItrue\fP and \fIfalse\fP.
+
 .TP
 .B
 savelocation
@@ -232,7 +237,7 @@ Tells the client what command to use to start a telnet session. Should be a vali
 .TP
 .B
 terminalonly
-Sets whether or not to try to open non-text files served via gemini in gui programs or not. If set to \fItrue\fP, bombdaillo will only attempt to use terminal programs to open files. If set to anything else, \fBbombadillo\fP may choose from the appropriate programs installed on the system, if one is present.
+Sets whether or not to try to open non-text files served via gemini in gui programs or not. If set to \fItrue\fP \fBbombdaillo\fP will only attempt to use terminal programs to open files. If set to \fIfalse\fP \fBbombadillo\fP may choose from the appropriate programs installed on the system, including graphical ones.
 .TP
 .B
 theme
