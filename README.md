@@ -9,33 +9,57 @@ These instructions will get a copy of the project up and running on your local m
 
 ### Prerequisites
 
-If building from source, you will need to have [Go](https://golang.org/) version >= 1.11. Bombadillo uses the module system, so if using 1.11 you will need to have that feature enabled. If using a version > 1.11, you already have modules enabled.
+If building from source, you will need to have [Go](https://golang.org/) version >= 1.12.
 
-Bombadillo does not use any outside dependencies beyond the Go standard library.
+While Bombadillo has one external dependency of [Mailcap](https://tildegit.org/sloum/mailcap), no action is typically required to download this, as it is handled automatically during the build process.
 
 ### Installing
 
-Assuming you have `go` installed, run the following:
+Assuming you have all prerequisites installed, Bombadillo can be installed on your system using the following commands:
 
 ```
 git clone https://tildegit.org/sloum/bombadillo.git
 cd bombadillo
-go install
+sudo make install
 ```
 
-Once you have done that you should, assuming `go install` is set up to install to a place on your path, you should be able to run the following from anywhere on your system to use Bombadillo:
+Once this is done, you should be able to start Bombadillo using the following command:
 
 ```
 bombadillo
+``` 
+
+#### Other installation options
+
+If you only want to install Bombadillo for your own user account, you could try the following in the cloned repository:
+
 ```
+make PREFIX=~ install
+```
+
+You can then add `~/bin` to your PATH environment variable, and `~/share/man` to your manpath.
+
+The `PREFIX` option can be used to install Bombadillo to any location different to `/usr/local`.
 
 #### Troubleshooting
 
-If you run `bombadillo` and get `bombadillo: command not found`, try running `go build` from within the cloned repo. Then try: `./bombadillo`. If that works it means that Go does not install to your path. `go build` added an executable file to the repo directory. Move that file to somewhere on your path. I suggest `/usr/local/bin` on most systems, but that may be a matter of personal preference.
+If you run `bombadillo` and get `bombadillo: command not found`, try running `make` from within the cloned repository. Next, try: `./bombadillo`. If this works, it means that the installation was not completed to an area in your `PATH`.
+
+Please feel free to [open an issue](https://tildegit.org/sloum/bombadillo/issues) if you experience any other issues with the installation.
+
+### Uninstalling
+
+To uninstall Bombadillo, simply run the following command from the cloned repository:
+
+```
+sudo make uninstall
+```
+
+Please note that directories created during the installation will not be removed.
 
 ### Downloading
 
-If you would prefer to download a binary for your system, rather than build from source, please visit the [Bombadillo downloads](https://rawtext.club/~sloum/bombadillo.html#downloads) page. Don't see your OS/architecture? Bombadillo can be built for use with any POSIX compliant system that is supported as a target for the Go compiler (Linux, BSD, OS X, Plan 9). No testing has been done for Windows. The program will build, but will likely not work properly outside of the Linux subsystem. If you are a Windows user and would like to do some testing or get involved in development please reach out or open an issue.
+If you would prefer to download a binary for your system, rather than build from source, please visit the [Bombadillo downloads](https://rawtext.club/~sloum/bombadillo.html#downloads) page. Don't see your OS/architecture? Bombadillo can be built for use with any POSIX compliant system that is supported as a target for the Go compiler (Linux, BSD, OS X, Plan 9). No testing has been done for Windows. The program will build, but will likely not work properly outside of the Linux subsystem. If you are a Windows user and would like to do some testing or get involved in development please reach out or [open an issue](https://tildegit.org/sloum/bombadillo/issues).
 
 ### Documentation
 

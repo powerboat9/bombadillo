@@ -32,10 +32,11 @@ import (
 	"tildegit.org/sloum/mailcap"
 )
 
-const version = "2.0.0"
+var version string
+var build string
 
 var bombadillo *client
-var helplocation string = "gopher://colorfield.space:70/1/bombadillo-info"
+var helplocation string = "gopher://bombadillo.colorfield.space:70/1/user-guide.map"
 var settings config.Config
 var mc *mailcap.Mailcap
 
@@ -109,8 +110,9 @@ func loadConfig() error {
 	for _, v := range settings.Settings {
 		lowerkey := strings.ToLower(v.Key)
 		if lowerkey == "configlocation" {
-			// The config should always be stored in home
-			// folder. Users cannot really edit this value.
+			// The config defaults to the home folder.
+			// Users cannot really edit this value. But
+      // a compile time override is available.
 			// It is still stored in the ini and as a part
 			// of the options map.
 			continue
@@ -163,7 +165,7 @@ func main() {
 	getVersion := flag.Bool("v", false, "See version number")
 	flag.Parse()
 	if *getVersion {
-		fmt.Printf("Bombadillo v%s\n", version)
+		fmt.Printf("Bombadillo %s\n", version)
 		os.Exit(0)
 	}
 	args := flag.Args()
