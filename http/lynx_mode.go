@@ -7,8 +7,8 @@ import (
 )
 
 type page struct {
-	Content   string
-	Links			[]string
+	Content string
+	Links   []string
 }
 
 func Visit(url string, width int) (page, error) {

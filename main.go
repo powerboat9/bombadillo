@@ -1,6 +1,6 @@
 package main
 
-// Bombadillo is an internet client for the terminal of unix or 
+// Bombadillo is an internet client for the terminal of unix or
 // unix-like systems.
 //
 // Copyright (C) 2019 Brian Evans

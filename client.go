@@ -979,7 +979,7 @@ func (c *client) Visit(url string) {
 		}
 		switch strings.ToUpper(c.Options["lynxmode"]) {
 		case "TRUE":
-			page, err := http.Visit(u.Full, c.Width - 1)
+			page, err := http.Visit(u.Full, c.Width-1)
 			if err != nil {
 				c.SetMessage(fmt.Sprintf("Lynx error: %s", err.Error()), true)
 				c.DrawMessage()
@@ -1056,7 +1056,6 @@ func (c *client) ReloadPage() error {
 	c.PageState.Length = length
 	return nil
 }
-
 
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\
