@@ -47,6 +47,16 @@ If you run `bombadillo` and get `bombadillo: command not found`, try running `ma
 
 Please feel free to [open an issue](https://tildegit.org/sloum/bombadillo/issues) if you experience any other issues with the installation.
 
+### Uninstalling
+
+To uninstall Bombadillo, simply run the following command from the cloned repository:
+
+```
+sudo make uninstall
+```
+
+Please note that directories created during the installation will not be removed.
+
 ### Downloading
 
 If you would prefer to download a binary for your system, rather than build from source, please visit the [Bombadillo downloads](https://rawtext.club/~sloum/bombadillo.html#downloads) page. Don't see your OS/architecture? Bombadillo can be built for use with any POSIX compliant system that is supported as a target for the Go compiler (Linux, BSD, OS X, Plan 9). No testing has been done for Windows. The program will build, but will likely not work properly outside of the Linux subsystem. If you are a Windows user and would like to do some testing or get involved in development please reach out or [open an issue](https://tildegit.org/sloum/bombadillo/issues).
