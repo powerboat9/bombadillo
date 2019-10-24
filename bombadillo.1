@@ -44,7 +44,7 @@ Telnet is not supported directly, but addresses will be followed and opened as a
 .TP
 .B
 http, https
-Neither of the world wide web protocols are supported directly. However, bombadillo is capable of attempting to open web links in a user's default web browser. This feature is opt-in only and controlled in a user's settings. This feature does not function properly in a terminal only environment at present.
+Neither of the world wide web protocols are supported directly. However,\fBbombadillo\fPis capable of attempting to open web links in a user's default web browser. This feature is opt-in only and controlled in a user's settings. Opening in a default web browser only works if a user has a gui environment available. An alternate option to get web content directly in the client is to install the lynx web browser on the system and turn on 'lynxmode' in the settings (and opt in to following http links). Doing so will allow web content, rendered by lynx, to be viewable directly in \fBbombadillo\fP.
 .SH COMMANDS
 .SS  KEY COMMANDS
 These commands work as a single keypress anytime \fBbombadillo\fP is not taking in a line based command. This is the default command mode of \fBbombadillo\fP.
@@ -269,3 +269,4 @@ Gopher Homepage
 gopher://bombadillo.colorfield.space
 .SH AUTHORS
 \fBbombadillo\fP was primarily developed by sloum, with kind and patient assistance from ~asdf and jboverf.
+
