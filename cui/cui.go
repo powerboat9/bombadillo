@@ -56,26 +56,29 @@ func moveCursorToward(dir string, amount int) {
 	}
 }
 
+// Exit performs cleanup operations before exiting the application
 func Exit() {
 	CleanupTerm()
 	os.Exit(0)
 }
 
+// InitTerm sets the terminal modes appropriate for Bombadillo
 func InitTerm() {
 	SetCharMode()
 	Tput("rmam")  // turn off line wrapping
 	Tput("smcup") // use alternate screen
 }
 
+// CleanupTerm reverts changs to terminal mode made by InitTerm
 func CleanupTerm() {
 	moveCursorToward("down", 500)
 	moveCursorToward("right", 500)
 	SetLineMode()
 
 	fmt.Print("\n")
-	fmt.Print("\033[?25h")
-	Tput("smam")  // turn on line wrap
-	Tput("rmcup") // stop using alternate screen
+	fmt.Print("\033[?25h") // reenables cursor blinking
+	Tput("smam")           // turn on line wrap
+	Tput("rmcup")          // stop using alternate screen
 }
 
 func Clear(dir string) {

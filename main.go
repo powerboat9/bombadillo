@@ -149,20 +149,20 @@ func initClient() error {
 
 // In the event of specific signals, ensure the display is shown correctly.
 // Accepts a signal, blocking until it is received.  Once not blocked, corrects
-// terminal display settings. Loops indefinitely, does not return.
+// terminal display settings as appropriate for that signal. Loops
+// indefinitely, does not return.
 func handleSignals(c <-chan os.Signal) {
-	switch <-c {
-	case syscall.SIGTSTP:
-		cui.CleanupTerm()
-		//TODO: getting stuck here
-		// SIGSTOP seems to be the right signal, but the process
-		// does not recover?
-		syscall.Kill(syscall.Getpid(), syscall.SIGSTOP)
-	case syscall.SIGCONT:
-		cui.InitTerm()
-		bombadillo.Draw()
-	case syscall.SIGINT:
-		cui.Exit()
+	for {
+		switch <-c {
+		case syscall.SIGTSTP:
+			cui.CleanupTerm()
+			syscall.Kill(syscall.Getpid(), syscall.SIGSTOP)
+		case syscall.SIGCONT:
+			cui.InitTerm()
+			bombadillo.Draw()
+		case syscall.SIGINT:
+			cui.Exit()
+		}
 	}
 }
 
