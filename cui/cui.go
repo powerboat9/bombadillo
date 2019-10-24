@@ -57,15 +57,25 @@ func moveCursorToward(dir string, amount int) {
 }
 
 func Exit() {
+	CleanupTerm()
+	os.Exit(0)
+}
+
+func InitTerm() {
+	SetCharMode()
+	Tput("rmam")  // turn off line wrapping
+	Tput("smcup") // use alternate screen
+}
+
+func CleanupTerm() {
 	moveCursorToward("down", 500)
 	moveCursorToward("right", 500)
 	SetLineMode()
 
 	fmt.Print("\n")
 	fmt.Print("\033[?25h")
-	Tput("smam") // turn off line wrap
-	Tput("rmcup") // use alternate screen
-	os.Exit(0)
+	Tput("smam")  // turn on line wrap
+	Tput("rmcup") // stop using alternate screen
 }
 
 func Clear(dir string) {
