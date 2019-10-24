@@ -112,7 +112,7 @@ func loadConfig() error {
 		if lowerkey == "configlocation" {
 			// The config defaults to the home folder.
 			// Users cannot really edit this value. But
-      // a compile time override is available.
+			// a compile time override is available.
 			// It is still stored in the ini and as a part
 			// of the options map.
 			continue
@@ -161,11 +161,28 @@ func handleSIGCONT(c <-chan os.Signal) {
 	}
 }
 
+//printHelp produces a nice display message when the --help flag is used
+func printHelp() {
+	art := `Bombadillo - a non-web client
+
+Syntax:   bombadillo [url] 
+          bombadillo [options...]
+
+Examples: bombadillo gopher://bombadillo.colorfield.space
+          bombadillo -v
+
+Options: 
+`
+	fmt.Fprint(os.Stdout, art)
+	flag.PrintDefaults()
+}
+
 func main() {
-	getVersion := flag.Bool("v", false, "See version number")
+	getVersion := flag.Bool("v", false, "Display version information and exit")
+	flag.Usage = printHelp
 	flag.Parse()
 	if *getVersion {
-		fmt.Printf("Bombadillo %s\n", version)
+		fmt.Printf("Bombadillo %s - build %s\n", version, build)
 		os.Exit(0)
 	}
 	args := flag.Args()
