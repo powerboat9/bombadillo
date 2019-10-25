@@ -140,7 +140,6 @@ func loadConfig() error {
 
 func initClient() error {
 	bombadillo = MakeClient("  ((( Bombadillo )))  ")
-	cui.SetCharMode()
 	err := loadConfig()
 	if bombadillo.Options["tlscertificate"] != "" && bombadillo.Options["tlskey"] != "" {
 		bombadillo.Certs.LoadCertificate(bombadillo.Options["tlscertificate"], bombadillo.Options["tlskey"])
@@ -148,16 +147,22 @@ func initClient() error {
 	return err
 }
 
-// In the event of SIGCONT, ensure the display is shown correctly.  Accepts a
-// signal, blocking until it is received. Once not blocked, corrects terminal
-// display settings. Loops indefinitely, does not return.
-func handleSIGCONT(c <-chan os.Signal) {
+// In the event of specific signals, ensure the display is shown correctly.
+// Accepts a signal, blocking until it is received.  Once not blocked, corrects
+// terminal display settings as appropriate for that signal. Loops
+// indefinitely, does not return.
+func handleSignals(c <-chan os.Signal) {
 	for {
-		<-c
-		cui.Tput("rmam")  // turn off line wrapping
-		cui.Tput("smcup") // use alternate screen
-		cui.SetCharMode()
-		bombadillo.Draw()
+		switch <-c {
+		case syscall.SIGTSTP:
+			cui.CleanupTerm()
+			syscall.Kill(syscall.Getpid(), syscall.SIGSTOP)
+		case syscall.SIGCONT:
+			cui.InitTerm()
+			bombadillo.Draw()
+		case syscall.SIGINT:
+			cui.Exit()
+		}
 	}
 }
 
@@ -191,8 +196,7 @@ func main() {
 	// So that we can open files from gemini
 	mc = mailcap.NewMailcap()
 
-	cui.Tput("rmam")  // turn off line wrapping
-	cui.Tput("smcup") // use alternate screen
+	cui.InitTerm()
 	defer cui.Exit()
 	err := initClient()
 	if err != nil {
@@ -200,10 +204,10 @@ func main() {
 		panic(err)
 	}
 
-	// watch for SIGCONT, send it to be handled
+	// watch for signals, send them to be handled
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, syscall.SIGCONT)
-	go handleSIGCONT(c)
+	signal.Notify(c, syscall.SIGTSTP, syscall.SIGCONT, syscall.SIGINT)
+	go handleSignals(c)
 
 	// Start polling for terminal size changes
 	go bombadillo.GetSize()
