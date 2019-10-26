@@ -514,6 +514,8 @@ func (c *client) saveFile(u Url, name string) {
 		file, err = gopher.Retrieve(u.Host, u.Port, u.Resource)
 	case "gemini":
 		file, err = gemini.Fetch(u.Host, u.Port, u.Resource, &c.Certs)
+	case "http", "https":
+		file, err = http.Fetch(u.Full)
 	default:
 		c.SetMessage(fmt.Sprintf("Saving files over %s is not supported", u.Scheme), true)
 		c.DrawMessage()
@@ -737,6 +739,21 @@ func (c *client) Scroll(amount int) {
 	c.Draw()
 }
 
+func (c *client) ReloadPage() error {
+	if c.PageState.Length < 1 {
+		return fmt.Errorf("There is no page to reload")
+	}
+	url := c.PageState.History[c.PageState.Position].Location.Full
+	err := c.PageState.NavigateHistory(-1)
+	if err != nil {
+		return err
+	}
+	length := c.PageState.Length
+	c.Visit(url)
+	c.PageState.Length = length
+	return nil
+}
+
 func (c *client) SetPercentRead() {
 	page := c.PageState.History[c.PageState.Position]
 	var percentRead int
@@ -834,6 +851,8 @@ func (c *client) SetHeaderUrl() {
 	}
 }
 
+// Visit functions as a controller/router to the
+// appropriate protocol handler
 func (c *client) Visit(url string) {
 	c.SetMessage("Loading...", false)
 	c.DrawMessage()
@@ -848,137 +867,199 @@ func (c *client) Visit(url string) {
 
 	switch u.Scheme {
 	case "gopher":
-		if u.DownloadOnly {
-			nameSplit := strings.Split(u.Resource, "/")
-			filename := nameSplit[len(nameSplit)-1]
-			filename = strings.Trim(filename, " \t\r\n\v\f\a")
-			if filename == "" {
-				filename = "gopherfile"
-			}
-			c.saveFile(u, filename)
-		} else if u.Mime == "7" {
-			c.search("", u.Full, "?")
-		} else {
-			content, links, err := gopher.Visit(u.Mime, u.Host, u.Port, u.Resource)
-			if err != nil {
-				c.SetMessage(err.Error(), true)
-				c.DrawMessage()
-				return
-			}
-			pg := MakePage(u, content, links)
+		c.handleGopher(u)
+	case "gemini":
+		c.handleGemini(u)
+	case "telnet":
+		c.handleTelnet(u)
+	case "http", "https":
+		c.handleWeb(u)
+	case "local":
+		c.handleLocal(u)
+	case "finger":
+		c.handleFinger(u)
+	default:
+		c.SetMessage(fmt.Sprintf("%q is not a supported protocol", u.Scheme), true)
+		c.DrawMessage()
+	}
+}
+
+
+// +++ Begin Protocol Handlers +++ 
+
+func (c *client) handleGopher(u Url) {
+	if u.DownloadOnly {
+		nameSplit := strings.Split(u.Resource, "/")
+		filename := nameSplit[len(nameSplit)-1]
+		filename = strings.Trim(filename, " \t\r\n\v\f\a")
+		if filename == "" {
+			filename = "gopherfile"
+		}
+		c.saveFile(u, filename)
+	} else if u.Mime == "7" {
+		c.search("", u.Full, "?")
+	} else {
+		content, links, err := gopher.Visit(u.Mime, u.Host, u.Port, u.Resource)
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+			return
+		}
+		pg := MakePage(u, content, links)
+		pg.WrapContent(c.Width - 1)
+		c.PageState.Add(pg)
+		c.SetPercentRead()
+		c.ClearMessage()
+		c.SetHeaderUrl()
+		c.Draw()
+	}
+}
+
+func (c *client) handleGemini(u Url) {
+	capsule, err := gemini.Visit(u.Host, u.Port, u.Resource, &c.Certs)
+	if err != nil {
+		c.SetMessage(err.Error(), true)
+		c.DrawMessage()
+		return
+	}
+	go saveConfig()
+	switch capsule.Status {
+	case 1:
+		c.search("", u.Full, capsule.Content)
+	case 2:
+		if capsule.MimeMaj == "text" {
+			pg := MakePage(u, capsule.Content, capsule.Links)
 			pg.WrapContent(c.Width - 1)
 			c.PageState.Add(pg)
 			c.SetPercentRead()
 			c.ClearMessage()
 			c.SetHeaderUrl()
 			c.Draw()
-		}
-	case "gemini":
-		capsule, err := gemini.Visit(u.Host, u.Port, u.Resource, &c.Certs)
-		if err != nil {
-			c.SetMessage(err.Error(), true)
-			c.DrawMessage()
-			return
-		}
-		go saveConfig()
-		switch capsule.Status {
-		case 1:
-			c.search("", u.Full, capsule.Content)
-		case 2:
-			if capsule.MimeMaj == "text" {
-				pg := MakePage(u, capsule.Content, capsule.Links)
-				pg.WrapContent(c.Width - 1)
-				c.PageState.Add(pg)
-				c.SetPercentRead()
-				c.ClearMessage()
-				c.SetHeaderUrl()
-				c.Draw()
-			} else {
-				c.SetMessage("The file is non-text: (o)pen or (w)rite to disk", false)
-				c.DrawMessage()
-				var ch rune
-				for {
-					ch = cui.Getch()
-					if ch == 'o' || ch == 'w' {
-						break
-					}
-				}
-				switch ch {
-				case 'o':
-					mime := fmt.Sprintf("%s/%s", capsule.MimeMaj, capsule.MimeMin)
-					var term bool
-					if c.Options["terminalonly"] == "true" {
-						term = true
-					} else {
-						term = false
-					}
-					mcEntry, err := mc.FindMatch(mime, "view", term)
-					if err != nil {
-						c.SetMessage(err.Error(), true)
-						c.DrawMessage()
-						return
-					}
-					file, err := ioutil.TempFile("/tmp/", "bombadillo-*.tmp")
-					if err != nil {
-						c.SetMessage("Unable to create temporary file for opening, aborting file open", true)
-						c.DrawMessage()
-						return
-					}
-					// defer os.Remove(file.Name())
-					file.Write([]byte(capsule.Content))
-					com, e := mcEntry.Command(file.Name())
-					if e != nil {
-						c.SetMessage(e.Error(), true)
-						c.DrawMessage()
-						return
-					}
-					com.Stdin = os.Stdin
-					com.Stdout = os.Stdout
-					com.Stderr = os.Stderr
-					if c.Options["terminalonly"] == "true" {
-						cui.Clear("screen")
-					}
-					com.Run()
-					c.SetMessage("File opened by an appropriate program", true)
-					c.DrawMessage()
-					c.Draw()
-				case 'w':
-					nameSplit := strings.Split(u.Resource, "/")
-					filename := nameSplit[len(nameSplit)-1]
-					c.saveFileFromData(capsule.Content, filename)
-				}
-			}
-		case 3:
-			c.SetMessage("[3] Redirect. Follow redirect? y or any other key for no", false)
-			c.DrawMessage()
-			ch := cui.Getch()
-			if ch == 'y' || ch == 'Y' {
-				c.Visit(capsule.Content)
-			} else {
-				c.SetMessage("Redirect aborted", false)
-				c.DrawMessage()
-			}
-		}
-	case "telnet":
-		c.SetMessage("Attempting to start telnet session", false)
-		c.DrawMessage()
-		msg, err := telnet.StartSession(u.Host, u.Port)
-		if err != nil {
-			c.SetMessage(err.Error(), true)
-			c.DrawMessage()
 		} else {
-			c.SetMessage(msg, true)
+			c.SetMessage("The file is non-text: (o)pen or (w)rite to disk", false)
+			c.DrawMessage()
+			var ch rune
+			for {
+				ch = cui.Getch()
+				if ch == 'o' || ch == 'w' {
+					break
+				}
+			}
+			switch ch {
+			case 'o':
+				mime := fmt.Sprintf("%s/%s", capsule.MimeMaj, capsule.MimeMin)
+				var term bool
+				if c.Options["terminalonly"] == "true" {
+					term = true
+				} else {
+					term = false
+				}
+				mcEntry, err := mc.FindMatch(mime, "view", term)
+				if err != nil {
+					c.SetMessage(err.Error(), true)
+					c.DrawMessage()
+					return
+				}
+				file, err := ioutil.TempFile("/tmp/", "bombadillo-*.tmp")
+				if err != nil {
+					c.SetMessage("Unable to create temporary file for opening, aborting file open", true)
+					c.DrawMessage()
+					return
+				}
+				// defer os.Remove(file.Name())
+				file.Write([]byte(capsule.Content))
+				com, e := mcEntry.Command(file.Name())
+				if e != nil {
+					c.SetMessage(e.Error(), true)
+					c.DrawMessage()
+					return
+				}
+				com.Stdin = os.Stdin
+				com.Stdout = os.Stdout
+				com.Stderr = os.Stderr
+				if c.Options["terminalonly"] == "true" {
+					cui.Clear("screen")
+				}
+				com.Run()
+				c.SetMessage("File opened by an appropriate program", true)
+				c.DrawMessage()
+				c.Draw()
+			case 'w':
+				nameSplit := strings.Split(u.Resource, "/")
+				filename := nameSplit[len(nameSplit)-1]
+				c.saveFileFromData(capsule.Content, filename)
+			}
+		}
+	case 3:
+		c.SetMessage("[3] Redirect. Follow redirect? y or any other key for no", false)
+		c.DrawMessage()
+		ch := cui.Getch()
+		if ch == 'y' || ch == 'Y' {
+			c.Visit(capsule.Content)
+		} else {
+			c.SetMessage("Redirect aborted", false)
 			c.DrawMessage()
 		}
-		c.Draw()
-	case "http", "https":
-		if strings.ToUpper(c.Options["openhttp"]) != "TRUE" {
-			c.SetMessage("'openhttp' is not set to true, cannot open web link", false)
-			c.DrawMessage()
-			return
-		}
-		switch strings.ToUpper(c.Options["lynxmode"]) {
-		case "TRUE":
+	}
+}
+
+func (c *client) handleTelnet(u Url) {
+	c.SetMessage("Attempting to start telnet session", false)
+	c.DrawMessage()
+	msg, err := telnet.StartSession(u.Host, u.Port)
+	if err != nil {
+		c.SetMessage(err.Error(), true)
+		c.DrawMessage()
+	} else {
+		c.SetMessage(msg, true)
+		c.DrawMessage()
+	}
+	c.Draw()
+}
+
+func (c *client) handleLocal(u Url) {
+	content, err := local.Open(u.Resource)
+	if err != nil {
+		c.SetMessage(err.Error(), true)
+		c.DrawMessage()
+		return
+	}
+	pg := MakePage(u, content, []string{})
+	pg.WrapContent(c.Width - 1)
+	c.PageState.Add(pg)
+	c.SetPercentRead()
+	c.ClearMessage()
+	c.SetHeaderUrl()
+	c.Draw()
+}
+
+func (c *client) handleFinger(u Url) {
+	content, err := finger.Finger(u.Host, u.Port, u.Resource)
+	if err != nil {
+		c.SetMessage(err.Error(), true)
+		c.DrawMessage()
+		return
+	}
+	pg := MakePage(u, content, []string{})
+	pg.WrapContent(c.Width - 1)
+	c.PageState.Add(pg)
+	c.SetPercentRead()
+	c.ClearMessage()
+	c.SetHeaderUrl()
+	c.Draw()
+}
+
+func (c *client) handleWeb(u Url) {
+	// Following http is disabled
+	if strings.ToUpper(c.Options["openhttp"]) != "TRUE" {
+		c.SetMessage("'openhttp' is not set to true, cannot open web link", false)
+		c.DrawMessage()
+		return
+	}
+
+	// Use lynxmode
+	if strings.ToUpper(c.Options["lynxmode"]) == "TRUE" {
+		if http.IsTextFile(u.Full) {
 			page, err := http.Visit(u.Full, c.Width-1)
 			if err != nil {
 				c.SetMessage(fmt.Sprintf("Lynx error: %s", err.Error()), true)
@@ -992,70 +1073,37 @@ func (c *client) Visit(url string) {
 			c.ClearMessage()
 			c.SetHeaderUrl()
 			c.Draw()
-		default:
-			if strings.ToUpper(c.Options["terminalonly"]) == "TRUE" {
-				c.SetMessage("'terminalonly' is set to true and 'lynxmode' is not enabled, cannot open web link", false)
-				c.DrawMessage()
+		} else {
+			c.SetMessage("The file is non-text: writing to disk...", false)
+			c.DrawMessage()
+			var fn string
+			if i := strings.LastIndex(u.Full, "/"); i > 0 && i + 1 < len(u.Full) {
+				fn = u.Full[i + 1:]
 			} else {
-				c.SetMessage("Attempting to open in web browser", false)
-				c.DrawMessage()
-				msg, err := http.OpenInBrowser(u.Full)
-				if err != nil {
-					c.SetMessage(err.Error(), true)
-				} else {
-					c.SetMessage(msg, false)
-				}
-				c.DrawMessage()
+				fn = "bombadillo.download"
 			}
+			c.saveFile(u, fn)
 		}
-	case "local":
-		content, err := local.Open(u.Resource)
-		if err != nil {
-			c.SetMessage(err.Error(), true)
+
+	// Open in default web browser if available
+	} else {
+		if strings.ToUpper(c.Options["terminalonly"]) == "TRUE" {
+			c.SetMessage("'terminalonly' is set to true and 'lynxmode' is not enabled, cannot open web link", false)
 			c.DrawMessage()
-			return
-		}
-		pg := MakePage(u, content, []string{})
-		pg.WrapContent(c.Width - 1)
-		c.PageState.Add(pg)
-		c.SetPercentRead()
-		c.ClearMessage()
-		c.SetHeaderUrl()
-		c.Draw()
-	case "finger":
-		content, err := finger.Finger(u.Host, u.Port, u.Resource)
-		if err != nil {
-			c.SetMessage(err.Error(), true)
+		} else {
+			c.SetMessage("Attempting to open in web browser", false)
 			c.DrawMessage()
-			return
+			msg, err := http.OpenInBrowser(u.Full)
+			if err != nil {
+				c.SetMessage(err.Error(), true)
+			} else {
+				c.SetMessage(msg, false)
+			}
+			c.DrawMessage()
 		}
-		pg := MakePage(u, content, []string{})
-		pg.WrapContent(c.Width - 1)
-		c.PageState.Add(pg)
-		c.SetPercentRead()
-		c.ClearMessage()
-		c.SetHeaderUrl()
-		c.Draw()
-	default:
-		c.SetMessage(fmt.Sprintf("%q is not a supported protocol", u.Scheme), true)
-		c.DrawMessage()
 	}
 }
 
-func (c *client) ReloadPage() error {
-	if c.PageState.Length < 1 {
-		return fmt.Errorf("There is no page to reload")
-	}
-	url := c.PageState.History[c.PageState.Position].Location.Full
-	err := c.PageState.NavigateHistory(-1)
-	if err != nil {
-		return err
-	}
-	length := c.PageState.Length
-	c.Visit(url)
-	c.PageState.Length = length
-	return nil
-}
 
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\
