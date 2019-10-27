@@ -21,12 +21,12 @@ var defaultOptions = map[string]string{
 	"savelocation": userinfo.HomeDir,
 	"searchengine": "gopher://gopher.floodgap.com:70/7/v2/vs",
 	"openhttp":     "false",
-	"httpbrowser":  "",
 	"telnetcommand": "telnet",
 	"configlocation": userinfo.HomeDir,
 	"theme": "normal", // "normal", "inverted"
 	"terminalonly": "true",
 	"tlscertificate": "",
 	"tlskey": "",
+	"lynxmode": "false",
 }
 
