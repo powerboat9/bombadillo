@@ -1,4 +1,4 @@
-.TH "bombadillo" 1 "12 OCT 2019" "" "General Opperation Manual"
+.TH "bombadillo" 1 "12 OCT 2019" "" "General Operation Manual"
 .SH NAME
 \fBbombadillo \fP- a non-web client
 .SH SYNOPSIS
@@ -32,7 +32,7 @@ Gemini is supported, but as a new protocol with an incomplete specification, fea
 .TP
 .B
 finger
-Basic support is provided for the finger protocol. The format is: \fIfinger://[[username@]][hostname]\fP. Many servers still support finger and it can be fun to see if friends are online or read about the users who's phlogs you follow.
+Basic support is provided for the finger protocol. The format is: \fIfinger://[[username@]][hostname]\fP. Many servers still support finger and it can be fun to see if friends are online or read about the users whose phlogs you follow.
 .TP
 .B
 local
@@ -44,7 +44,11 @@ Telnet is not supported directly, but addresses will be followed and opened as a
 .TP
 .B
 http, https
-Neither of the world wide web protocols are supported directly. However,\fBbombadillo\fPis capable of attempting to open web links in a user's default web browser. This feature is opt-in only and controlled in a user's settings. Opening in a default web browser only works if a user has a gui environment available. An alternate option to get web content directly in the client is to install the lynx web browser on the system and turn on 'lynxmode' in the settings (and opt in to following http links). Doing so will allow web content, rendered by lynx, to be viewable directly in \fBbombadillo\fP.
+Neither of the world wide web protocols are supported directly. However, \fBbombadillo\fP can open web links in a user's default web browser, or display web content directly in the client via the lynx web browser. Opening http links is opt-in only, controlled by the \fIopenhttp\fP setting.
+.IP
+Opening links in a default web browser only works if a GUI environment is available.
+.IP
+Opening web content directly in the client requires the lynx web browser, and is enabled using the \fIlynxmode\fP setting. Web content is processed using lynx, and then displayed in the client.
 .SH COMMANDS
 .SS  KEY COMMANDS
 These commands work as a single keypress anytime \fBbombadillo\fP is not taking in a line based command. This is the default command mode of \fBbombadillo\fP.
@@ -238,11 +242,11 @@ Tells the client what command to use to start a telnet session. Should be a vali
 .TP
 .B
 terminalonly
-Sets whether or not to try to open non-text files served via gemini in gui programs or not. If set to \fItrue\fP \fBbombdaillo\fP will only attempt to use terminal programs to open files. If set to \fIfalse\fP \fBbombadillo\fP may choose from the appropriate programs installed on the system, including graphical ones.
+Sets whether or not to try to open non-text files served via gemini in GUI programs or not. If set to \fItrue\fP \fBbombadillo\fP will only attempt to use terminal programs to open files. If set to \fIfalse\fP \fBbombadillo\fP may choose from the appropriate programs installed on the system, including graphical ones.
 .TP
 .B
 theme
-Can toggle between visual modes. Valid values are \fInormal\fP and \fIinverse\fP. When set to ivnerse, the terminal color mode is inversed.
+Can toggle between visual modes. Valid values are \fInormal\fP and \fIinverse\fP. When set to inverse, the terminal color mode is inverted.
 .TP
 .B
 tlscertificate
@@ -250,7 +254,7 @@ A path to a tls certificate file on a user's local filesystem. Defaults to NULL.
 .TP
 .B
 tlskey
-A path the a tls key that pairs with the tlscertificate setting, on a user's local filesystem. Defaults to NULL. Both \fItlskey\fP and \fItlscertificate\fP must be set for client certificates to work in gemini.
+A path to a tls key that pairs with the tlscertificate setting, on a user's local filesystem. Defaults to NULL. Both \fItlskey\fP and \fItlscertificate\fP must be set for client certificates to work in gemini.
 .SH BUGS
 There are very likely bugs. Many known bugs can be found in the issues section of \fBbombadillo\fP's software repository (see \fIlinks\fP).
 .SH LINKS
