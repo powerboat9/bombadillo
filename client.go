@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -504,6 +505,7 @@ func (c *client) getCurrentPageRawData() (string, error) {
 	return c.PageState.History[c.PageState.Position].RawContent, nil
 }
 
+// Saves the specified URL to the specified file path.
 func (c *client) saveFile(u Url, name string) {
 	var file []byte
 	var err error
@@ -849,8 +851,7 @@ func (c *client) Visit(url string) {
 	switch u.Scheme {
 	case "gopher":
 		if u.DownloadOnly {
-			nameSplit := strings.Split(u.Resource, "/")
-			filename := nameSplit[len(nameSplit)-1]
+			filename := path.Base(u.Resource)
 			filename = strings.Trim(filename, " \t\r\n\v\f\a")
 			if filename == "" {
 				filename = "gopherfile"
@@ -943,8 +944,7 @@ func (c *client) Visit(url string) {
 					c.DrawMessage()
 					c.Draw()
 				case 'w':
-					nameSplit := strings.Split(u.Resource, "/")
-					filename := nameSplit[len(nameSplit)-1]
+					filename := path.Base(u.Resource)
 					c.saveFileFromData(capsule.Content, filename)
 				}
 			}
@@ -1034,7 +1034,6 @@ func (c *client) ReloadPage() error {
 	c.PageState.Length = length
 	return nil
 }
-
 
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\

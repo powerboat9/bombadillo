@@ -23,6 +23,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 
@@ -61,7 +62,7 @@ func saveConfig() error {
 
 	opts.WriteString(certs)
 
-	return ioutil.WriteFile(bombadillo.Options["configlocation"]+"/.bombadillo.ini", []byte(opts.String()), 0644)
+	return ioutil.WriteFile(filepath.Join(bombadillo.Options["configlocation"], ".bombadillo.ini"), []byte(opts.String()), 0644)
 }
 
 func validateOpt(opt, val string) bool {
