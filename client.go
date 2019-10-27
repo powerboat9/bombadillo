@@ -936,62 +936,14 @@ func (c *client) handleGemini(u Url) {
 			c.SetHeaderUrl()
 			c.Draw()
 		} else {
-			c.SetMessage("The file is non-text: (o)pen or (w)rite to disk", false)
+			c.SetMessage("The file is non-text: writing to disk...", false)
 			c.DrawMessage()
-			var ch rune
-			for {
-				ch = cui.Getch()
-				if ch == 'o' || ch == 'w' {
-					break
-				}
-			}
-			switch ch {
-			case 'o':
-				mime := fmt.Sprintf("%s/%s", capsule.MimeMaj, capsule.MimeMin)
-				var term bool
-				if c.Options["terminalonly"] == "true" {
-					term = true
-				} else {
-					term = false
-				}
-				mcEntry, err := mc.FindMatch(mime, "view", term)
-				if err != nil {
-					c.SetMessage(err.Error(), true)
-					c.DrawMessage()
-					return
-				}
-				file, err := ioutil.TempFile("/tmp/", "bombadillo-*.tmp")
-				if err != nil {
-					c.SetMessage("Unable to create temporary file for opening, aborting file open", true)
-					c.DrawMessage()
-					return
-				}
-				// defer os.Remove(file.Name())
-				file.Write([]byte(capsule.Content))
-				com, e := mcEntry.Command(file.Name())
-				if e != nil {
-					c.SetMessage(e.Error(), true)
-					c.DrawMessage()
-					return
-				}
-				com.Stdin = os.Stdin
-				com.Stdout = os.Stdout
-				com.Stderr = os.Stderr
-				if c.Options["terminalonly"] == "true" {
-					cui.Clear("screen")
-				}
-				com.Run()
-				c.SetMessage("File opened by an appropriate program", true)
-				c.DrawMessage()
-				c.Draw()
-			case 'w':
-				nameSplit := strings.Split(u.Resource, "/")
-				filename := nameSplit[len(nameSplit)-1]
-				c.saveFileFromData(capsule.Content, filename)
-			}
+			nameSplit := strings.Split(u.Resource, "/")
+			filename := nameSplit[len(nameSplit)-1]
+			c.saveFileFromData(capsule.Content, filename)
 		}
 	case 3:
-		c.SetMessage("[3] Redirect. Follow redirect? y or any other key for no", false)
+		c.SetMessage(fmt.Sprintf("Follow redirect (y/n): %s?", capsule.Content), false)
 		c.DrawMessage()
 		ch := cui.Getch()
 		if ch == 'y' || ch == 'Y' {
