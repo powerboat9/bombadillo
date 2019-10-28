@@ -13,7 +13,7 @@ If building from source, you will need to have [Go](https://golang.org/) version
 
 #### Optional
 
-[Lynx](https://lynx.invisible-island.net/), the text based web browser, can be used as a parsing engine for http/https. This is a totally optional item and Lynx is in no way required in order to compile or run Bombadillo. Having it available on the system can help create a richer experience by allowing users to navigate directly to web content in Bombadillo. Many users may wish to avoid this entirely,a nd the default configuration does not have this behavior turned on. To turn it on from within Bombadillo enter the command `set lynxmode true`.
+[Lynx](https://lynx.invisible-island.net/), the text based web browser, can be used as a parsing engine for http/https. This is a totally optional item and Lynx is in no way required in order to compile or run Bombadillo. Having it available on the system can help create a richer experience by allowing users to navigate directly to web content in Bombadillo. Many users may wish to avoid this entirely, and the default configuration does not have this behavior turned on. To turn it on from within Bombadillo enter the command `set lynxmode true`.
 
 ### Installing
 
