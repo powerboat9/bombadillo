@@ -30,7 +30,6 @@ import (
 	"tildegit.org/sloum/bombadillo/config"
 	"tildegit.org/sloum/bombadillo/cui"
 	_ "tildegit.org/sloum/bombadillo/gemini"
-	"tildegit.org/sloum/mailcap"
 )
 
 var version string
@@ -39,7 +38,6 @@ var build string
 var bombadillo *client
 var helplocation string = "gopher://bombadillo.colorfield.space:70/1/user-guide.map"
 var settings config.Config
-var mc *mailcap.Mailcap
 
 func saveConfig() error {
 	var opts strings.Builder
@@ -193,10 +191,6 @@ func main() {
 		os.Exit(0)
 	}
 	args := flag.Args()
-
-	// Build the mailcap db
-	// So that we can open files from gemini
-	mc = mailcap.NewMailcap()
 
 	cui.InitTerm()
 	defer cui.Exit()
