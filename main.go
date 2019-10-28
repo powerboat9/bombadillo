@@ -1,6 +1,7 @@
 package main
 
-// Bombadillo is a gopher and gemini client for the terminal of unix or unix-like systems.
+// Bombadillo is an internet client for the terminal of unix or
+// unix-like systems.
 //
 // Copyright (C) 2019 Brian Evans
 //
@@ -30,7 +31,6 @@ import (
 	"tildegit.org/sloum/bombadillo/config"
 	"tildegit.org/sloum/bombadillo/cui"
 	_ "tildegit.org/sloum/bombadillo/gemini"
-	"tildegit.org/sloum/mailcap"
 )
 
 var version string
@@ -39,7 +39,6 @@ var build string
 var bombadillo *client
 var helplocation string = "gopher://bombadillo.colorfield.space:70/1/user-guide.map"
 var settings config.Config
-var mc *mailcap.Mailcap
 
 func saveConfig() error {
 	var opts strings.Builder
@@ -70,6 +69,7 @@ func validateOpt(opt, val string) bool {
 		"openhttp":     []string{"true", "false"},
 		"theme":        []string{"normal", "inverse"},
 		"terminalonly": []string{"true", "false"},
+		"lynxmode":     []string{"true", "false"},
 	}
 
 	opt = strings.ToLower(opt)
@@ -192,10 +192,6 @@ func main() {
 		os.Exit(0)
 	}
 	args := flag.Args()
-
-	// Build the mailcap db
-	// So that we can open files from gemini
-	mc = mailcap.NewMailcap()
 
 	cui.InitTerm()
 	defer cui.Exit()
