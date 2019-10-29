@@ -1,14 +1,16 @@
 # Bombadillo
 
-Bombadillo is a non-web client for the terminal, and functions as a pager/terminal UI. Bombadillo features vim-like keybindings, configurable settings, and a robust command selection. Currently, Bombadillo supports the following protocols as first class citizens:
+Bombadillo is a non-web client for the terminal, and functions as a pager/terminal UI.
+
+Bombadillo features vim-like keybindings, configurable settings, and a robust command selection. Currently, Bombadillo supports the following protocols as first class citizens:
 * gopher
 * gemini
 * finger
-* local (a user's filesystem)
+* local (a user's file system)
 
 Support for the following protocols is also available via integration with 3rd party applications:
 * telnet
-    * By opening links in a subprocess w/ a telnet application
+    * Links are opened in a telnet application run as a subprocess
 * http/https
     * Web support is opt-in (turned off by default)
     * Links can be opened in a user's default web browser when in a graphical environment
@@ -25,22 +27,29 @@ You will need to have [Go](https://golang.org/) version >= 1.11.
 
 ### Building, Installing, Uninstalling
 
-Bombadillo installation uses `make`. It is also possible to just use the go compiler directly (`go install`), but this is not the recommended approach.
+Bombadillo installation uses `make`. It is also possible to use Go to build and install (i.e `go build`, `go install`), but this is not the recommended approach.
 
-By default running `make` from the source code directory will build Bombadillo in the local directory. This is fine for testing or trying things out. But for usage systemwide and easy access to documentation, you will likely want to install.
+Running `make` from the source code directory will build Bombadillo in the local directory. This is fine for testing or trying things out. For usage system-wide, and easy access to documentation, follow the installation instructions below. 
 
 #### Basic Installation
 
-Most users will want to isntall via the following:
+Most users will want to install using the following commands:
 
 ```
 git clone https://tildegit.org/sloum/bombadillo.git
 cd bombadillo
 sudo make install
 ```
-Note: the usage of sudo here will be system dependent. Most systems will require it for installation to `/usr/local/bin`.
+*Note: the usage of `sudo` here will be system dependent. Most systems will require it for installation to `/usr/local/bin`.*
 
-You can then run `bombadillo` or familiarize yourself with the application by running `man bombadillo`.
+You can then start Bombadillo by running the command:
+```
+bombadillo
+```
+To familiarize yourself with the application, documentation is available by running the command:
+```
+man bombadillo
+```
 
 #### Custom Installation
 
@@ -71,11 +80,11 @@ If you used a custom `DESTDIR` value during install, you will need to supply it 
 sudo make DESTDIR=/some/directory uninstall
 ```
 
-Uninstall will clean up any build files, remove the installed binary, and remove the manpage from the system. If will _not_ remove any directories created as a part of the installation, nor will it remove any Bombadillo user configuration files.
+Uninstall will clean up any build files, remove the installed binary, and remove the man page from the system. If will _not_ remove any directories created as a part of the installation, nor will it remove any Bombadillo user configuration files.
 
 #### Troubleshooting
 
-If you run `bombadillo` and get `bombadillo: command not found`, try running `make build` from within the cloned repo. Then try: `./bombadillo`. If that works it means  that the application is getting built correctly and the issue is likely in your path settings. Any errors during `make install` should be pretty visible, as you will be able to see what command it failed on.
+If you run `bombadillo` and get `bombadillo: command not found`, try running `make` from within the cloned repo. Then try: `./bombadillo`. If that works it means  that the application is getting built correctly and the issue is likely in your path settings. Any errors during `make install` should be pretty visible, as you will be able to see what command it failed on.
 
 ### Downloading
 
@@ -89,7 +98,11 @@ In addition to the man page, users can get information on Bombadillo on the web 
 
 ## Contributing
 
-Bombadillo development is largely handled by Sloum, with help from asdf, jboverf, and some community input. If you would like to get involved, please reach out or submit an [issue](https://tildegit.org/sloum/bombadillo/issues). At present the developers use the tildegit issues system to discuss new features, track bugs, and communicate with users about hopes and/or issues for/with the software. If you have forked and would like to make a pull request, please make the pull request into `develop` where it will be reviewed by one of the maintainers. That said, a heads up or comment/issue somewhere is advised. While input is always welcome, not all requests will be granted. That said, we do our best to make Bombadillo a useful piece of software for its users and in general want to help you out.
+Bombadillo development is largely handled by Sloum, with help from asdf, jboverf, and some community input. If you would like to get involved, please reach out or submit an issue.
+
+At present the developers use the tildegit issues system to discuss new features, track bugs, and communicate with users about hopes and/or issues for/with the software.
+
+If you have forked and would like to make a pull request, please make the pull request into develop where it will be reviewed by one of the maintainers. That said, a heads up or comment/issue somewhere is advised. While input is always welcome, not all requests will be granted. That said, we do our best to make Bombadillo a useful piece of software for its users and in general want to help you out.
 
 ## License
 
@@ -97,5 +110,5 @@ This project is licensed under the GNU GPL version 3. See the [LICENSE](LICENSE)
 
 ## Releases
 
-Starting with v2.0.0 releases into `master` will be version-tagged. Work done toward the next release will be created on work branches named for what they are doing and then merged into `develop` to be combined with other ongoing efforts before a release is merged into `master`. At present there is no specific release schedule. It will depend on the urgency of the work that makes its way into develop and will be up to the project maintainers' judgement when to release from `develop`.
+Starting with version 2.0.0 releases into `master` will be version-tagged. Work done toward the next release will be created on work branches named for what they are doing and then merged into `develop` to be combined with other ongoing efforts before a release is merged into `master`. At present there is no specific release schedule. It will depend on the urgency of the work that makes its way into develop and will be up to the project maintainers' judgement when to release from `develop`.
 
