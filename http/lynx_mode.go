@@ -38,9 +38,16 @@ func IsTextFile(url string) bool {
 	for _, header := range headers {
 		if strings.Contains(header, "content-type:") && strings.Contains(header, "text") {
 			return true
+		} else if strings.Contains(header, "content-type:") {
+			return false
 		}
 	}
-	return false
+
+	// If we made it here, there is no content-type header.
+	// So in the event of the unknown, lets render to the 
+	// screen. This will allow redirects to get rendered
+	// as well.
+	return true
 }
 
 func parseLinks(c string) page {
