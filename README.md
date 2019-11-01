@@ -90,7 +90,7 @@ Uninstall will clean up any build files, remove the installed binary, and remove
 
 #### Troubleshooting
 
-If you run `bombadillo` and get `bombadillo: command not found`, try running `make` from within the cloned repo. Then try: `./bombadillo`. If that works it means  that the application is getting built correctly and the issue is likely in your path settings. Any errors during `make install` should be pretty visible, as you will be able to see what command it failed on.
+If you run `bombadillo` and get `bombadillo: command not found`, try running `make` from within the cloned repo. Then try: `./bombadillo`. If that works it means  that the application is getting built correctly and the issue is likely in your path settings. Any errors during `make install` should be visible, and you will be able to see what command it failed on.
 
 ### Downloading
 
@@ -104,11 +104,19 @@ In addition to the man page, users can get information on Bombadillo on the web 
 
 ## Contributing
 
-Bombadillo development is largely handled by Sloum, with help from asdf, jboverf, and some community input. If you would like to get involved, please reach out or submit an issue.
+Bombadillo development is largely handled by Sloum, with help from asdf, jboverf, and community input.
 
-At present the developers use the tildegit issues system to discuss new features, track bugs, and communicate with users about hopes and/or issues for/with the software.
+There are many ways to contribute to Bombadillo, including a fair few that don't require knowledge of programming:
 
-If you have forked and would like to make a pull request, please make the pull request into develop where it will be reviewed by one of the maintainers. That said, a heads up or comment/issue somewhere is advised. While input is always welcome, not all requests will be granted. That said, we do our best to make Bombadillo a useful piece of software for its users and in general want to help you out.
+- Try out the client and let us know if you have a suggestion for improvement, or if you find a bug.
+- Read the documentation and let us know if something isn't well explained, or needs correction.
+- Maybe you have a cool logo or some art that you think would look nice.
+
+If you have something in mind, please reach out or [open an issue](https://tildegit.org/sloum/bombadillo/issues).
+
+We aim for simplicity and quality, and do our best to make Bombadillo useful to its users. Any proposals for change are reviewed by the maintainers with this in mind, and not every request will be accepted. Furthermore, this software is developed in our spare time for the good of all, and help is provided as best efforts. In general, we want to help!
+
+The maintainers use the [tildegit](https://tildegit.org) issues system to discuss new features, track bugs, and communicate with users regarding issues and suggestions. Pull requests should typically have an associated issue, and should target the `develop` branch.
 
 ## License
 
@@ -117,4 +125,3 @@ This project is licensed under the GNU GPL version 3. See the [LICENSE](LICENSE)
 ## Releases
 
 Starting with version 2.0.0 releases into `master` will be version-tagged. Work done toward the next release will be created on work branches named for what they are doing and then merged into `develop` to be combined with other ongoing efforts before a release is merged into `master`. At present there is no specific release schedule. It will depend on the urgency of the work that makes its way into develop and will be up to the project maintainers' judgement when to release from `develop`.
-
