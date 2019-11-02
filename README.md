@@ -1,8 +1,10 @@
 # Bombadillo - a non-web client
 
-Bombadillo is a non-web client for the terminal, and functions as a pager/terminal UI.
+Bombadillo is a non-web client for the terminal.
 
-Bombadillo features vim-like keybindings, configurable settings, and a robust command selection. Currently, Bombadillo supports the following protocols as first class citizens:
+Bombadillo features a full terminal user interface, vim-like keybindings, document pager, configurable settings, and a robust command selection.
+
+Currently, Bombadillo supports the following protocols as first class citizens:
 * gopher
 * gemini
 * finger
@@ -10,12 +12,11 @@ Bombadillo features vim-like keybindings, configurable settings, and a robust co
 
 Support for the following protocols is also available via integration with 3rd party applications:
 * telnet
-    * Links are opened in a telnet application run as a subprocess
+    * Links are opened in a telnet application run as a subprocess.
 * http/https
-    * Web support is opt-in (turned off by default)
-    * Links can be opened in a user's default web browser when in a graphical environment
+    * Web support is opt-in (turned off by default).
+    * Links can be opened in a user's default web browser when in a graphical environment.
     * Web pages can be rendered directly in Bombadillo if [Lynx](https://lynx.invisible-island.net/) is installed on the system to handle the document parsing.
-
 
 ## Getting Started
 
@@ -35,7 +36,7 @@ Running `make` from the source code directory will build Bombadillo in the local
 
 Most users will want to install using the following commands:
 
-```
+```shell
 git clone https://tildegit.org/sloum/bombadillo.git
 cd bombadillo
 sudo make install
@@ -43,21 +44,28 @@ sudo make install
 *Note: the usage of `sudo` here will be system dependent. Most systems will require it for installation to `/usr/local/bin`.*
 
 You can then start Bombadillo by running the command:
-```
+```shell
 bombadillo
 ```
 To familiarize yourself with the application, documentation is available by running the command:
-```
+```shell
 man bombadillo
 ```
 
 #### Custom Installation
+##### Configuration Options
+There are a number of default configuration options in the file `defaults.go`, allowing customisation of the default settings for users of Bombadillo.
 
-There are a number of default configuration options in the file `defaults.go`. These can all be set prior to building in order to have these defaults apply to all users of Bombadillo on a given system. That said, the basic configuration already present should be suitable for most users (and all settings but one can be changed from within a Bombadillo session).
+To use this feature, amend the `defaults.go` file as appropriate, then follow the standard install instructions.
 
+Full documentation for these options is contained within the `defaults.go` file.
+
+An administrator might use this to feature to set a default for all users of a system. Typically though, these options should not need changing, and a user may change most of these settings themselves once they start Bombadillo. The one option that can only be configured in `defaults.go` is `configlocation` which controls where `.bombadillo.ini` is stored.
+
+##### Override Install Location
 The installation location can be overridden at compile time, which can be very useful for administrators wanting to set up Bombadillo on a multi-user machine. 
 
-```
+```shell
 git clone https://tildegit.org/sloum/bombadillo.git
 cd bombadillo
 sudo make DESTDIR=/some/directory install
@@ -71,12 +79,12 @@ There are two things to know about when using the above format:
 
 If you used the makefile to install Bombadillo then uninstalling is very simple. From the Bombadillo source folder run:
 
-```
+```shell
 sudo make uninstall
 ```
 
 If you used a custom `DESTDIR` value during install, you will need to supply it when uninstalling:
-```
+```shell
 sudo make DESTDIR=/some/directory uninstall
 ```
 make PREFIX=~ install
