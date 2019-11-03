@@ -533,7 +533,7 @@ func (c *client) saveFile(u Url, name string) {
 	savePath, _ := findAvailableFileName(c.Options["savelocation"], name)
 	err = ioutil.WriteFile(savePath, file, 0644)
 	if err != nil {
-		c.SetMessage("Error writing file: "+err.Error()+savePath, true)
+		c.SetMessage("Error writing file: "+err.Error(), true)
 		c.DrawMessage()
 		return
 	}
@@ -552,7 +552,7 @@ func (c *client) saveFileFromData(d, name string) {
 	savePath, _ := findAvailableFileName(c.Options["savelocation"], name)
 	err := ioutil.WriteFile(savePath, data, 0644)
 	if err != nil {
-		c.SetMessage("Error writing file: "+err.Error()+savePath, true)
+		c.SetMessage("Error writing file: "+err.Error(), true)
 		c.DrawMessage()
 		return
 	}
