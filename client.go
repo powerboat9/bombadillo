@@ -529,6 +529,14 @@ func (c *client) saveFile(u Url, name string) {
 	}
 
 	savePath := filepath.Join(c.Options["savelocation"], name)
+	suffix := 1
+	_, fileErr := os.Stat(savePath) 
+	for fileErr == nil {
+		fn := fmt.Sprintf("%s.%d", name, suffix)
+		savePath = filepath.Join(c.Options["savelocation"], fn)
+		_, fileErr = os.Stat(savePath) 
+		suffix++
+	}
 	err = ioutil.WriteFile(savePath, file, 0644)
 	if err != nil {
 		c.SetMessage("Error writing file: "+err.Error(), true)
@@ -546,6 +554,14 @@ func (c *client) saveFileFromData(d, name string) {
 	c.DrawMessage()
 
 	savePath := filepath.Join(c.Options["savelocation"], name)
+	suffix := 1
+	_, fileErr := os.Stat(savePath) 
+	for fileErr == nil {
+		fn := fmt.Sprintf("%s.%d", name, suffix)
+		savePath = filepath.Join(c.Options["savelocation"], fn)
+		_, fileErr = os.Stat(savePath) 
+		suffix++
+	}
 	err := ioutil.WriteFile(savePath, data, 0644)
 	if err != nil {
 		c.SetMessage("Error writing file: "+err.Error(), true)
