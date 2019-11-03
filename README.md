@@ -2,6 +2,8 @@
 
 Bombadillo is a non-web client for the terminal.
 
+![a screenshot of the bombadillo client](bombadillo-screenshot.png)
+
 Bombadillo features a full terminal user interface, vim-like keybindings, document pager, configurable settings, and a robust command selection.
 
 Currently, Bombadillo supports the following protocols as first class citizens:
