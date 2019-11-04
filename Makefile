@@ -1,13 +1,17 @@
 BINARY := bombadillo
 PREFIX := /usr/local
-MANPREFIX := ${PREFIX}/share/man
+EXEC_PREFIX := ${PREFIX}
+BINDIR := ${EXEC_PREFIX}/bin
+DATAROOTDIR := ${PREFIX}/share
+MANDIR := ${DATAROOTDIR}/share/man
+MAN1DIR := ${MANDIR}/man1
 
 # Use a dateformat rather than -I flag since OSX
 # does not support -I. It also doesn't support 
 # %:z - so settle for %z.
 BUILD_TIME := ${shell date "+%Y-%m-%dT%H:%M%z"}
 
-# If VERSION is empty or not deffined use the contents of the VERSION file
+# If VERSION is empty or not defined use the contents of the VERSION file
 VERSION    := ${shell git describe --tags 2> /dev/null}
 ifndef VERSION
 	VERSION  := ${shell cat ./VERSION}
@@ -25,13 +29,13 @@ install: install-bin install-man clean
 .PHONY: install-man
 install-man: bombadillo.1
 	gzip -k ./bombadillo.1
-	install -d ${DESTDIR}${MANPREFIX}/man1
-	install -m 0644 ./bombadillo.1.gz ${DESTDIR}${MANPREFIX}/man1
+	install -d ${DESTDIR}${MAN1DIR}
+	install -m 0644 ./bombadillo.1.gz ${DESTDIR}${MAN1DIR}
 
 .PHONY: install-bin
 install-bin: build
-	install -d ${DESTDIR}${PREFIX}/bin
-	install -m 0755 ./${BINARY} ${DESTDIR}${PREFIX}/bin/${BINARY}
+	install -d ${DESTDIR}${BINDIR}
+	install -m 0755 ./${BINARY} ${DESTDIR}${BINDIR}
 
 .PHONY: clean
 clean: 
@@ -40,6 +44,6 @@ clean:
 
 .PHONY: uninstall
 uninstall: clean
-	rm -f ${DESTDIR}${MANPREFIX}/man1/bombadillo.1.gz
-	rm -f ${DESTDIR}${PREFIX}/bin/${BINARY}
+	rm -f ${DESTDIR}${MAN1DIR}/bombadillo.1.gz
+	rm -f ${DESTDIR}${BINDIR}/${BINARY}
 
