@@ -777,7 +777,7 @@ func (c *client) displayConfigValue(setting string) {
 
 func (c *client) SetMessage(msg string, isError bool) {
 	c.MessageIsErr = isError
-	c.Message = strings.ReplaceAll(msg, "\t", "%09")
+	c.Message = strings.Replace(msg, "\t", "%09", -1)
 }
 
 func (c *client) DrawMessage() {
@@ -845,7 +845,7 @@ func (c *client) goToLink(l string) {
 func (c *client) SetHeaderUrl() {
 	if c.PageState.Length > 0 {
 		u := c.PageState.History[c.PageState.Position].Location.Full
-		c.TopBar.url = strings.ReplaceAll(u, "\t", "%09")
+		c.TopBar.url = strings.Replace(u, "\t", "%09", -1)
 	} else {
 		c.TopBar.url = ""
 	}
@@ -857,7 +857,7 @@ func (c *client) Visit(url string) {
 	c.SetMessage("Loading...", false)
 	c.DrawMessage()
 
-	url = strings.ReplaceAll(url, "%09", "\t")
+	url = strings.Replace(url, "%09", "\t", -1)
 	u, err := MakeUrl(url)
 	if err != nil {
 		c.SetMessage(err.Error(), true)
