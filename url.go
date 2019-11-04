@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"os"
+	"os/user"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -50,9 +50,12 @@ func MakeUrl(u string) (Url, error) {
 		if local && len(u) > 8 {
 			u = u[8:]
 		}
-		home, err := os.UserHomeDir()
+		var home string
+		userinfo, err := user.Current()
 		if err != nil {
 			home = ""
+		} else {
+			home = userinfo.HomeDir
 		}
 		u = strings.Replace(u, "~", home, 1)
 		res, err := filepath.Abs(u)
