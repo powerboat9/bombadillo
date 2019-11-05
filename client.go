@@ -528,7 +528,9 @@ func (c *client) saveFile(u Url, name string) {
 		return
 	}
 
-	savePath := filepath.Join(c.Options["savelocation"], name)
+	// We are ignoring the error here since WriteFile will
+	// generate the same error, and will handle the messaging
+	savePath, _ := findAvailableFileName(c.Options["savelocation"], name)
 	err = ioutil.WriteFile(savePath, file, 0644)
 	if err != nil {
 		c.SetMessage("Error writing file: "+err.Error(), true)
@@ -545,7 +547,9 @@ func (c *client) saveFileFromData(d, name string) {
 	c.SetMessage(fmt.Sprintf("Saving %s ...", name), false)
 	c.DrawMessage()
 
-	savePath := filepath.Join(c.Options["savelocation"], name)
+	// We are ignoring the error here since WriteFile will
+	// generate the same error, and will handle the messaging
+	savePath, _ := findAvailableFileName(c.Options["savelocation"], name)
 	err := ioutil.WriteFile(savePath, data, 0644)
 	if err != nil {
 		c.SetMessage("Error writing file: "+err.Error(), true)
@@ -1065,3 +1069,21 @@ func MakeClient(name string) *client {
 	c := client{0, 0, defaultOptions, "", false, MakePages(), MakeBookmarks(), MakeHeadbar(name), MakeFootbar(), gemini.MakeTofuDigest()}
 	return &c
 }
+
+func findAvailableFileName(fpath, fname string) (string, error) {
+	savePath := filepath.Join(fpath, fname)
+	_, fileErr := os.Stat(savePath) 
+
+	for suffix := 1; fileErr == nil; suffix++ {
+		fn := fmt.Sprintf("%s.%d", fname, suffix)
+		savePath = filepath.Join(fpath, fn)
+		_, fileErr = os.Stat(savePath) 
+
+		if !os.IsNotExist(fileErr) && fileErr != nil {
+			return savePath, fileErr
+		}
+	}
+
+	return savePath, nil
+}
+
