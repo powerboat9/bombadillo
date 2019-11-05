@@ -3,7 +3,7 @@ PREFIX := /usr/local
 EXEC_PREFIX := ${PREFIX}
 BINDIR := ${EXEC_PREFIX}/bin
 DATAROOTDIR := ${PREFIX}/share
-MANDIR := ${DATAROOTDIR}/share/man
+MANDIR := ${DATAROOTDIR}/man
 MAN1DIR := ${MANDIR}/man1
 
 # Use a dateformat rather than -I flag since OSX
@@ -46,4 +46,3 @@ clean:
 uninstall: clean
 	rm -f ${DESTDIR}${MAN1DIR}/bombadillo.1.gz
 	rm -f ${DESTDIR}${BINDIR}/${BINARY}
-

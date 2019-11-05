@@ -70,31 +70,28 @@ The installation location can be overridden at compile time, which can be very u
 ```shell
 git clone https://tildegit.org/sloum/bombadillo.git
 cd bombadillo
-sudo make DESTDIR=/some/directory install
+sudo make install PREFIX=/some/directory
 ```
 
 There are two things to know about when using the above format:
-1. The above would install Bombadillo to `/some/directory/usr/local/bin`, _not_ to `/some/directory`. So you will want to make sure your `$PATH` is set accordingly.
-2. Using the above will install the man page to `/some/directory/usr/local/share/man`, rather than its usual location. You will want to update your `manpath` accordingly.
+1. The above would install Bombadillo to `/some/directory/bin`, _not_ to `/some/directory`. So you will want to make sure your `$PATH` is set accordingly.
+2. Using the above will install the man page to `/some/directory/share/man/man1`, rather than its usual location. You will want to update your `manpath` accordingly.
+
+There are other overrides available - please review the [Makefile](Makefile) for more information.
 
 #### Uninstall
 
-If you used the makefile to install Bombadillo then uninstalling is very simple. From the Bombadillo source folder run:
+If you used the Makefile to install Bombadillo then uninstalling is very simple. From the Bombadillo source folder run:
 
 ```shell
 sudo make uninstall
 ```
 
-If you used a custom `DESTDIR` value during install, you will need to supply it when uninstalling:
+If you used a custom `PREFIX` value during install, you will need to supply it when uninstalling:
+
 ```shell
-sudo make DESTDIR=/some/directory uninstall
+sudo make uninstall PREFIX=/some/directory
 ```
-make PREFIX=~ install
-```
-
-You can then add `~/bin` to your PATH environment variable, and `~/share/man` to your manpath.
-
-The `PREFIX` option can be used to install Bombadillo to any location different to `/usr/local`.
 
 Uninstall will clean up any build files, remove the installed binary, and remove the man page from the system. If will _not_ remove any directories created as a part of the installation, nor will it remove any Bombadillo user configuration files.
 
