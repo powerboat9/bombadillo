@@ -1,3 +1,4 @@
+GOCMD := go
 BINARY := bombadillo
 PREFIX := /usr/local
 EXEC_PREFIX := ${PREFIX}
@@ -21,7 +22,7 @@ LDFLAGS  := -ldflags "-s -X main.version=${VERSION} -X main.build=${BUILD_TIME}"
 
 .PHONY: build
 build:
-	go build ${LDFLAGS} -o ${BINARY}
+	${GOCMD} build ${LDFLAGS} -o ${BINARY}
 
 .PHONY: install
 install: install-bin install-man clean
@@ -39,7 +40,7 @@ install-bin: build
 
 .PHONY: clean
 clean: 
-	go clean
+	${GOCMD} clean
 	rm -f ./bombadillo.1.gz 2> /dev/null
 
 .PHONY: uninstall
