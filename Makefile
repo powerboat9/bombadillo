@@ -6,6 +6,7 @@ BINDIR := ${EXEC_PREFIX}/bin
 DATAROOTDIR := ${PREFIX}/share
 MANDIR := ${DATAROOTDIR}/man
 MAN1DIR := ${MANDIR}/man1
+test : GOCMD := go1.11.13
 
 # Use a dateformat rather than -I flag since OSX
 # does not support -I. It also doesn't support 
@@ -47,3 +48,6 @@ clean:
 uninstall: clean
 	rm -f ${DESTDIR}${MAN1DIR}/bombadillo.1.gz
 	rm -f ${DESTDIR}${BINDIR}/${BINARY}
+
+.PHONY: test
+test: clean build
