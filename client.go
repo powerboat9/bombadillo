@@ -369,7 +369,7 @@ func (c *client) doCommand(action string, values []string) {
 
 func (c *client) doCommandAs(action string, values []string) {
 	if len(values) < 2 {
-		c.SetMessage(fmt.Sprintf("Expected 1 argument, received %d", len(values)), true)
+		c.SetMessage(fmt.Sprintf("Expected 2+ arguments, received %d", len(values)), true)
 		c.DrawMessage()
 		return
 	}
@@ -400,17 +400,6 @@ func (c *client) doCommandAs(action string, values []string) {
 		}
 	case "SEARCH":
 		c.search(strings.Join(values, " "), "", "")
-	case "WRITE", "W":
-		u, err := MakeUrl(values[0])
-		if err != nil {
-			c.SetMessage(err.Error(), true)
-			c.DrawMessage()
-			return
-		}
-		fileName := strings.Join(values[1:], "-")
-		fileName = strings.Trim(fileName, " \t\r\n\a\f\v")
-		c.saveFile(u, fileName)
-
 	case "SET", "S":
 		if _, ok := c.Options[values[0]]; ok {
 			val := strings.Join(values[1:], " ")
@@ -438,6 +427,7 @@ func (c *client) doCommandAs(action string, values []string) {
 		return
 	}
 	c.SetMessage(fmt.Sprintf("Unknown command structure"), true)
+	c.DrawMessage()
 }
 
 func (c *client) doLinkCommandAs(action, target string, values []string) {

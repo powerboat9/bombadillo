@@ -189,29 +189,17 @@ Sets the value for a given configuration setting. \fIs\fP can be used instead of
 .TP
 .B
 write .
-Writes the current document to a file. The file is named by the last component of the url path. If the last component is blank or \fI/\fP a default name will be used. The file saves to the folder set by the \fIsavelocation\fP setting. \fIw\fP can be entered rather than the full \fIwrite\fP.
+Writes the current document to a file. The file is named by the last component of the url path. If the last component is blank or \fI/\fP a default name will be used. The file saves to the directory set by the \fIsavelocation\fP setting. \fIw\fP can be entered rather than the full \fIwrite\fP.
 .TP
 .B
 write [url]
-Writes data from a given url to a file. The file is named by the last component of the url path. If the last component is blank or \fI/\fP a default name will be used. The file saves to the folder set by the \fIsavelocation\fP setting. \fIw\fP can be entered rather than the full \fIwrite\fP.
+Writes data from a given url to a file. The file is named by the last component of the url path. If the last component is blank or \fI/\fP a default name will be used. The file saves to the directory set by the \fIsavelocation\fP setting. \fIw\fP can be entered rather than the full \fIwrite\fP.
 .TP
 .B
-write [link id]]
-Writes data from a given link id in the current document to a file. The file is named by the last component of the url path. If the last component is blank or \fI/\fP a default name will be used. The file saves to the folder set by the \fIsavelocation\fP setting. \fIw\fP can be entered rather than the full \fIwrite\fP.
-.TP
-.B
-write . [filename\.\.\.]
-Writes the current document to a file. The file is named by the filename argument should should not include a leading \fI/\fP. The file saves to the folder set by the \fIsavelocation\fP setting. \fIw\fP can be entered rather than the full \fIwrite\fP.
-.TP
-.B
-write [url] [filename\.\.\.]
-Writes data from a given url to a file. The file is named by the filename argument should should not include a leading \fI/\fP. The file saves to the folder set by the \fIsavelocation\fP setting. \fIw\fP can be entered rather than the full \fIwrite\fP.
-.TP
-.B
-write [link id] [filename\.\.\.]
-Writes data from a given link id in the current document to a file. The file is named by the filename argument should should not include a leading \fI/\fP. The file saves to the folder set by the \fIsavelocation\fP setting. \fIw\fP can be entered rather than the full \fIwrite\fP.
+write [link id]
+Writes data from a given link id in the current document to a file. The file is named by the last component of the url path. If the last component is blank or \fI/\fP a default name will be used. The file saves to the directory set by the \fIsavelocation\fP setting. \fIw\fP can be entered rather than the full \fIwrite\fP.
 .SH FILES
-\fBbombadillo\fP keeps a hidden configuration file in a user's home directory. The file is a simplified ini file titled \fI.bombadillo.ini\fP. It is generated when a user first loads \fBbombadillo\fP and is updated with bookmarks and settings as a user adds them. The file can be directly edited, but it is best to use the SET command to update settings whenever possible. To return to the state of a fresh install, simply remove the file and a new one will be generated with the \fBbombadillo\fP defaults. On some systems an administrator may set the configuration file location to somewhere other than a user's home folder. If you do not see the file where you expect it, contact your system administrator.
+\fBbombadillo\fP keeps a hidden configuration file in a user's home directory. The file is a simplified ini file titled \fI.bombadillo.ini\fP. It is generated when a user first loads \fBbombadillo\fP and is updated with bookmarks and settings as a user adds them. The file can be directly edited, but it is best to use the SET command to update settings whenever possible. To return to the state of a fresh install, simply remove the file and a new one will be generated with the \fBbombadillo\fP defaults. On some systems an administrator may set the configuration file location to somewhere other than a user's home directory. If you do not see the file where you expect it, contact your system administrator.
 .SH SETTINGS
 The following is a list of the settings that \fBbombadillo\fP recognizes, as well as a description of their valid values.
 .TP
@@ -230,7 +218,7 @@ Tells the client whether or not to try to follow web (http/https) links. If set 
 .TP
 .B
 savelocation
-The path to the folder that \fBbombadillo\fP should write files to. This should be a valid filepath for the system and should end in a \fI/\fP.
+The path to the directory that \fBbombadillo\fP should write files to. This must be a valid filepath for the system, must be a directory, and must already exist.
 .TP
 .B
 searchengine
