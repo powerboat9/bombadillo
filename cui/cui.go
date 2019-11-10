@@ -26,19 +26,6 @@ var Shapes = map[string]string{
 	"abr":      "▟",
 }
 
-func drawShape(shape string) {
-	if val, ok := Shapes[shape]; ok {
-		fmt.Printf("%s", val)
-	} else {
-		fmt.Print("x")
-	}
-}
-
-func moveThenDrawShape(r, c int, s string) {
-	MoveCursorTo(r, c)
-	drawShape(s)
-}
-
 func MoveCursorTo(row, col int) {
 	fmt.Printf("\033[%d;%dH", row, col)
 }
