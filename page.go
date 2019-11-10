@@ -8,6 +8,9 @@ import (
 // + + +             T Y P E S               + + + \\
 //--------------------------------------------------\\
 
+// Page represents a visited URL's contents; including
+// the raw content, wrapped content, link slice, URL,
+// and the current scroll position
 type Page struct {
 	WrappedContent []string
 	RawContent     string
@@ -38,7 +41,7 @@ func (p *Page) ScrollPositionRange(termHeight int) (int, int) {
 	return p.ScrollPosition, end
 }
 
-// Performs a hard wrap to the requested
+// WrapContent performs a hard wrap to the requested
 // width and updates the WrappedContent
 // of the Page struct width a string slice
 // of the wrapped data

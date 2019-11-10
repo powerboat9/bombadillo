@@ -385,10 +385,9 @@ func (c *client) doCommandAs(action string, values []string) {
 			c.SetMessage(err.Error(), true)
 			c.DrawMessage()
 			return
-		} else {
-			c.SetMessage(msg, false)
-			c.DrawMessage()
 		}
+		c.SetMessage(msg, false)
+		c.DrawMessage()
 
 		err = saveConfig()
 		if err != nil {
@@ -437,7 +436,7 @@ func (c *client) doLinkCommandAs(action, target string, values []string) {
 		return
 	}
 
-	num -= 1
+	num--
 
 	links := c.PageState.History[c.PageState.Position].Links
 	if num >= len(links) || num < 0 {
@@ -456,10 +455,9 @@ func (c *client) doLinkCommandAs(action, target string, values []string) {
 			c.SetMessage(err.Error(), true)
 			c.DrawMessage()
 			return
-		} else {
-			c.SetMessage(msg, false)
-			c.DrawMessage()
 		}
+		c.SetMessage(msg, false)
+		c.DrawMessage()
 
 		err = saveConfig()
 		if err != nil {
@@ -564,10 +562,9 @@ func (c *client) doLinkCommand(action, target string) {
 			c.SetMessage(err.Error(), true)
 			c.DrawMessage()
 			return
-		} else {
-			c.SetMessage(msg, false)
-			c.DrawMessage()
 		}
+		c.SetMessage(msg, false)
+		c.DrawMessage()
 
 		err = saveConfig()
 		if err != nil {
@@ -585,7 +582,7 @@ func (c *client) doLinkCommand(action, target string) {
 		}
 		c.Visit(c.BookMarks.Links[num])
 	case "CHECK", "C":
-		num -= 1
+		num--
 
 		links := c.PageState.History[c.PageState.Position].Links
 		if num >= len(links) || num < 0 {
@@ -1052,6 +1049,7 @@ func (c *client) handleWeb(u Url) {
 // + + +          F U N C T I O N S          + + + \\
 //--------------------------------------------------\\
 
+// Creates a client instance and names the client after the string that is passed in
 func MakeClient(name string) *client {
 	c := client{0, 0, defaultOptions, "", false, MakePages(), MakeBookmarks(), MakeHeadbar(name), MakeFootbar(), gemini.MakeTofuDigest()}
 	return &c

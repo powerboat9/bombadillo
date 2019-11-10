@@ -41,7 +41,7 @@ func (p *Pages) Add(pg Page) {
 		}
 		p.History[len(p.History)-1] = pg
 	} else {
-		p.Position += 1
+		p.Position++
 		p.Length = p.Position + 1
 		p.History[p.Position] = pg
 	}

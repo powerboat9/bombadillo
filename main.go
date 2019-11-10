@@ -82,9 +82,8 @@ func validateOpt(opt, val string) bool {
 			}
 		}
 		return false
-	} else {
-		return true
 	}
+	return true
 }
 
 func lowerCaseOpt(opt, val string) string {
