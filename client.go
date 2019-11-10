@@ -424,10 +424,9 @@ func (c *client) doCommandAs(action string, values []string) {
 		}
 		c.SetMessage(fmt.Sprintf("Unable to set %s, it does not exist", values[0]), true)
 		c.DrawMessage()
-		return
+	default:
+		c.SetMessage(fmt.Sprintf("Unknown command structure"), true)
 	}
-	c.SetMessage(fmt.Sprintf("Unknown command structure"), true)
-	c.DrawMessage()
 }
 
 func (c *client) doLinkCommandAs(action, target string, values []string) {
