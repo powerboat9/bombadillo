@@ -2,8 +2,8 @@ package finger
 
 import (
 	"fmt"
-	"net"
 	"io/ioutil"
+	"net"
 	"time"
 )
 

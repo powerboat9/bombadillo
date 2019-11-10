@@ -10,9 +10,8 @@ import (
 
 type Headbar struct {
 	title string
-	url string
+	url   string
 }
-
 
 //------------------------------------------------\\
 // + + +           R E C E I V E R S         + + + \\
@@ -27,7 +26,6 @@ func (h *Headbar) Render(width int, theme string) string {
 	}
 }
 
-
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\
 //--------------------------------------------------\\
@@ -35,4 +33,3 @@ func (h *Headbar) Render(width int, theme string) string {
 func MakeHeadbar(title string) Headbar {
 	return Headbar{title, ""}
 }
-

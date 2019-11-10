@@ -44,7 +44,7 @@ func IsTextFile(url string) bool {
 	}
 
 	// If we made it here, there is no content-type header.
-	// So in the event of the unknown, lets render to the 
+	// So in the event of the unknown, lets render to the
 	// screen. This will allow redirects to get rendered
 	// as well.
 	return true
@@ -89,4 +89,3 @@ func Fetch(url string) ([]byte, error) {
 
 	return bodyBytes, nil
 }
-

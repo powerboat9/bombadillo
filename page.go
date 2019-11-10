@@ -10,9 +10,9 @@ import (
 
 type Page struct {
 	WrappedContent []string
-	RawContent string
-	Links []string
-	Location Url
+	RawContent     string
+	Links          []string
+	Location       Url
 	ScrollPosition int
 }
 
@@ -22,7 +22,7 @@ type Page struct {
 
 func (p *Page) ScrollPositionRange(termHeight int) (int, int) {
 	termHeight -= 3
-	if len(p.WrappedContent) - p.ScrollPosition < termHeight {
+	if len(p.WrappedContent)-p.ScrollPosition < termHeight {
 		p.ScrollPosition = len(p.WrappedContent) - termHeight
 	}
 	if p.ScrollPosition < 0 {
@@ -51,7 +51,7 @@ func (p *Page) WrapContent(width int) {
 			content.WriteRune(ch)
 			counter = 0
 		} else if ch == '\t' {
-			if counter + 4 < width {
+			if counter+4 < width {
 				content.WriteString("    ")
 				counter += 4
 			} else {
@@ -69,7 +69,7 @@ func (p *Page) WrapContent(width int) {
 				content.WriteRune('\n')
 				counter = 0
 				if p.Location.Mime == "1" {
-					spacer := "           " 
+					spacer := "           "
 					content.WriteString(spacer)
 					counter += len(spacer)
 				}
@@ -89,4 +89,3 @@ func MakePage(url Url, content string, links []string) Page {
 	p := Page{make([]string, 0), content, links, url, 0}
 	return p
 }
-

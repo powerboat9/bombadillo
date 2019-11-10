@@ -877,8 +877,7 @@ func (c *client) Visit(url string) {
 	}
 }
 
-
-// +++ Begin Protocol Handlers +++ 
+// +++ Begin Protocol Handlers +++
 
 func (c *client) handleGopher(u Url) {
 	if u.DownloadOnly {
@@ -1022,15 +1021,15 @@ func (c *client) handleWeb(u Url) {
 			c.SetMessage("The file is non-text: writing to disk...", false)
 			c.DrawMessage()
 			var fn string
-			if i := strings.LastIndex(u.Full, "/"); i > 0 && i + 1 < len(u.Full) {
-				fn = u.Full[i + 1:]
+			if i := strings.LastIndex(u.Full, "/"); i > 0 && i+1 < len(u.Full) {
+				fn = u.Full[i+1:]
 			} else {
 				fn = "bombadillo.download"
 			}
 			c.saveFile(u, fn)
 		}
 
-	// Open in default web browser if available
+		// Open in default web browser if available
 	} else {
 		if strings.ToUpper(c.Options["terminalonly"]) == "TRUE" {
 			c.SetMessage("'terminalonly' is set to true and 'lynxmode' is not enabled, cannot open web link", false)
@@ -1049,7 +1048,6 @@ func (c *client) handleWeb(u Url) {
 	}
 }
 
-
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\
 //--------------------------------------------------\\
@@ -1061,12 +1059,12 @@ func MakeClient(name string) *client {
 
 func findAvailableFileName(fpath, fname string) (string, error) {
 	savePath := filepath.Join(fpath, fname)
-	_, fileErr := os.Stat(savePath) 
+	_, fileErr := os.Stat(savePath)
 
 	for suffix := 1; fileErr == nil; suffix++ {
 		fn := fmt.Sprintf("%s.%d", fname, suffix)
 		savePath = filepath.Join(fpath, fn)
-		_, fileErr = os.Stat(savePath) 
+		_, fileErr = os.Stat(savePath)
 
 		if !os.IsNotExist(fileErr) && fileErr != nil {
 			return savePath, fileErr
@@ -1075,4 +1073,3 @@ func findAvailableFileName(fpath, fname string) (string, error) {
 
 	return savePath, nil
 }
-

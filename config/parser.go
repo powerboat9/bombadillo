@@ -21,11 +21,11 @@ type Parser struct {
 
 type Config struct {
 	// Bookmarks gopher.Bookmarks
-	Bookmarks	struct {
-		Titles, Links []string 
+	Bookmarks struct {
+		Titles, Links []string
 	}
-	Settings  []KeyValue
-	Certs     []KeyValue
+	Settings []KeyValue
+	Certs    []KeyValue
 }
 
 type KeyValue struct {

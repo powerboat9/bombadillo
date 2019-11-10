@@ -12,12 +12,12 @@ import (
 //--------------------------------------------------\\
 
 type Bookmarks struct {
-	IsOpen bool
+	IsOpen    bool
 	IsFocused bool
-	Position int
-	Length int
-	Titles []string
-	Links []string
+	Position  int
+	Length    int
+	Titles    []string
+	Links     []string
 }
 
 //------------------------------------------------\\
@@ -89,7 +89,7 @@ func (b Bookmarks) Render(termwidth, termheight int) []string {
 	var walll, wallr, floor, ceil, tr, tl, br, bl string
 	if termwidth < 40 {
 		width = termwidth
-	} 
+	}
 	if b.IsFocused {
 		walll = cui.Shapes["awalll"]
 		wallr = cui.Shapes["awallr"]
@@ -115,11 +115,11 @@ func (b Bookmarks) Render(termwidth, termheight int) []string {
 	top := fmt.Sprintf("%s%s%s", tl, strings.Repeat(ceil, contentWidth), tr)
 	out = append(out, top)
 	marks := b.List()
-	for i := 0; i < termheight - 2; i++ {
-		if i + b.Position >= len(b.Titles) {
+	for i := 0; i < termheight-2; i++ {
+		if i+b.Position >= len(b.Titles) {
 			out = append(out, fmt.Sprintf("%s%-*.*s%s", walll, contentWidth, contentWidth, "", wallr))
 		} else {
-			out = append(out, fmt.Sprintf("%s%-*.*s%s", walll, contentWidth, contentWidth, marks[i + b.Position], wallr))
+			out = append(out, fmt.Sprintf("%s%-*.*s%s", walll, contentWidth, contentWidth, marks[i+b.Position], wallr))
 		}
 	}
 
@@ -132,7 +132,6 @@ func (b Bookmarks) Render(termwidth, termheight int) []string {
 // either here with a scroll up/down or in the client
 // code for scroll
 
-
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\
 //--------------------------------------------------\\
@@ -140,4 +139,3 @@ func (b Bookmarks) Render(termwidth, termheight int) []string {
 func MakeBookmarks() Bookmarks {
 	return Bookmarks{false, false, 0, 0, make([]string, 0), make([]string, 0)}
 }
-

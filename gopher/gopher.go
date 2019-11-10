@@ -83,15 +83,14 @@ func Visit(gophertype, host, port, resource string) (string, []string, error) {
 	resp, err := Retrieve(host, port, resource)
 	if err != nil {
 		return "", []string{}, err
-	} 
-	
+	}
+
 	text := string(resp)
 	links := []string{}
 
 	if IsDownloadOnly(gophertype) {
 		return text, []string{}, nil
 	}
-
 
 	if gophertype == "1" {
 		text, links = parseMap(text)
@@ -116,7 +115,7 @@ func isWebLink(resource string) (string, bool) {
 	return "", false
 }
 
-func parseMap(text string) (string, []string)  {
+func parseMap(text string) (string, []string) {
 	splitContent := strings.Split(text, "\n")
 	links := make([]string, 0, 10)
 
@@ -135,7 +134,7 @@ func parseMap(text string) (string, []string)  {
 		} else {
 			title = ""
 		}
-		
+
 		if len(line) > 1 && len(line[0]) > 0 && string(line[0][0]) == "i" {
 			splitContent[i] = "           " + string(title)
 		} else if len(line) >= 4 {
