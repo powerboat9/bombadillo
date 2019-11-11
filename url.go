@@ -12,6 +12,11 @@ import (
 // + + +             T Y P E S               + + + \\
 //--------------------------------------------------\\
 
+// Url is a struct representing the different pieces
+// of a url. This custom struct is used rather than the
+// built-in url library so-as to support gopher URLs, as
+// well as track mime-type and renderability (can the
+// response to the url be rendered as text in the client).
 type Url struct {
 	Scheme       string
 	Host         string

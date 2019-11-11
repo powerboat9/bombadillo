@@ -23,6 +23,8 @@ type Page struct {
 // + + +           R E C E I V E R S         + + + \\
 //--------------------------------------------------\\
 
+// ScrollPositionRange may not be in actual usage....
+// TODO: find where this is being used
 func (p *Page) ScrollPositionRange(termHeight int) (int, int) {
 	termHeight -= 3
 	if len(p.WrappedContent)-p.ScrollPosition < termHeight {
@@ -88,6 +90,7 @@ func (p *Page) WrapContent(width int) {
 // + + +          F U N C T I O N S          + + + \\
 //--------------------------------------------------\\
 
+// MakePage returns a Page struct with default values
 func MakePage(url Url, content string, links []string) Page {
 	p := Page{make([]string, 0), content, links, url, 0}
 	return p

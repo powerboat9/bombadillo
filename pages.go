@@ -8,6 +8,9 @@ import (
 // + + +             T Y P E S               + + + \\
 //--------------------------------------------------\\
 
+// Pages is a struct that represents the history of the client.
+// It functions as a container for the pages (history array) and
+// tracks the current history length and location.
 type Pages struct {
 	Position int
 	Length   int
@@ -18,6 +21,10 @@ type Pages struct {
 // + + +           R E C E I V E R S         + + + \\
 //--------------------------------------------------\\
 
+// NavigateHistory takes a positive or negative integer
+// and updates the current history position. Checks are done
+// to make sure that the position moved to is a valid history
+// location. Returns an error or nil.
 func (p *Pages) NavigateHistory(qty int) error {
 	newPosition := p.Position + qty
 	if newPosition < 0 {
@@ -30,6 +37,10 @@ func (p *Pages) NavigateHistory(qty int) error {
 	return nil
 }
 
+// Add gets passed a Page, which gets added to the history
+// arrayr. Add also updates the current length and position
+// of the Pages struct to which it belongs. Add also shifts
+// off array items if necessary.
 func (p *Pages) Add(pg Page) {
 	if p.Position == p.Length-1 && p.Length < len(p.History) {
 		p.History[p.Length] = pg
@@ -47,6 +58,8 @@ func (p *Pages) Add(pg Page) {
 	}
 }
 
+// Render wraps the content for the current page and returns
+// the page content as a string slice
 func (p *Pages) Render(termHeight, termWidth int) []string {
 	if p.Length < 1 {
 		return make([]string, 0)
@@ -79,6 +92,7 @@ func (p *Pages) Render(termHeight, termWidth int) []string {
 // + + +          F U N C T I O N S          + + + \\
 //--------------------------------------------------\\
 
+// MakePages returns a Pages struct with default values
 func MakePages() Pages {
 	return Pages{-1, 0, [20]Page{}}
 }

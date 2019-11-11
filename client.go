@@ -51,7 +51,7 @@ func (c *client) GetSizeOnce() {
 		os.Exit(5)
 	}
 	var h, w int
-	fmt.Sscan(string(out), &h, &w)
+	_, _ = fmt.Sscan(string(out), &h, &w)
 	c.Height = h
 	c.Width = w
 }
@@ -70,7 +70,7 @@ func (c *client) GetSize() {
 			os.Exit(5)
 		}
 		var h, w int
-		fmt.Sscan(string(out), &h, &w)
+		_, _ = fmt.Sscan(string(out), &h, &w)
 		if h != c.Height || w != c.Width {
 			c.Height = h
 			c.Width = w
@@ -268,7 +268,7 @@ func (c *client) routeCommandInput(com *cmdparse.Command) error {
 	case cmdparse.DOLINKAS:
 		c.doLinkCommandAs(com.Action, com.Target, com.Value)
 	default:
-		return fmt.Errorf("Unknown command entry!")
+		return fmt.Errorf("Unknown command entry")
 	}
 
 	return err
@@ -1049,7 +1049,8 @@ func (c *client) handleWeb(u Url) {
 // + + +          F U N C T I O N S          + + + \\
 //--------------------------------------------------\\
 
-// Creates a client instance and names the client after the string that is passed in
+// MakeClient returns a client struct and names the client after
+// the string that is passed in
 func MakeClient(name string) *client {
 	c := client{0, 0, defaultOptions, "", false, MakePages(), MakeBookmarks(), MakeHeadbar(name), MakeFootbar(), gemini.MakeTofuDigest()}
 	return &c
