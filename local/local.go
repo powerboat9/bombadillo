@@ -18,7 +18,6 @@ func Open(address string) (string, error) {
 	}
 	defer file.Close()
 
-
 	if pathIsDir(address) {
 		fileList, err := file.Readdirnames(0)
 		if err != nil {
@@ -40,21 +39,20 @@ func Open(address string) (string, error) {
 	return string(bytes), nil
 }
 
-
 func pathExists(p string) bool {
 	exists := true
 
-  if _, err := os.Stat(p); os.IsNotExist(err) {
-    exists = false
-  }
+	if _, err := os.Stat(p); os.IsNotExist(err) {
+		exists = false
+	}
 
-  return exists
+	return exists
 }
 
 func pathIsDir(p string) bool {
-  info, err := os.Stat(p)
+	info, err := os.Stat(p)
 	if err != nil {
 		return false
-  }
+	}
 	return info.IsDir()
 }

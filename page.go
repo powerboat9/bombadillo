@@ -8,11 +8,14 @@ import (
 // + + +             T Y P E S               + + + \\
 //--------------------------------------------------\\
 
+// Page represents a visited URL's contents; including
+// the raw content, wrapped content, link slice, URL,
+// and the current scroll position
 type Page struct {
 	WrappedContent []string
-	RawContent string
-	Links []string
-	Location Url
+	RawContent     string
+	Links          []string
+	Location       Url
 	ScrollPosition int
 }
 
@@ -20,9 +23,11 @@ type Page struct {
 // + + +           R E C E I V E R S         + + + \\
 //--------------------------------------------------\\
 
+// ScrollPositionRange may not be in actual usage....
+// TODO: find where this is being used
 func (p *Page) ScrollPositionRange(termHeight int) (int, int) {
 	termHeight -= 3
-	if len(p.WrappedContent) - p.ScrollPosition < termHeight {
+	if len(p.WrappedContent)-p.ScrollPosition < termHeight {
 		p.ScrollPosition = len(p.WrappedContent) - termHeight
 	}
 	if p.ScrollPosition < 0 {
@@ -38,7 +43,7 @@ func (p *Page) ScrollPositionRange(termHeight int) (int, int) {
 	return p.ScrollPosition, end
 }
 
-// Performs a hard wrap to the requested
+// WrapContent performs a hard wrap to the requested
 // width and updates the WrappedContent
 // of the Page struct width a string slice
 // of the wrapped data
@@ -51,7 +56,7 @@ func (p *Page) WrapContent(width int) {
 			content.WriteRune(ch)
 			counter = 0
 		} else if ch == '\t' {
-			if counter + 4 < width {
+			if counter+4 < width {
 				content.WriteString("    ")
 				counter += 4
 			} else {
@@ -69,7 +74,7 @@ func (p *Page) WrapContent(width int) {
 				content.WriteRune('\n')
 				counter = 0
 				if p.Location.Mime == "1" {
-					spacer := "           " 
+					spacer := "           "
 					content.WriteString(spacer)
 					counter += len(spacer)
 				}
@@ -85,8 +90,8 @@ func (p *Page) WrapContent(width int) {
 // + + +          F U N C T I O N S          + + + \\
 //--------------------------------------------------\\
 
+// MakePage returns a Page struct with default values
 func MakePage(url Url, content string, links []string) Page {
 	p := Page{make([]string, 0), content, links, url, 0}
 	return p
 }
-

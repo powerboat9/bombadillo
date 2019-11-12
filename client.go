@@ -51,7 +51,7 @@ func (c *client) GetSizeOnce() {
 		os.Exit(5)
 	}
 	var h, w int
-	fmt.Sscan(string(out), &h, &w)
+	_, _ = fmt.Sscan(string(out), &h, &w)
 	c.Height = h
 	c.Width = w
 }
@@ -70,7 +70,7 @@ func (c *client) GetSize() {
 			os.Exit(5)
 		}
 		var h, w int
-		fmt.Sscan(string(out), &h, &w)
+		_, _ = fmt.Sscan(string(out), &h, &w)
 		if h != c.Height || w != c.Width {
 			c.Height = h
 			c.Width = w
@@ -268,7 +268,7 @@ func (c *client) routeCommandInput(com *cmdparse.Command) error {
 	case cmdparse.DOLINKAS:
 		c.doLinkCommandAs(com.Action, com.Target, com.Value)
 	default:
-		return fmt.Errorf("Unknown command entry!")
+		return fmt.Errorf("Unknown command entry")
 	}
 
 	return err
@@ -385,10 +385,9 @@ func (c *client) doCommandAs(action string, values []string) {
 			c.SetMessage(err.Error(), true)
 			c.DrawMessage()
 			return
-		} else {
-			c.SetMessage(msg, false)
-			c.DrawMessage()
 		}
+		c.SetMessage(msg, false)
+		c.DrawMessage()
 
 		err = saveConfig()
 		if err != nil {
@@ -437,7 +436,7 @@ func (c *client) doLinkCommandAs(action, target string, values []string) {
 		return
 	}
 
-	num -= 1
+	num--
 
 	links := c.PageState.History[c.PageState.Position].Links
 	if num >= len(links) || num < 0 {
@@ -456,10 +455,9 @@ func (c *client) doLinkCommandAs(action, target string, values []string) {
 			c.SetMessage(err.Error(), true)
 			c.DrawMessage()
 			return
-		} else {
-			c.SetMessage(msg, false)
-			c.DrawMessage()
 		}
+		c.SetMessage(msg, false)
+		c.DrawMessage()
 
 		err = saveConfig()
 		if err != nil {
@@ -564,10 +562,9 @@ func (c *client) doLinkCommand(action, target string) {
 			c.SetMessage(err.Error(), true)
 			c.DrawMessage()
 			return
-		} else {
-			c.SetMessage(msg, false)
-			c.DrawMessage()
 		}
+		c.SetMessage(msg, false)
+		c.DrawMessage()
 
 		err = saveConfig()
 		if err != nil {
@@ -585,7 +582,7 @@ func (c *client) doLinkCommand(action, target string) {
 		}
 		c.Visit(c.BookMarks.Links[num])
 	case "CHECK", "C":
-		num -= 1
+		num--
 
 		links := c.PageState.History[c.PageState.Position].Links
 		if num >= len(links) || num < 0 {
@@ -877,8 +874,7 @@ func (c *client) Visit(url string) {
 	}
 }
 
-
-// +++ Begin Protocol Handlers +++ 
+// +++ Begin Protocol Handlers +++
 
 func (c *client) handleGopher(u Url) {
 	if u.DownloadOnly {
@@ -1022,15 +1018,15 @@ func (c *client) handleWeb(u Url) {
 			c.SetMessage("The file is non-text: writing to disk...", false)
 			c.DrawMessage()
 			var fn string
-			if i := strings.LastIndex(u.Full, "/"); i > 0 && i + 1 < len(u.Full) {
-				fn = u.Full[i + 1:]
+			if i := strings.LastIndex(u.Full, "/"); i > 0 && i+1 < len(u.Full) {
+				fn = u.Full[i+1:]
 			} else {
 				fn = "bombadillo.download"
 			}
 			c.saveFile(u, fn)
 		}
 
-	// Open in default web browser if available
+		// Open in default web browser if available
 	} else {
 		if strings.ToUpper(c.Options["terminalonly"]) == "TRUE" {
 			c.SetMessage("'terminalonly' is set to true and 'lynxmode' is not enabled, cannot open web link", false)
@@ -1049,11 +1045,12 @@ func (c *client) handleWeb(u Url) {
 	}
 }
 
-
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\
 //--------------------------------------------------\\
 
+// MakeClient returns a client struct and names the client after
+// the string that is passed in
 func MakeClient(name string) *client {
 	c := client{0, 0, defaultOptions, "", false, MakePages(), MakeBookmarks(), MakeHeadbar(name), MakeFootbar(), gemini.MakeTofuDigest()}
 	return &c
@@ -1061,12 +1058,12 @@ func MakeClient(name string) *client {
 
 func findAvailableFileName(fpath, fname string) (string, error) {
 	savePath := filepath.Join(fpath, fname)
-	_, fileErr := os.Stat(savePath) 
+	_, fileErr := os.Stat(savePath)
 
 	for suffix := 1; fileErr == nil; suffix++ {
 		fn := fmt.Sprintf("%s.%d", fname, suffix)
 		savePath = filepath.Join(fpath, fn)
-		_, fileErr = os.Stat(savePath) 
+		_, fileErr = os.Stat(savePath)
 
 		if !os.IsNotExist(fileErr) && fileErr != nil {
 			return savePath, fileErr
@@ -1075,4 +1072,3 @@ func findAvailableFileName(fpath, fname string) (string, error) {
 
 	return savePath, nil
 }
-

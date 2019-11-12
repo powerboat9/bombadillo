@@ -11,19 +11,23 @@ import (
 // + + +             T Y P E S               + + + \\
 //--------------------------------------------------\\
 
+// Bookmarks represents the contents of the bookmarks
+// bar, as well as its visibility, focus, and scroll
+// state.
 type Bookmarks struct {
-	IsOpen bool
+	IsOpen    bool
 	IsFocused bool
-	Position int
-	Length int
-	Titles []string
-	Links []string
+	Position  int
+	Length    int
+	Titles    []string
+	Links     []string
 }
 
 //------------------------------------------------\\
 // + + +           R E C E I V E R S         + + + \\
 //--------------------------------------------------\\
 
+// Add a bookmark to the bookmarks struct
 func (b *Bookmarks) Add(v []string) (string, error) {
 	if len(v) < 2 {
 		return "", fmt.Errorf("Received %d arguments, expected 2+", len(v))
@@ -34,6 +38,7 @@ func (b *Bookmarks) Add(v []string) (string, error) {
 	return "Bookmark added successfully", nil
 }
 
+// Delete a bookmark from the bookmarks struct
 func (b *Bookmarks) Delete(i int) (string, error) {
 	if i < len(b.Titles) && len(b.Titles) == len(b.Links) {
 		b.Titles = append(b.Titles[:i], b.Titles[i+1:]...)
@@ -44,6 +49,7 @@ func (b *Bookmarks) Delete(i int) (string, error) {
 	return "", fmt.Errorf("Bookmark %d does not exist", i)
 }
 
+// ToggleOpen toggles visibility state of the bookmarks bar
 func (b *Bookmarks) ToggleOpen() {
 	b.IsOpen = !b.IsOpen
 	if b.IsOpen {
@@ -53,12 +59,15 @@ func (b *Bookmarks) ToggleOpen() {
 	}
 }
 
+// ToggleFocused toggles the focal state of the bookmarks bar
 func (b *Bookmarks) ToggleFocused() {
 	if b.IsOpen {
 		b.IsFocused = !b.IsFocused
 	}
 }
 
+// IniDump returns a string representing the current bookmarks
+// in the format that .bombadillo.ini uses
 func (b Bookmarks) IniDump() string {
 	if len(b.Titles) < 1 {
 		return ""
@@ -73,7 +82,7 @@ func (b Bookmarks) IniDump() string {
 	return out
 }
 
-// Get a list, including link nums, of bookmarks
+// List returns a list, including link nums, of bookmarks
 // as a string slice
 func (b Bookmarks) List() []string {
 	var out []string
@@ -83,13 +92,15 @@ func (b Bookmarks) List() []string {
 	return out
 }
 
+// Render returns a string slice with the contents of each
+// visual row of the bookmark bar.
 func (b Bookmarks) Render(termwidth, termheight int) []string {
 	width := 40
 	termheight -= 3
 	var walll, wallr, floor, ceil, tr, tl, br, bl string
 	if termwidth < 40 {
 		width = termwidth
-	} 
+	}
 	if b.IsFocused {
 		walll = cui.Shapes["awalll"]
 		wallr = cui.Shapes["awallr"]
@@ -115,11 +126,11 @@ func (b Bookmarks) Render(termwidth, termheight int) []string {
 	top := fmt.Sprintf("%s%s%s", tl, strings.Repeat(ceil, contentWidth), tr)
 	out = append(out, top)
 	marks := b.List()
-	for i := 0; i < termheight - 2; i++ {
-		if i + b.Position >= len(b.Titles) {
+	for i := 0; i < termheight-2; i++ {
+		if i+b.Position >= len(b.Titles) {
 			out = append(out, fmt.Sprintf("%s%-*.*s%s", walll, contentWidth, contentWidth, "", wallr))
 		} else {
-			out = append(out, fmt.Sprintf("%s%-*.*s%s", walll, contentWidth, contentWidth, marks[i + b.Position], wallr))
+			out = append(out, fmt.Sprintf("%s%-*.*s%s", walll, contentWidth, contentWidth, marks[i+b.Position], wallr))
 		}
 	}
 
@@ -128,16 +139,11 @@ func (b Bookmarks) Render(termwidth, termheight int) []string {
 	return out
 }
 
-// TODO handle scrolling of the bookmarks list
-// either here with a scroll up/down or in the client
-// code for scroll
-
-
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\
 //--------------------------------------------------\\
 
+// MakeBookmarks creates a Bookmark struct with default values
 func MakeBookmarks() Bookmarks {
 	return Bookmarks{false, false, 0, 0, make([]string, 0), make([]string, 0)}
 }
-

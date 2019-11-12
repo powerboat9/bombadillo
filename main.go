@@ -82,9 +82,8 @@ func validateOpt(opt, val string) bool {
 			}
 		}
 		return false
-	} else {
-		return true
 	}
+	return true
 }
 
 func lowerCaseOpt(opt, val string) string {
@@ -107,7 +106,7 @@ func loadConfig() error {
 
 	confparser := config.NewParser(file)
 	settings, _ = confparser.Parse()
-	file.Close()
+	_ = file.Close()
 	for _, v := range settings.Settings {
 		lowerkey := strings.ToLower(v.Key)
 		if lowerkey == "configlocation" {
@@ -129,7 +128,7 @@ func loadConfig() error {
 	}
 
 	for i, v := range settings.Bookmarks.Titles {
-		bombadillo.BookMarks.Add([]string{v, settings.Bookmarks.Links[i]})
+		_, _ = bombadillo.BookMarks.Add([]string{v, settings.Bookmarks.Links[i]})
 	}
 
 	for _, v := range settings.Certs {
@@ -157,7 +156,7 @@ func handleSignals(c <-chan os.Signal) {
 		switch <-c {
 		case syscall.SIGTSTP:
 			cui.CleanupTerm()
-			syscall.Kill(syscall.Getpid(), syscall.SIGSTOP)
+			_ = syscall.Kill(syscall.Getpid(), syscall.SIGSTOP)
 		case syscall.SIGCONT:
 			cui.InitTerm()
 			bombadillo.Draw()
@@ -179,7 +178,7 @@ Examples: bombadillo gopher://bombadillo.colorfield.space
 
 Options: 
 `
-	fmt.Fprint(os.Stdout, art)
+	_, _ = fmt.Fprint(os.Stdout, art)
 	flag.PrintDefaults()
 }
 

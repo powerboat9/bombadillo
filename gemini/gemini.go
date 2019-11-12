@@ -11,21 +11,18 @@ import (
 	"time"
 )
 
-
 type Capsule struct {
-	MimeMaj	string
+	MimeMaj string
 	MimeMin string
-	Status	int
-	Content	string
+	Status  int
+	Content string
 	Links   []string
 }
 
-
 type TofuDigest struct {
-	certs          map[string]string
-	ClientCert     tls.Certificate
+	certs      map[string]string
+	ClientCert tls.Certificate
 }
-
 
 //------------------------------------------------\\
 // + + +          R E C E I V E R S          + + + \\
@@ -107,17 +104,17 @@ func (t *TofuDigest) newCert(host string, cState *tls.ConnectionState) error {
 			reasons.WriteString("; ")
 		}
 		if now.Before(cert.NotBefore) {
-			reasons.WriteString(fmt.Sprintf("Cert [%d] is not valid yet", index + 1))
+			reasons.WriteString(fmt.Sprintf("Cert [%d] is not valid yet", index+1))
 			continue
 		}
 
 		if now.After(cert.NotAfter) {
-			reasons.WriteString(fmt.Sprintf("Cert [%d] is expired", index + 1))
+			reasons.WriteString(fmt.Sprintf("Cert [%d] is expired", index+1))
 			continue
 		}
 
 		if err := cert.VerifyHostname(host); err != nil {
-			reasons.WriteString(fmt.Sprintf("Cert [%d] hostname does not match", index + 1))
+			reasons.WriteString(fmt.Sprintf("Cert [%d] hostname does not match", index+1))
 			continue
 		}
 
@@ -143,8 +140,6 @@ func (t *TofuDigest) IniDump() string {
 	return out.String()
 }
 
-
-
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\
 //--------------------------------------------------\\
@@ -157,7 +152,7 @@ func Retrieve(host, port, resource string, td *TofuDigest) (string, error) {
 	addr := host + ":" + port
 
 	conf := &tls.Config{
-		MinVersion: tls.VersionTLS12,
+		MinVersion:         tls.VersionTLS12,
 		InsecureSkipVerify: true,
 	}
 
@@ -183,7 +178,7 @@ func Retrieve(host, port, resource string, td *TofuDigest) (string, error) {
 
 	if td.Exists(host) {
 		// See if we have a matching cert
-		err := td.Match(host, &connState) 
+		err := td.Match(host, &connState)
 		if err != nil && err.Error() != "EXP" {
 			// If there is no match and it isnt because of an expiration
 			// just return the error
@@ -223,21 +218,21 @@ func Fetch(host, port, resource string, td *TofuDigest) ([]byte, error) {
 	rawResp, err := Retrieve(host, port, resource, td)
 	if err != nil {
 		return make([]byte, 0), err
-	} 
+	}
 
 	resp := strings.SplitN(rawResp, "\r\n", 2)
 	if len(resp) != 2 {
 		if err != nil {
 			return make([]byte, 0), fmt.Errorf("Invalid response from server")
-		} 
+		}
 	}
 	header := strings.SplitN(resp[0], " ", 2)
 	if len([]rune(header[0])) != 2 {
 		header = strings.SplitN(resp[0], "\t", 2)
 		if len([]rune(header[0])) != 2 {
-			return make([]byte,0), fmt.Errorf("Invalid response format from server")
-		} 
-	} 
+			return make([]byte, 0), fmt.Errorf("Invalid response format from server")
+		}
+	}
 
 	// Get status code single digit form
 	status, err := strconv.Atoi(string(header[0][0]))
@@ -271,24 +266,24 @@ func Visit(host, port, resource string, td *TofuDigest) (Capsule, error) {
 	rawResp, err := Retrieve(host, port, resource, td)
 	if err != nil {
 		return capsule, err
-	} 
+	}
 
 	resp := strings.SplitN(rawResp, "\r\n", 2)
 	if len(resp) != 2 {
 		if err != nil {
 			return capsule, fmt.Errorf("Invalid response from server")
-		} 
+		}
 	}
 	header := strings.SplitN(resp[0], " ", 2)
 	if len([]rune(header[0])) != 2 {
 		header = strings.SplitN(resp[0], "\t", 2)
 		if len([]rune(header[0])) != 2 {
 			return capsule, fmt.Errorf("Invalid response format from server")
-		} 
-	} 
+		}
+	}
 
 	body := resp[1]
-	
+
 	// Get status code single digit form
 	capsule.Status, err = strconv.Atoi(string(header[0][0]))
 	if err != nil {
@@ -351,7 +346,7 @@ func parseGemini(b, rootUrl, currentUrl string) (string, []string) {
 			subLn := strings.Trim(ln[2:], "\r\n\t \a")
 			splitPoint := strings.IndexAny(subLn, " \t")
 
-			if splitPoint < 0 || len([]rune(subLn)) - 1 <= splitPoint {
+			if splitPoint < 0 || len([]rune(subLn))-1 <= splitPoint {
 				link = subLn
 				decorator = subLn
 			} else {
@@ -359,7 +354,7 @@ func parseGemini(b, rootUrl, currentUrl string) (string, []string) {
 				decorator = strings.Trim(subLn[splitPoint:], "\t\n\r \a")
 			}
 
-			if strings.Index(link, "://") < 0  {
+			if strings.Index(link, "://") < 0 {
 				link = handleRelativeUrl(link, rootUrl, currentUrl)
 			}
 
@@ -385,7 +380,7 @@ func handleRelativeUrl(u, root, current string) string {
 		return fmt.Sprintf("%s/%s", root, u)
 	}
 
-	current = current[:ind + 1]
+	current = current[:ind+1]
 	return fmt.Sprintf("%s%s", current, u)
 }
 
@@ -397,7 +392,6 @@ func hashCert(cert []byte) string {
 	}
 	return fmt.Sprintf("%s", string(bytes.Join(hex, []byte(":"))))
 }
-
 
 func MakeCapsule() Capsule {
 	return Capsule{"", "", 0, "", make([]string, 0, 5)}

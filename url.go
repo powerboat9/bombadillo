@@ -12,13 +12,18 @@ import (
 // + + +             T Y P E S               + + + \\
 //--------------------------------------------------\\
 
+// Url is a struct representing the different pieces
+// of a url. This custom struct is used rather than the
+// built-in url library so-as to support gopher URLs, as
+// well as track mime-type and renderability (can the
+// response to the url be rendered as text in the client).
 type Url struct {
-	Scheme string
-	Host string
-	Port string
-	Resource string
-	Full string
-	Mime string
+	Scheme       string
+	Host         string
+	Port         string
+	Resource     string
+	Full         string
+	Mime         string
 	DownloadOnly bool
 }
 
@@ -28,11 +33,9 @@ type Url struct {
 
 // There are currently no receivers for the Url struct
 
-
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\
 //--------------------------------------------------\\
-
 
 // MakeUrl is a Url constructor that takes in a string
 // representation of a url and returns a Url struct and
@@ -152,7 +155,7 @@ func parseFinger(u string) (Url, error) {
 	if len(userPlusAddress) > 1 {
 		out.Resource = userPlusAddress[0]
 		u = userPlusAddress[1]
-	} 
+	}
 	hostPort := strings.Split(u, ":")
 	if len(hostPort) < 2 {
 		out.Port = "79"
@@ -167,5 +170,3 @@ func parseFinger(u string) (Url, error) {
 	out.Full = fmt.Sprintf("%s://%s%s:%s", out.Scheme, resource, out.Host, out.Port)
 	return out, nil
 }
-
-
