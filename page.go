@@ -50,8 +50,15 @@ func (p *Page) ScrollPositionRange(termHeight int) (int, int) {
 func (p *Page) WrapContent(width int) {
 	counter := 0
 	var content strings.Builder
+	escape := false
 	content.Grow(len(p.RawContent))
 	for _, ch := range []rune(p.RawContent) {
+		if escape {
+			if (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') {
+				escape = false
+			}
+			continue
+		}
 		if ch == '\n' {
 			content.WriteRune(ch)
 			counter = 0
@@ -63,8 +70,11 @@ func (p *Page) WrapContent(width int) {
 				content.WriteRune('\n')
 				counter = 0
 			}
-		} else if ch == '\r' || ch == '\v' || ch == '\b' || ch == '\f' || ch == 27 {
+		} else if ch == '\r' || ch == '\v' || ch == '\b' || ch == '\f' {
 			// Get rid of control characters we dont want
+			continue
+		} else if ch == 27 {
+			escape = true
 			continue
 		} else {
 			if counter < width {
