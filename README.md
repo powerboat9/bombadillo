@@ -125,6 +125,14 @@ We aim for simplicity and quality, and do our best to make Bombadillo useful to 
 
 The maintainers use the [tildegit](https://tildegit.org) issues system to discuss new features, track bugs, and communicate with users regarding issues and suggestions. Pull requests should typically have an associated issue, and should target the `develop` branch.
 
+## Development
+
+Following the standard install instructions should lead you to have nearly everything you need to commence development. The only additions to this are:
+
+- To be able to submit pull requests, you will need to fork this repository first.
+- The build process must be tested with Go 1.11 to ensure backward compatibility. This version can be installed as per the [Go install documentation](https://golang.org/doc/install#extra_versions). Check that changes build with this version using `make test`.
+- Linting must be performed on new changes using `gofmt` and [golangci-lint](https://github.com/golangci/golangci-lint)
+
 ## License
 
 This project is licensed under the GNU GPL version 3. See the [LICENSE](LICENSE) file for details.
