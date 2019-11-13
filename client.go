@@ -641,6 +641,8 @@ func (c *client) search(query, url, question string) {
 			c.DrawMessage()
 			return
 		} else if strings.TrimSpace(entry) == "" {
+      c.ClearMessage()
+			c.DrawMessage()
 			return
 		}
 	} else {
