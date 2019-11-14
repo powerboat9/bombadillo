@@ -1,6 +1,6 @@
 .TH "bombadillo" 1 "27 OCT 2019" "" "General Operation Manual"
 .SH NAME
-\fBbombadillo \fP- a non-web client
+\fBbombadillo \fP- a non-web browser
 .SH SYNOPSIS
 .nf
 .fam C
@@ -9,7 +9,7 @@
 .fam T
 .fi
 .SH DESCRIPTION
-\fBbombadillo\fP is a non-web client for the terminal. It features a full terminal user interface, vim-like keybindings, document pager, configurable settings, and a robust command selection.
+\fBbombadillo\fP is a non-web browser for the terminal. It features a full terminal user interface, vim-like keybindings, document pager, configurable settings, and a robust command selection.
 .TP
 \fBbombadillo\fP supports the following protocols as first class citizens: gopher, gemini, finger, and local (a user’s file system). Support for telnet, http and https is also available via integration with third party applications.
 .SH OPTIONS
@@ -30,7 +30,7 @@ Gopher is the default protocol for \fBbombadillo\fP. Any textual item types will
 .TP
 .B
 gemini
-Gemini is supported, but as a new protocol with an incomplete specification, features may change over time. At present Bombadillo supports TLS with a trust on first use certificate pinning system (similar to SSH). Client certificates are also supported as a configurable option. Gemini maps and other text types are rendered in the client and non-text types will be downloaded.
+Gemini is supported, but as a new protocol with an incomplete specification, features may change over time. At present Bombadillo supports TLS with a trust on first use certificate pinning system (similar to SSH). Client certificates are also supported as a configurable option. Gemini maps and other text types are rendered in the browser and non-text types will be downloaded.
 .TP
 .B
 finger
@@ -46,11 +46,11 @@ Telnet is not supported directly, but addresses will be followed and opened as a
 .TP
 .B
 http, https
-Neither of the world wide web protocols are supported directly. However, \fBbombadillo\fP can open web links in a user's default web browser, or display web content directly in the client via the lynx web browser. Opening http/https links is opt-in only, controlled by the \fIopenhttp\fP setting.
+Neither of the world wide web protocols are supported directly. However, \fBbombadillo\fP can open web links in a user's default web browser, or display web content directly in the browser via the lynx web browser. Opening http/https links is opt-in only, controlled by the \fIopenhttp\fP setting.
 .IP
 Opening links in a default web browser only works if a GUI environment is available.
 .IP
-Opening web content directly in the client requires the lynx web browser, and is enabled using the \fIlynxmode\fP setting. Web content is processed using lynx, and then displayed in the client.
+Opening web content directly in the browser requires the lynx web browser, and is enabled using the \fIlynxmode\fP setting. Web content is processed using lynx, and then displayed in \fBbombadillo\fP.
 .SH COMMANDS
 .SS  KEY COMMANDS
 These commands work as a single keypress anytime \fBbombadillo\fP is not taking in a line based command. This is the default command mode of \fBbombadillo\fP.

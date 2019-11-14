@@ -2,7 +2,7 @@
 
 Bombadillo is a non-web browser for the terminal.
 
-![a screenshot of the bombadillo client](bombadillo-screenshot.png)
+![a screenshot of the bombadillo browser](bombadillo-screenshot.png)
 
 Bombadillo features a full terminal user interface, vim-like keybindings, document pager, configurable settings, and a robust command selection.
 

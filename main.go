@@ -169,7 +169,7 @@ func handleSignals(c <-chan os.Signal) {
 
 //printHelp produces a nice display message when the --help flag is used
 func printHelp() {
-	art := `Bombadillo - a non-web client
+	art := `Bombadillo - a non-web browser
 
 Syntax:   bombadillo [url] 
           bombadillo [options...]
