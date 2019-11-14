@@ -48,14 +48,12 @@ var defaultOptions = map[string]string{
 	"homeurl":        "gopher://bombadillo.colorfield.space:70/1/user-guide.map",
 	"savelocation":   homePath(),
 	"searchengine":   "gopher://gopher.floodgap.com:70/7/v2/vs",
-	"openhttp":       "false",
 	"telnetcommand":  "telnet",
 	"configlocation": xdgConfigPath(),
 	"theme":          "normal", // "normal", "inverted"
-	"terminalonly":   "true",
 	"tlscertificate": "",
 	"tlskey":         "",
-	"lynxmode":       "false",
+	"webmode":        "none", // "none", "gui", "lynx", "w3m"
 }
 
 // homePath will return the path to your home directory as a string

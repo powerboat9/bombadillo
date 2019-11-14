@@ -13,12 +13,22 @@ type page struct {
 	Links   []string
 }
 
-func Visit(url string, width int) (page, error) {
+func Visit(webmode, url string, width int) (page, error) {
 	if width > 80 {
 		width = 80
 	}
-	w := fmt.Sprintf("-width=%d", width)
-	c, err := exec.Command("lynx", "-dump", w, url).Output()
+	var w string
+	switch webmode {
+	case "lynx":
+		w = "-width"
+	case "w3m":
+		w = "-cols"
+	case "elinks":
+		w = "-dump-width"
+	default:
+		return page{}, fmt.Errorf("Invalid webmode setting")
+	}
+	c, err := exec.Command(webmode, "-dump", w, fmt.Sprintf("%d", width), url).Output()
 	if err != nil {
 		return page{}, err
 	}
@@ -28,26 +38,16 @@ func Visit(url string, width int) (page, error) {
 // Returns false on err or non-text type
 // Else returns true
 func IsTextFile(url string) bool {
-	c, err := exec.Command("lynx", "-dump", "-head", url).Output()
+	resp, err := http.Head(url)
 	if err != nil {
 		return false
 	}
-	content := string(c)
-	content = strings.ToLower(content)
-	headers := strings.Split(content, "\n")
-	for _, header := range headers {
-		if strings.Contains(header, "content-type:") && strings.Contains(header, "text") {
-			return true
-		} else if strings.Contains(header, "content-type:") {
-			return false
-		}
+	ctype := resp.Header.Get("content-type")
+	if strings.Contains(ctype, "text") || ctype == "" {
+		return true
 	}
 
-	// If we made it here, there is no content-type header.
-	// So in the event of the unknown, lets render to the
-	// screen. This will allow redirects to get rendered
-	// as well.
-	return true
+	return false
 }
 
 func parseLinks(c string) page {
@@ -72,7 +72,6 @@ func parseLinks(c string) page {
 		out.Links = append(out.Links, strings.TrimSpace(ls[1]))
 	}
 	return out
-
 }
 
 func Fetch(url string) ([]byte, error) {

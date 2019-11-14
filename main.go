@@ -66,6 +66,7 @@ func saveConfig() error {
 
 func validateOpt(opt, val string) bool {
 	var validOpts = map[string][]string{
+		"webmode":      []string{"none", "gui", "lynx", "w3m", "elinks"},
 		"openhttp":     []string{"true", "false"},
 		"theme":        []string{"normal", "inverse"},
 		"terminalonly": []string{"true", "false"},
