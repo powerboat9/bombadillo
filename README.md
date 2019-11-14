@@ -1,8 +1,8 @@
-# Bombadillo - a non-web client
+# Bombadillo - a non-web browser
 
-Bombadillo is a non-web client for the terminal.
+Bombadillo is a non-web browser for the terminal.
 
-![a screenshot of the bombadillo client](bombadillo-screenshot.png)
+![a screenshot of the bombadillo browser](bombadillo-screenshot.png)
 
 Bombadillo features a full terminal user interface, vim-like keybindings, document pager, configurable settings, and a robust command selection.
 
@@ -115,7 +115,7 @@ Bombadillo development is largely handled by Sloum, with help from asdf, jboverf
 
 There are many ways to contribute to Bombadillo, including a fair few that don't require knowledge of programming:
 
-- Try out the client and let us know if you have a suggestion for improvement, or if you find a bug.
+- Try out the browser and let us know if you have a suggestion for improvement, or if you find a bug.
 - Read the documentation and let us know if something isn't well explained, or needs correction.
 - Maybe you have a cool logo or some art that you think would look nice.
 
