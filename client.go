@@ -244,14 +244,13 @@ func (c *client) TakeControlInput() {
 			err := c.routeCommandInput(p)
 			if err != nil {
 				c.SetMessage(err.Error(), true)
-				c.Draw()
+				c.DrawMessage()
 			}
 		}
 	}
 }
 
 func (c *client) routeCommandInput(com *cmdparse.Command) error {
-	var err error
 	switch com.Type {
 	case cmdparse.SIMPLE:
 		c.simpleCommand(com.Action)
@@ -271,7 +270,8 @@ func (c *client) routeCommandInput(com *cmdparse.Command) error {
 		return fmt.Errorf("Unknown command entry")
 	}
 
-	return err
+	return nil
+
 }
 
 func (c *client) simpleCommand(action string) {
@@ -425,6 +425,7 @@ func (c *client) doCommandAs(action string, values []string) {
 		c.DrawMessage()
 	default:
 		c.SetMessage(fmt.Sprintf("Unknown command structure"), true)
+		c.DrawMessage()
 	}
 }
 
@@ -474,6 +475,7 @@ func (c *client) doLinkCommandAs(action, target string, values []string) {
 		c.doCommandAs(action, out)
 	default:
 		c.SetMessage(fmt.Sprintf("Unknown command structure"), true)
+		c.DrawMessage()
 	}
 }
 
@@ -618,7 +620,7 @@ func (c *client) doLinkCommand(action, target string) {
 		}
 		c.saveFile(u, fn)
 	default:
-		c.SetMessage(fmt.Sprintf("Action %q does not exist for target %q", action, target), true)
+		c.SetMessage("Unknown command structure", true)
 		c.DrawMessage()
 	}
 
