@@ -53,7 +53,7 @@ var defaultOptions = map[string]string{
 	"theme":          "normal", // "normal", "inverted"
 	"tlscertificate": "",
 	"tlskey":         "",
-	"webmode":        "none", // "none", "gui", "lynx", "w3m"
+	"webmode":        "none", // "none", "gui", "lynx", "w3m", "elinks"
 }
 
 // homePath will return the path to your home directory as a string

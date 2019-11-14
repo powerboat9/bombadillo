@@ -1001,7 +1001,7 @@ func (c *client) handleWeb(u Url) {
 		if http.IsTextFile(u.Full) {
 			page, err := http.Visit(wm, u.Full, c.Width-1)
 			if err != nil {
-				c.SetMessage(fmt.Sprintf("Lynx error: %s", err.Error()), true)
+				c.SetMessage(fmt.Sprintf("%s error: %s", wm, err.Error()), true)
 				c.DrawMessage()
 				return
 			}
@@ -1032,6 +1032,7 @@ func (c *client) handleWeb(u Url) {
 		} else {
 			c.SetMessage(msg, false)
 		}
+		c.DrawMessage()
 	default:
 		c.SetMessage("Current 'webmode' setting does not allow http/https", false)
 		c.DrawMessage()
