@@ -1,6 +1,6 @@
-# Bombadillo - a non-web client
+# Bombadillo - a non-web browser
 
-Bombadillo is a non-web client for the terminal.
+Bombadillo is a non-web browser for the terminal.
 
 ![a screenshot of the bombadillo client](bombadillo-screenshot.png)
 
@@ -18,7 +18,7 @@ Support for the following protocols is also available via integration with 3rd p
 * http/https
     * Web support is opt-in (turned off by default).
     * Links can be opened in a user's default web browser when in a graphical environment.
-    * Web pages can be rendered directly in Bombadillo if [Lynx](https://lynx.invisible-island.net/) is installed on the system to handle the document parsing.
+    * Web pages can be rendered directly in Bombadillo if [Lynx](https://lynx.invisible-island.net/), [w3m](http://w3m.sourceforge.net/), or [elinks](http://elinks.or.cz/) are installed on the system to handle the document parsing.
 
 ## Getting Started
 
@@ -115,7 +115,7 @@ Bombadillo development is largely handled by Sloum, with help from asdf, jboverf
 
 There are many ways to contribute to Bombadillo, including a fair few that don't require knowledge of programming:
 
-- Try out the client and let us know if you have a suggestion for improvement, or if you find a bug.
+- Try out the browser and let us know if you have a suggestion for improvement, or if you find a bug.
 - Read the documentation and let us know if something isn't well explained, or needs correction.
 - Maybe you have a cool logo or some art that you think would look nice.
 

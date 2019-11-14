@@ -210,14 +210,6 @@ homeurl
 The url that \fBbombadillo\fP navigates to when the program loads or when the \fIhome\fP or \fIh\fP LINE COMMAND is issued. This should be a valid url. If a scheme/protocol is not included, gopher will be assumed.
 .TP
 .B
-lynxmode
-Sets whether or not to use lynx as a rendering engine for http/https requests, and display results in \fBbombadillo\fP. Lynx must be installed, and \fIopenhttp\fP must be set to \fItrue\fP. Valid values are \fItrue\fP and \fIfalse\fP.
-.TP
-.B
-openhttp
-Tells the client whether or not to try to follow web (http/https) links. If set to \fItrue\fP, \fBbombadillo\fP will try to open these links in a user's default web browser, or render them via lynx, depending on the status of \fIlynxmode\fP and \fIterminalonly\fP settings. Valid values are \fItrue\fP and \fIfalse\fP.
-.TP
-.B
 savelocation
 The path to the directory that \fBbombadillo\fP should write files to. This must be a valid filepath for the system, must be a directory, and must already exist.
 .TP
@@ -227,11 +219,7 @@ The url to use for the LINE COMMANDs \fI?\fP and \fIsearch\fP. Should be a valid
 .TP
 .B
 telnetcommand
-Tells the client what command to use to start a telnet session. Should be a valid command, including any flags. The address being navigated to will be added to the end of the command.
-.TP
-.B
-terminalonly
-Sets whether web links should handled within \fBbombadillo\fP only, or if they can be opened in a user's external web browser. If \fIopenhttp\fP is true, and this setting is true, web links will be handled within \fBbombadillo\fP only. If \fIlynxmode\fP is also true, web links will be rendered in bombadillo via lynx. If \fIopenhttp\fP is true, \fIlynxmode\fP is disabled, and this setting is disabled, \fBbombadillo\fP will open web links in a user's default web browser. Valid values are \fItrue\fP and \fIfalse\fP.
+Tells the browser what command to use to start a telnet session. Should be a valid command, including any flags. The address being navigated to will be added to the end of the command.
 .TP
 .B
 theme
@@ -244,6 +232,11 @@ A path to a tls certificate file on a user's local filesystem. Defaults to NULL.
 .B
 tlskey
 A path to a tls key that pairs with the tlscertificate setting, on a user's local filesystem. Defaults to NULL. Both \fItlskey\fP and \fItlscertificate\fP must be set for client certificates to work in gemini.
+.TP
+.B
+webmode
+Controls behavior when following web links. The following values are valid: \fInone\fP will disable following web links, \fIgui\fP will have the browser attempt to open web links in a user's default graphical web browser; \fIlynx\fP, \fIw3m\fP, and \fIelinks\fP will have the browser attempt to use the selected terminal web browser to handle the rendering of web pages and will display the pages directly in Bombadillo.
+
 .SH BUGS
 There are very likely bugs. Many known bugs can be found in the issues section of \fBbombadillo\fP's source code repository (see \fIlinks\fP).
 .SH LINKS

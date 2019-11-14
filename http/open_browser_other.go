@@ -7,5 +7,5 @@ package http
 import "fmt"
 
 func OpenInBrowser(url string) (string, error) {
-	return "", fmt.Errorf("Unsupported os for browser detection")
+	return "", fmt.Errorf("Unsupported os for 'webmode' 'gui' setting")
 }
