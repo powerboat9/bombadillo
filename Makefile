@@ -36,6 +36,9 @@ install-man: bombadillo.1
 
 .PHONY: install-desktop
 install-desktop:
+ifeq ($(shell uname), Linux)
+	# These steps will not work on Darwin, Plan9, or Windows
+	# They would likely work on BSD systems
 	install -d ${DESTDIR}${DATAROOTDIR}/applications
 	install -m 0644 ./bombadillo.desktop ${DESTDIR}${DATAROOTDIR}/applications
 	install -d ${DESTDIR}${DATAROOTDIR}/pixmaps
@@ -43,6 +46,9 @@ install-desktop:
 	xdg-mime default bombadillo.desktop x-scheme-handler/gopher
 	xdg-mime default bombadillo.desktop x-scheme-handler/gemini
 	xdg-mime default bombadillo.desktop x-scheme-handler/finger
+else
+	@echo "* Skipping protocol handler associations and desktop file creation for non-linux system *"
+endif
 
 .PHONY: install-bin
 install-bin: build
