@@ -8,12 +8,16 @@ import (
 	"strings"
 )
 
-type page struct {
+// Page represents the contents and links or an http/https document
+type Page struct {
 	Content string
 	Links   []string
 }
 
-func Visit(webmode, url string, width int) (page, error) {
+// Visit is the main entry to viewing a web document in bombadillo.
+// It takes a url, a terminal width, and which web backend the user
+// currently has set. Visit returns a Page and an error
+func Visit(webmode, url string, width int) (Page, error) {
 	if width > 80 {
 		width = 80
 	}
@@ -26,17 +30,18 @@ func Visit(webmode, url string, width int) (page, error) {
 	case "elinks":
 		w = "-dump-width"
 	default:
-		return page{}, fmt.Errorf("Invalid webmode setting")
+		return Page{}, fmt.Errorf("Invalid webmode setting")
 	}
 	c, err := exec.Command(webmode, "-dump", w, fmt.Sprintf("%d", width), url).Output()
 	if err != nil {
-		return page{}, err
+		return Page{}, err
 	}
 	return parseLinks(string(c)), nil
 }
 
-// Returns false on err or non-text type
-// Else returns true
+// IsTextFile makes an http(s) head request to a given URL
+// and determines if the content-type is text based. It then
+// returns a bool
 func IsTextFile(url string) bool {
 	resp, err := http.Head(url)
 	if err != nil {
@@ -50,8 +55,8 @@ func IsTextFile(url string) bool {
 	return false
 }
 
-func parseLinks(c string) page {
-	var out page
+func parseLinks(c string) Page {
+	var out Page
 	contentUntil := strings.LastIndex(c, "References")
 	if contentUntil >= 1 {
 		out.Content = c[:contentUntil]
@@ -74,6 +79,9 @@ func parseLinks(c string) page {
 	return out
 }
 
+// Fetch makes an http(s) request and returns the []bytes
+// for the response and an error. Fetch is used for saving
+// the source file of an http(s) document
 func Fetch(url string) ([]byte, error) {
 	resp, err := http.Get(url)
 	if err != nil {

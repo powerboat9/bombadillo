@@ -2,21 +2,27 @@
 
 package http
 
-import "os/exec"
+import (
+	"fmt"
+	"os"
+	"os/exec"
+)
 
+// OpenInBrowser checks for the presence of a display server
+// and environment variables indicating a gui is present. If found
+// then xdg-open is called on a url to open said url in the default
+// gui web browser for the system
 func OpenInBrowser(url string) (string, error) {
-  // Check for a local display server, this is
-  // not a silver bullet but should help ssh
-  // connected users on many systems get accurate
-  // messaging and not spin off processes needlessly
-	err := exec.Command("type", "Xorg").Run()
-	if err != nil {
+	disp := os.Getenv("DISPLAY")
+	wayland := os.Getenv("WAYLAND_DISPLAY")
+	_, err := exec.LookPath("Xorg")
+	if disp == "" && wayland == "" && err != nil {
 		return "", fmt.Errorf("No gui is available, check 'webmode' setting")
 	}
 
-  // Use start rather than run or output in order
-  // to release the process and not block
-	err := exec.Command("xdg-open", url).Start()
+	// Use start rather than run or output in order
+	// to release the process and not block
+	err = exec.Command("xdg-open", url).Start()
 	if err != nil {
 		return "", err
 	}
