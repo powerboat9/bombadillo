@@ -46,11 +46,11 @@ Telnet is not supported directly, but addresses will be followed and opened as a
 .TP
 .B
 http, https
-Neither of the world wide web protocols are supported directly. However, \fBbombadillo\fP can open web links in a user's default web browser, or display web content directly in the browser via the lynx web browser. Opening http/https links is opt-in only, controlled by the \fIopenhttp\fP setting.
+Neither of the world wide web protocols are supported directly. \fBbombadillo\fP can be configured to open web links in a user's default graphical web browser. It is also possible to display web content directly in \fBbombadillo\fP using lynx, w3m, or elinks terminal web browsers to render pages. Opening http/https links is opt-in only, controlled by the \fIwebmode\fP setting.
 .IP
-Opening links in a default web browser only works if a GUI environment is available.
+Opening links in a default graphical web browser will only work in a GUI environment.
 .IP
-Opening web content directly in the browser requires the lynx web browser, and is enabled using the \fIlynxmode\fP setting. Web content is processed using lynx, and then displayed in \fBbombadillo\fP.
+Displaying web content directly in \fBbombadillo\fP requires lynx, w3m or elinks terminal web browsers are installed on the system.
 .SH COMMANDS
 .SS  KEY COMMANDS
 These commands work as a single keypress anytime \fBbombadillo\fP is not taking in a line based command. This is the default command mode of \fBbombadillo\fP.
