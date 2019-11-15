@@ -46,11 +46,11 @@ Telnet is not supported directly, but addresses will be followed and opened as a
 .TP
 .B
 http, https
-Neither of the world wide web protocols are supported directly. However, \fBbombadillo\fP can open web links in a user's default web browser, or display web content directly in the browser via the lynx web browser. Opening http/https links is opt-in only, controlled by the \fIopenhttp\fP setting.
+Neither of the world wide web protocols are supported directly. \fBbombadillo\fP can be configured to open web links in a user's default graphical web browser. It is also possible to display web content directly in \fBbombadillo\fP using lynx, w3m, or elinks terminal web browsers to render pages. Opening http/https links is opt-in only, controlled by the \fIwebmode\fP setting.
 .IP
-Opening links in a default web browser only works if a GUI environment is available.
+Opening links in a default graphical web browser will only work in a GUI environment.
 .IP
-Opening web content directly in the browser requires the lynx web browser, and is enabled using the \fIlynxmode\fP setting. Web content is processed using lynx, and then displayed in \fBbombadillo\fP.
+Displaying web content directly in \fBbombadillo\fP requires lynx, w3m or elinks terminal web browsers are installed on the system.
 .SH COMMANDS
 .SS  KEY COMMANDS
 These commands work as a single keypress anytime \fBbombadillo\fP is not taking in a line based command. This is the default command mode of \fBbombadillo\fP.
@@ -210,14 +210,6 @@ homeurl
 The url that \fBbombadillo\fP navigates to when the program loads or when the \fIhome\fP or \fIh\fP LINE COMMAND is issued. This should be a valid url. If a scheme/protocol is not included, gopher will be assumed.
 .TP
 .B
-lynxmode
-Sets whether or not to use lynx as a rendering engine for http/https requests, and display results in \fBbombadillo\fP. Lynx must be installed, and \fIopenhttp\fP must be set to \fItrue\fP. Valid values are \fItrue\fP and \fIfalse\fP.
-.TP
-.B
-openhttp
-Tells the browser whether or not to try to follow web (http/https) links. If set to \fItrue\fP, \fBbombadillo\fP will try to open these links in a user's default web browser, or render them via lynx, depending on the status of \fIlynxmode\fP and \fIterminalonly\fP settings. Valid values are \fItrue\fP and \fIfalse\fP.
-.TP
-.B
 savelocation
 The path to the directory that \fBbombadillo\fP should write files to. This must be a valid filepath for the system, must be a directory, and must already exist.
 .TP
@@ -230,10 +222,6 @@ telnetcommand
 Tells the browser what command to use to start a telnet session. Should be a valid command, including any flags. The address being navigated to will be added to the end of the command.
 .TP
 .B
-terminalonly
-Sets whether web links should handled within \fBbombadillo\fP only, or if they can be opened in a user's external web browser. If \fIopenhttp\fP is true, and this setting is true, web links will be handled within \fBbombadillo\fP only. If \fIlynxmode\fP is also true, web links will be rendered in bombadillo via lynx. If \fIopenhttp\fP is true, \fIlynxmode\fP is disabled, and this setting is disabled, \fBbombadillo\fP will open web links in a user's default web browser. Valid values are \fItrue\fP and \fIfalse\fP.
-.TP
-.B
 theme
 Can toggle between visual modes. Valid values are \fInormal\fP and \fIinverse\fP. When set to inverse, the terminal color mode is inverted.
 .TP
@@ -244,6 +232,11 @@ A path to a tls certificate file on a user's local filesystem. Defaults to NULL.
 .B
 tlskey
 A path to a tls key that pairs with the tlscertificate setting, on a user's local filesystem. Defaults to NULL. Both \fItlskey\fP and \fItlscertificate\fP must be set for client certificates to work in gemini.
+.TP
+.B
+webmode
+Controls behavior when following web links. The following values are valid: \fInone\fP will disable following web links, \fIgui\fP will have the browser attempt to open web links in a user's default graphical web browser; \fIlynx\fP, \fIw3m\fP, and \fIelinks\fP will have the browser attempt to use the selected terminal web browser to handle the rendering of web pages and will display the pages directly in Bombadillo.
+
 .SH BUGS
 There are very likely bugs. Many known bugs can be found in the issues section of \fBbombadillo\fP's source code repository (see \fIlinks\fP).
 .SH LINKS

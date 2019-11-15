@@ -643,7 +643,7 @@ func (c *client) search(query, url, question string) {
 			c.DrawMessage()
 			return
 		} else if strings.TrimSpace(entry) == "" {
-      c.ClearMessage()
+			c.ClearMessage()
 			c.DrawMessage()
 			return
 		}
@@ -995,19 +995,13 @@ func (c *client) handleFinger(u Url) {
 }
 
 func (c *client) handleWeb(u Url) {
-	// Following http is disabled
-	if strings.ToUpper(c.Options["openhttp"]) != "TRUE" {
-		c.SetMessage("'openhttp' is not set to true, cannot open web link", false)
-		c.DrawMessage()
-		return
-	}
-
-	// Use lynxmode
-	if strings.ToUpper(c.Options["lynxmode"]) == "TRUE" {
+	wm := strings.ToLower(c.Options["webmode"])
+	switch wm {
+	case "lynx", "w3m", "elinks":
 		if http.IsTextFile(u.Full) {
-			page, err := http.Visit(u.Full, c.Width-1)
+			page, err := http.Visit(wm, u.Full, c.Width-1)
 			if err != nil {
-				c.SetMessage(fmt.Sprintf("Lynx error: %s", err.Error()), true)
+				c.SetMessage(fmt.Sprintf("%s error: %s", wm, err.Error()), true)
 				c.DrawMessage()
 				return
 			}
@@ -1029,23 +1023,19 @@ func (c *client) handleWeb(u Url) {
 			}
 			c.saveFile(u, fn)
 		}
-
-		// Open in default web browser if available
-	} else {
-		if strings.ToUpper(c.Options["terminalonly"]) == "TRUE" {
-			c.SetMessage("'terminalonly' is set to true and 'lynxmode' is not enabled, cannot open web link", false)
-			c.DrawMessage()
+	case "gui":
+		c.SetMessage("Attempting to open in gui web browser", false)
+		c.DrawMessage()
+		msg, err := http.OpenInBrowser(u.Full)
+		if err != nil {
+			c.SetMessage(err.Error(), true)
 		} else {
-			c.SetMessage("Attempting to open in web browser", false)
-			c.DrawMessage()
-			msg, err := http.OpenInBrowser(u.Full)
-			if err != nil {
-				c.SetMessage(err.Error(), true)
-			} else {
-				c.SetMessage(msg, false)
-			}
-			c.DrawMessage()
+			c.SetMessage(msg, false)
 		}
+		c.DrawMessage()
+	default:
+		c.SetMessage("Current 'webmode' setting does not allow http/https", false)
+		c.DrawMessage()
 	}
 }
 

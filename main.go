@@ -66,10 +66,8 @@ func saveConfig() error {
 
 func validateOpt(opt, val string) bool {
 	var validOpts = map[string][]string{
-		"openhttp":     []string{"true", "false"},
-		"theme":        []string{"normal", "inverse"},
-		"terminalonly": []string{"true", "false"},
-		"lynxmode":     []string{"true", "false"},
+		"webmode": []string{"none", "gui", "lynx", "w3m", "elinks"},
+		"theme":   []string{"normal", "inverse"},
 	}
 
 	opt = strings.ToLower(opt)
@@ -88,7 +86,7 @@ func validateOpt(opt, val string) bool {
 
 func lowerCaseOpt(opt, val string) string {
 	switch opt {
-	case "openhttp", "theme", "terminalonly":
+	case "webmode", "theme":
 		return strings.ToLower(val)
 	default:
 		return val

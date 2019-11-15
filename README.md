@@ -18,7 +18,7 @@ Support for the following protocols is also available via integration with 3rd p
 * http/https
     * Web support is opt-in (turned off by default).
     * Links can be opened in a user's default web browser when in a graphical environment.
-    * Web pages can be rendered directly in Bombadillo if [Lynx](https://lynx.invisible-island.net/) is installed on the system to handle the document parsing.
+    * Web pages can be rendered directly in Bombadillo if [Lynx](https://lynx.invisible-island.net/), [w3m](http://w3m.sourceforge.net/), or [elinks](http://elinks.or.cz/) are installed on the system to handle the document parsing.
 
 ## Getting Started
 
