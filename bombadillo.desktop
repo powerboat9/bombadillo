@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Bombadillo
+Type=Application
+Terminal=true
+Exec=bombadillo
+Icon=bombadillo-icon
