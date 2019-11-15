@@ -1,6 +1,9 @@
 [Desktop Entry]
-Name=Bombadillo
 Type=Application
+Name=Bombadillo
+GenericName=Non-Web Browser
+Comment=View gopher, gemini, finger, telnet, http(s) sites over the internet
 Terminal=true
+Categories=Network;Application;WebBrowser;ConsoleOnly;
 Exec=bombadillo
 Icon=bombadillo-icon
