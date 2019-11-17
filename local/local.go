@@ -4,39 +4,71 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"sort"
 	"strings"
 )
 
-func Open(address string) (string, error) {
+func Open(address string) (string, []string, error) {
+	links := make([]string, 0, 10)
+
 	if !pathExists(address) {
-		return "", fmt.Errorf("Invalid system path: %s", address)
+		return "", links, fmt.Errorf("Invalid system path: %s", address)
 	}
 
 	file, err := os.Open(address)
 	if err != nil {
-		return "", fmt.Errorf("Unable to open file: %s", address)
+		return "", links, err
 	}
 	defer file.Close()
 
 	if pathIsDir(address) {
-		fileList, err := file.Readdirnames(0)
+		offset := 1
+		fileList, err := file.Readdir(0)
 		if err != nil {
-			return "", fmt.Errorf("Unable to read from directory: %s", address)
+			return "", links, err
 		}
 		var out strings.Builder
 		out.WriteString(fmt.Sprintf("Current directory: %s\n\n", address))
-		for _, obj := range fileList {
-			out.WriteString(obj)
-			out.WriteString("\n")
+
+		// Handle 'addres/..' display
+		offset = 2
+		upFp := filepath.Join(address, "..")
+		upOneLevel, _ := filepath.Abs(upFp)
+		info, err := os.Stat(upOneLevel)
+		if err == nil {
+			out.WriteString("[1]   ")
+			out.WriteString(fmt.Sprintf("%-12s   ", info.Mode().String()))
+			out.WriteString("../\n")
+			links = append(links, upOneLevel)
 		}
-		return out.String(), nil
+
+		// Sort the directory contents alphabetically
+		sort.Slice(fileList, func(i, j int) bool {
+			return fileList[i].Name() < fileList[j].Name()
+		})
+
+		// Handle each item in the directory
+		for i, obj := range fileList {
+			linkNum := fmt.Sprintf("[%d]", i+offset)
+			out.WriteString(fmt.Sprintf("%-5s ", linkNum))
+			out.WriteString(fmt.Sprintf("%-12s   ", obj.Mode().String()))
+			out.WriteString(obj.Name())
+			if obj.IsDir() {
+				out.WriteString("/")
+			}
+			out.WriteString("\n")
+			fp := filepath.Join(address, obj.Name())
+			links = append(links, fp)
+		}
+		return out.String(), links, nil
 	}
 
 	bytes, err := ioutil.ReadAll(file)
 	if err != nil {
-		return "", fmt.Errorf("Unable to read file: %s", address)
+		return "", links, err
 	}
-	return string(bytes), nil
+	return string(bytes), links, nil
 }
 
 func pathExists(p string) bool {

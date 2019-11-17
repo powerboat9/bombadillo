@@ -963,13 +963,13 @@ func (c *client) handleTelnet(u Url) {
 }
 
 func (c *client) handleLocal(u Url) {
-	content, err := local.Open(u.Resource)
+	content, links, err := local.Open(u.Resource)
 	if err != nil {
 		c.SetMessage(err.Error(), true)
 		c.DrawMessage()
 		return
 	}
-	pg := MakePage(u, content, []string{})
+	pg := MakePage(u, content, links)
 	pg.WrapContent(c.Width - 1)
 	c.PageState.Add(pg)
 	c.SetPercentRead()
