@@ -18,7 +18,7 @@ func Open(address string) (string, []string, error) {
 
 	file, err := os.Open(address)
 	if err != nil {
-		return "", links, fmt.Errorf("Unable to open file: %s", address)
+		return "", links, err
 	}
 	defer file.Close()
 
@@ -26,28 +26,29 @@ func Open(address string) (string, []string, error) {
 		offset := 1
 		fileList, err := file.Readdir(0)
 		if err != nil {
-			return "", links, fmt.Errorf("Unable to read from directory: %s", address)
+			return "", links, err
 		}
 		var out strings.Builder
 		out.WriteString(fmt.Sprintf("Current directory: %s\n\n", address))
 
-		if address != "/" {
-			offset = 2
-			upFp := filepath.Join(address, "..")
-			upOneLevel, _ := filepath.Abs(upFp)
-			info, err := os.Stat(upOneLevel)
-			if err == nil {
-				out.WriteString("[1]   ")
-				out.WriteString(fmt.Sprintf("%-12s   ", info.Mode().String()))
-				out.WriteString("../\n")
-				links = append(links, upOneLevel)
-			}
+		// Handle 'addres/..' display
+		offset = 2
+		upFp := filepath.Join(address, "..")
+		upOneLevel, _ := filepath.Abs(upFp)
+		info, err := os.Stat(upOneLevel)
+		if err == nil {
+			out.WriteString("[1]   ")
+			out.WriteString(fmt.Sprintf("%-12s   ", info.Mode().String()))
+			out.WriteString("../\n")
+			links = append(links, upOneLevel)
 		}
 
+		// Sort the directory contents alphabetically
 		sort.Slice(fileList, func(i, j int) bool {
 			return fileList[i].Name() < fileList[j].Name()
 		})
 
+		// Handle each item in the directory
 		for i, obj := range fileList {
 			linkNum := fmt.Sprintf("[%d]", i+offset)
 			out.WriteString(fmt.Sprintf("%-5s ", linkNum))
@@ -65,7 +66,7 @@ func Open(address string) (string, []string, error) {
 
 	bytes, err := ioutil.ReadAll(file)
 	if err != nil {
-		return "", links, fmt.Errorf("Unable to read file: %s", address)
+		return "", links, err
 	}
 	return string(bytes), links, nil
 }
