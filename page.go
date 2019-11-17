@@ -70,7 +70,7 @@ func (p *Page) WrapContent(width int) {
 				content.WriteRune('\n')
 				counter = 0
 			}
-		} else if ch == '\r' || ch == '\v' || ch == '\b' || ch == '\f' {
+		} else if ch == '\r' || ch == '\v' || ch == '\b' || ch == '\f' || ch == '\a' {
 			// Get rid of control characters we dont want
 			continue
 		} else if ch == 27 {
