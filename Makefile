@@ -40,9 +40,9 @@ install-desktop:
 	install -m 0644 ./bombadillo.desktop ${DESTDIR}${DATAROOTDIR}/applications
 	install -d ${DESTDIR}${DATAROOTDIR}/pixmaps
 	install -m 0644 ./bombadillo-icon.png ${DESTDIR}${DATAROOTDIR}/pixmaps
-	xdg-mime default bombadillo.desktop x-scheme-handler/gopher
-	xdg-mime default bombadillo.desktop x-scheme-handler/gemini
-	xdg-mime default bombadillo.desktop x-scheme-handler/finger
+	-xdg-mime default bombadillo.desktop x-scheme-handler/gopher
+	-xdg-mime default bombadillo.desktop x-scheme-handler/gemini
+	-xdg-mime default bombadillo.desktop x-scheme-handler/finger
 
 .PHONY: install-bin
 install-bin: build
