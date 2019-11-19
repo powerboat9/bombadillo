@@ -206,6 +206,10 @@ Writes data from a given link id in the current document to a file. The file is 
 The following is a list of the settings that \fBbombadillo\fP recognizes, as well as a description of their valid values.
 .TP
 .B
+configlocation
+The path to the directory that the \fI.bombadillo.ini\fP configuration file is stored in. This is a \fBread only\fP setting and cannot be changed with the \fIset\fP command, but it can be read with the \fIcheck\fP command.
+.TP
+.B
 homeurl
 The url that \fBbombadillo\fP navigates to when the program loads or when the \fIhome\fP or \fIh\fP LINE COMMAND is issued. This should be a valid url. If a scheme/protocol is not included, gopher will be assumed.
 .TP

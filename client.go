@@ -410,7 +410,11 @@ func (c *client) doCommandAs(action string, values []string) {
 			c.Options[values[0]] = lowerCaseOpt(values[0], val)
 			if values[0] == "tlskey" || values[0] == "tlscertificate" {
 				c.Certs.LoadCertificate(c.Options["tlscertificate"], c.Options["tlskey"])
-			}
+			} else if values[0] == "configlocation" {
+				c.SetMessage("Cannot set READ ONLY setting 'configlocation'", true)
+				c.DrawMessage()
+				return
+      }
 			err := saveConfig()
 			if err != nil {
 				c.SetMessage("Value set, but error saving config to file", true)
