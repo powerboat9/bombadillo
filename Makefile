@@ -43,9 +43,7 @@ ifeq ($(shell uname), Linux)
 	install -m 0644 ./bombadillo.desktop ${DESTDIR}${DATAROOTDIR}/applications
 	install -d ${DESTDIR}${DATAROOTDIR}/pixmaps
 	install -m 0644 ./bombadillo-icon.png ${DESTDIR}${DATAROOTDIR}/pixmaps
-	-xdg-mime default bombadillo.desktop x-scheme-handler/gopher
-	-xdg-mime default bombadillo.desktop x-scheme-handler/gemini
-	-xdg-mime default bombadillo.desktop x-scheme-handler/finger
+	-update-desktop-database 2> /dev/null
 else
 	@echo "* Skipping protocol handler associations and desktop file creation for non-linux system *"
 endif
@@ -66,6 +64,8 @@ uninstall: clean
 	rm -f ${DESTDIR}${BINDIR}/${BINARY}
 	rm -f ${DESTDIR}${DATAROOTDIR}/applications/bombadillo.desktop
 	rm -f ${DESTDIR}${DATAROOTDIR}/pixmaps/bombadillo-icon.png
+	-update-desktop-database 2> /dev/null
+
 
 .PHONY: test
 test: clean build
