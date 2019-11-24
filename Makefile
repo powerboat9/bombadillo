@@ -26,13 +26,27 @@ build:
 	${GOCMD} build ${LDFLAGS} -o ${BINARY}
 
 .PHONY: install
-install: install-bin install-man clean
+install: install-bin install-man install-desktop clean
 
 .PHONY: install-man
 install-man: bombadillo.1
 	gzip -k ./bombadillo.1
 	install -d ${DESTDIR}${MAN1DIR}
 	install -m 0644 ./bombadillo.1.gz ${DESTDIR}${MAN1DIR}
+
+.PHONY: install-desktop
+install-desktop:
+ifeq ($(shell uname), Linux)
+	# These steps will not work on Darwin, Plan9, or Windows
+	# They would likely work on BSD systems
+	install -d ${DESTDIR}${DATAROOTDIR}/applications
+	install -m 0644 ./bombadillo.desktop ${DESTDIR}${DATAROOTDIR}/applications
+	install -d ${DESTDIR}${DATAROOTDIR}/pixmaps
+	install -m 0644 ./bombadillo-icon.png ${DESTDIR}${DATAROOTDIR}/pixmaps
+	-update-desktop-database 2> /dev/null
+else
+	@echo "* Skipping protocol handler associations and desktop file creation for non-linux system *"
+endif
 
 .PHONY: install-bin
 install-bin: build
@@ -48,6 +62,10 @@ clean:
 uninstall: clean
 	rm -f ${DESTDIR}${MAN1DIR}/bombadillo.1.gz
 	rm -f ${DESTDIR}${BINDIR}/${BINARY}
+	rm -f ${DESTDIR}${DATAROOTDIR}/applications/bombadillo.desktop
+	rm -f ${DESTDIR}${DATAROOTDIR}/pixmaps/bombadillo-icon.png
+	-update-desktop-database 2> /dev/null
+
 
 .PHONY: test
 test: clean build

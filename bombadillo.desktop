@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Bombadillo
+GenericName=Non-Web Browser
+Comment=View gopher, gemini, finger, telnet, http(s) sites over the internet
+Terminal=true
+Categories=Network;WebBrowser;ConsoleOnly;
+Exec=bombadillo %U
+Icon=bombadillo-icon
+MimeType=x-scheme-handler/gopher;x-scheme-handler/gemini;x-scheme-handler/finger;
