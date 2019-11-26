@@ -414,7 +414,7 @@ func (c *client) doCommandAs(action string, values []string) {
 				c.SetMessage("Cannot set READ ONLY setting 'configlocation'", true)
 				c.DrawMessage()
 				return
-      }
+			}
 			err := saveConfig()
 			if err != nil {
 				c.SetMessage("Value set, but error saving config to file", true)
@@ -481,20 +481,6 @@ func (c *client) doLinkCommandAs(action, target string, values []string) {
 		c.SetMessage(fmt.Sprintf("Unknown command structure"), true)
 		c.DrawMessage()
 	}
-}
-
-func (c *client) getCurrentPageUrl() (string, error) {
-	if c.PageState.Length < 1 {
-		return "", fmt.Errorf("There are no pages in history")
-	}
-	return c.PageState.History[c.PageState.Position].Location.Full, nil
-}
-
-func (c *client) getCurrentPageRawData() (string, error) {
-	if c.PageState.Length < 1 {
-		return "", fmt.Errorf("There are no pages in history")
-	}
-	return c.PageState.History[c.PageState.Position].RawContent, nil
 }
 
 func (c *client) saveFile(u Url, name string) {
