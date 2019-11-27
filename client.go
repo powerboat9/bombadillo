@@ -414,7 +414,7 @@ func (c *client) doCommandAs(action string, values []string) {
 				c.SetMessage("Cannot set READ ONLY setting 'configlocation'", true)
 				c.DrawMessage()
 				return
-      }
+			}
 			err := saveConfig()
 			if err != nil {
 				c.SetMessage("Value set, but error saving config to file", true)
@@ -817,7 +817,7 @@ func (c *client) goToURL(u string) {
 		return
 	}
 
-	go c.Visit(u)
+	c.Visit(u)
 }
 
 func (c *client) goToLink(l string) {
