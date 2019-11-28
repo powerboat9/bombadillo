@@ -93,7 +93,7 @@ If you used a custom `PREFIX` value during install, you will need to supply it w
 sudo make uninstall PREFIX=/some/directory
 ```
 
-Uninstall will clean up any build files, remove the installed binary, and remove the man page from the system. If will _not_ remove any directories created as a part of the installation, nor will it remove any Bombadillo user configuration files.
+Uninstall will clean up any build files, remove the installed binary, and remove the man page from the system. It will _not_ remove any directories created as a part of the installation, nor will it remove any Bombadillo user configuration files.
 
 #### Troubleshooting
 
