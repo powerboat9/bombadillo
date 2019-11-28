@@ -483,20 +483,6 @@ func (c *client) doLinkCommandAs(action, target string, values []string) {
 	}
 }
 
-func (c *client) getCurrentPageUrl() (string, error) {
-	if c.PageState.Length < 1 {
-		return "", fmt.Errorf("There are no pages in history")
-	}
-	return c.PageState.History[c.PageState.Position].Location.Full, nil
-}
-
-func (c *client) getCurrentPageRawData() (string, error) {
-	if c.PageState.Length < 1 {
-		return "", fmt.Errorf("There are no pages in history")
-	}
-	return c.PageState.History[c.PageState.Position].RawContent, nil
-}
-
 func (c *client) saveFile(u Url, name string) {
 	var file []byte
 	var err error
