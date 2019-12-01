@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"tildegit.org/sloum/bombadillo/gopher"
 )
 
 //------------------------------------------------\\
@@ -21,9 +20,12 @@ type Parser struct {
 }
 
 type Config struct {
-	Bookmarks gopher.Bookmarks
-	Colors    []KeyValue
-	Settings  []KeyValue
+	// Bookmarks gopher.Bookmarks
+	Bookmarks struct {
+		Titles, Links []string
+	}
+	Settings []KeyValue
+	Certs    []KeyValue
 }
 
 type KeyValue struct {
@@ -86,12 +88,10 @@ func (p *Parser) Parse() (Config, error) {
 			}
 			switch section {
 			case "BOOKMARKS":
-				err := c.Bookmarks.Add([]string{keyval.Value, keyval.Key})
-				if err != nil {
-					return c, err
-				}
-			case "COLORS":
-				c.Colors = append(c.Colors, keyval)
+				c.Bookmarks.Titles = append(c.Bookmarks.Titles, keyval.Value)
+				c.Bookmarks.Links = append(c.Bookmarks.Links, keyval.Key)
+			case "CERTS":
+				c.Certs = append(c.Certs, keyval)
 			case "SETTINGS":
 				c.Settings = append(c.Settings, keyval)
 			}

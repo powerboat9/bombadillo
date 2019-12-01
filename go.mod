@@ -1,3 +1,3 @@
 module tildegit.org/sloum/bombadillo
 
-go 1.10
+go 1.11

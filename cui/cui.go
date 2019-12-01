@@ -2,39 +2,28 @@ package cui
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 )
 
-var shapes = map[string]string{
-	"wall":     "╵",
-	"ceiling":  "╴",
-	"tl":       "┌",
-	"tr":       "┐",
-	"bl":       "└",
-	"br":       "┘",
-	"awall":    "║",
-	"aceiling": "═",
-	"atl":      "╔",
-	"atr":      "╗",
-	"abl":      "╚",
-	"abr":      "╝",
-}
-
-func drawShape(shape string) {
-	if val, ok := shapes[shape]; ok {
-		fmt.Printf("%s", val)
-	} else {
-		fmt.Print("x")
-	}
-}
-
-func moveThenDrawShape(r, c int, s string) {
-	MoveCursorTo(r, c)
-	drawShape(s)
+var Shapes = map[string]string{
+	"walll":    "╎",
+	"wallr":    " ",
+	"ceiling":  " ",
+	"floor":    " ",
+	"tl":       "╎",
+	"tr":       " ",
+	"bl":       "╎",
+	"br":       " ",
+	"awalll":   "▌",
+	"awallr":   "▐",
+	"aceiling": "▀",
+	"afloor":   "▄",
+	"atl":      "▞",
+	"atr":      "▜",
+	"abl":      "▚",
+	"abr":      "▟",
 }
 
 func MoveCursorTo(row, col int) {
@@ -54,15 +43,29 @@ func moveCursorToward(dir string, amount int) {
 	}
 }
 
+// Exit performs cleanup operations before exiting the application
 func Exit() {
+	CleanupTerm()
+	os.Exit(0)
+}
+
+// InitTerm sets the terminal modes appropriate for Bombadillo
+func InitTerm() {
+	SetCharMode()
+	Tput("rmam")  // turn off line wrapping
+	Tput("smcup") // use alternate screen
+}
+
+// CleanupTerm reverts changs to terminal mode made by InitTerm
+func CleanupTerm() {
 	moveCursorToward("down", 500)
 	moveCursorToward("right", 500)
 	SetLineMode()
 
 	fmt.Print("\n")
-	fmt.Print("\033[?25h")
-	HandleAlternateScreen("rmcup")
-	os.Exit(0)
+	fmt.Print("\033[?25h") // reenables cursor blinking
+	Tput("smam")           // turn on line wrap
+	Tput("rmcup")          // stop using alternate screen
 }
 
 func Clear(dir string) {
@@ -79,45 +82,6 @@ func Clear(dir string) {
 		fmt.Print(val)
 	}
 
-}
-
-// Takes the document content (as a slice of strings) and wraps any lines that
-// are longer than the specified console width. returns the amended document
-// content as a slice of strings.
-// Word wrapping uses a "greedy" algorithm, where long lines are split in to
-// words, and then rebuilt word by word to fill the available space. any
-// leftover words overflow to the next line.
-// To offer some support for unicode, some lengths are calculated using a slice
-// of runes in the following way: len([]rune(string))
-func wrapLines(s []string, consolewidth int) []string {
-	out := []string{}
-	for _, ln := range s {
-		if len([]rune(ln)) <= consolewidth {
-			out = append(out, ln)
-		} else {
-			words := strings.SplitAfter(ln, " ")
-			var subout bytes.Buffer
-			for i, wd := range words {
-				sublen := subout.Len()
-				wdlen := len([]rune(wd))
-				if sublen+wdlen <= consolewidth {
-					subout.WriteString(wd)
-					if i == len(words)-1 {
-						out = append(out, subout.String())
-					}
-				} else {
-					out = append(out, subout.String())
-					subout.Reset()
-					subout.WriteString(wd)
-					if i == len(words)-1 {
-						out = append(out, subout.String())
-						subout.Reset()
-					}
-				}
-			}
-		}
-	}
-	return out
 }
 
 func Getch() rune {
@@ -165,7 +129,7 @@ func SetLineMode() {
 	}
 }
 
-func HandleAlternateScreen(opt string) {
+func Tput(opt string) {
 	cmd := exec.Command("tput", opt)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
