@@ -94,7 +94,13 @@ func lowerCaseOpt(opt, val string) string {
 }
 
 func loadConfig() error {
-	file, err := os.Open(bombadillo.Options["configlocation"] + "/.bombadillo.ini")
+	err := os.MkdirAll(bombadillo.Options["configlocation"], 0755)
+	if err != nil {
+		return fmt.Errorf("Error creating configlocation: %s", err.Error())
+	}
+
+	fp := filepath.Join(bombadillo.Options["configlocation"], ".bombadillo.ini")
+	file, err := os.Open(fp)
 	if err != nil {
 		err = saveConfig()
 		if err != nil {
