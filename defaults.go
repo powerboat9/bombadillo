@@ -71,7 +71,12 @@ func homePath() string {
 func xdgConfigPath() string {
 	configPath := os.Getenv("XDG_CONFIG_HOME")
 	if configPath == "" {
-		return filepath.Join(homePath(), ".config")
+		fp := filepath.Join(homePath(), ".config")
+		err := os.MkdirAll(fp, 0755)
+		if err != nil {
+			panic("Unable to create configuration directory: ~/.config")
+		}
+		return fp
 	}
 	return configPath
 }
