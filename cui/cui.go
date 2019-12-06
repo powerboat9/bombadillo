@@ -26,8 +26,6 @@ var Shapes = map[string]string{
 	"abr":      "▟",
 }
 
-var ExitMessage string
-
 func MoveCursorTo(row, col int) {
 	fmt.Printf("\033[%d;%dH", row, col)
 }
@@ -46,10 +44,10 @@ func moveCursorToward(dir string, amount int) {
 }
 
 // Exit performs cleanup operations before exiting the application
-func Exit(exitCode int) {
+func Exit(exitCode int, msg string) {
 	CleanupTerm()
-	if ExitMessage != "" {
-		fmt.Print(ExitMessage, "\n")
+	if msg != "" {
+		fmt.Print(msg, "\n")
 	}
 	os.Exit(exitCode)
 }

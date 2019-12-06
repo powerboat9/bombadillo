@@ -96,8 +96,8 @@ func lowerCaseOpt(opt, val string) string {
 func loadConfig() {
 	err := os.MkdirAll(bombadillo.Options["configlocation"], 0755)
 	if err != nil {
-		cui.ExitMessage = fmt.Sprintf("Error creating configlocation: %s", err.Error())
-		cui.Exit(3)
+		exitMsg := fmt.Sprintf("Error creating configlocation: %s", err.Error())
+		cui.Exit(3, exitMsg)
 	}
 
 	fp := filepath.Join(bombadillo.Options["configlocation"], ".bombadillo.ini")
@@ -105,8 +105,8 @@ func loadConfig() {
 	if err != nil {
 		err = saveConfig()
 		if err != nil {
-			cui.ExitMessage = fmt.Sprintf("Error saving config during bootup: %s", err.Error())
-			cui.Exit(4)
+			exitMsg := fmt.Sprintf("Error saving config during bootup: %s", err.Error())
+			cui.Exit(4, exitMsg)
 		}
 	}
 
@@ -164,7 +164,7 @@ func handleSignals(c <-chan os.Signal) {
 			cui.InitTerm()
 			bombadillo.Draw()
 		case syscall.SIGINT:
-			cui.Exit(130)
+			cui.Exit(130, "")
 		}
 	}
 }
@@ -196,7 +196,7 @@ func main() {
 	args := flag.Args()
 
 	cui.InitTerm()
-	defer cui.Exit(0)
+	defer cui.Exit(0, "")
 	initClient()
 
 	// watch for signals, send them to be handled
