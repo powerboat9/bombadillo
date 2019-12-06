@@ -93,10 +93,11 @@ func lowerCaseOpt(opt, val string) string {
 	}
 }
 
-func loadConfig() error {
+func loadConfig() {
 	err := os.MkdirAll(bombadillo.Options["configlocation"], 0755)
 	if err != nil {
-		return fmt.Errorf("Error creating configlocation: %s", err.Error())
+		cui.ExitMessage = fmt.Sprintf("Error creating configlocation: %s", err.Error())
+		cui.Exit(3)
 	}
 
 	fp := filepath.Join(bombadillo.Options["configlocation"], ".bombadillo.ini")
@@ -104,7 +105,8 @@ func loadConfig() error {
 	if err != nil {
 		err = saveConfig()
 		if err != nil {
-			return err
+			cui.ExitMessage = fmt.Sprintf("Error saving config during bootup: %s", err.Error())
+			cui.Exit(4)
 		}
 	}
 
@@ -138,17 +140,14 @@ func loadConfig() error {
 	for _, v := range settings.Certs {
 		bombadillo.Certs.Add(v.Key, v.Value)
 	}
-
-	return nil
 }
 
-func initClient() error {
+func initClient() {
 	bombadillo = MakeClient("  ((( Bombadillo )))  ")
-	err := loadConfig()
+	loadConfig()
 	if bombadillo.Options["tlscertificate"] != "" && bombadillo.Options["tlskey"] != "" {
 		bombadillo.Certs.LoadCertificate(bombadillo.Options["tlscertificate"], bombadillo.Options["tlskey"])
 	}
-	return err
 }
 
 // In the event of specific signals, ensure the display is shown correctly.
@@ -198,12 +197,7 @@ func main() {
 
 	cui.InitTerm()
 	defer cui.Exit(0)
-	err := initClient()
-	if err != nil {
-		// if we can't initialize we should bail out
-		cui.ExitMessage = err.Error()
-		cui.Exit(1)
-	}
+	initClient()
 
 	// watch for signals, send them to be handled
 	c := make(chan os.Signal, 1)
