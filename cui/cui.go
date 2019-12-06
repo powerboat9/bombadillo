@@ -26,6 +26,8 @@ var Shapes = map[string]string{
 	"abr":      "▟",
 }
 
+var ExitMessage string
+
 func MoveCursorTo(row, col int) {
 	fmt.Printf("\033[%d;%dH", row, col)
 }
@@ -44,9 +46,12 @@ func moveCursorToward(dir string, amount int) {
 }
 
 // Exit performs cleanup operations before exiting the application
-func Exit() {
+func Exit(exitCode int) {
 	CleanupTerm()
-	os.Exit(0)
+	if ExitMessage != "" {
+		fmt.Print(ExitMessage, "\n")
+	}
+	os.Exit(exitCode)
 }
 
 // InitTerm sets the terminal modes appropriate for Bombadillo

@@ -165,7 +165,7 @@ func handleSignals(c <-chan os.Signal) {
 			cui.InitTerm()
 			bombadillo.Draw()
 		case syscall.SIGINT:
-			cui.Exit()
+			cui.Exit(130)
 		}
 	}
 }
@@ -197,11 +197,12 @@ func main() {
 	args := flag.Args()
 
 	cui.InitTerm()
-	defer cui.Exit()
+	defer cui.Exit(0)
 	err := initClient()
 	if err != nil {
 		// if we can't initialize we should bail out
-		panic(err)
+		cui.ExitMessage = err.Error()
+		cui.Exit(1)
 	}
 
 	// watch for signals, send them to be handled

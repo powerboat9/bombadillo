@@ -47,8 +47,8 @@ func (c *client) GetSizeOnce() {
 	cmd.Stdin = os.Stdin
 	out, err := cmd.Output()
 	if err != nil {
-		fmt.Println("Fatal error: Unable to retrieve terminal size")
-		os.Exit(5)
+		cui.ExitMessage = "Fatal error: Unable to retrieve terminal size"
+		cui.Exit(5)
 	}
 	var h, w int
 	_, _ = fmt.Sscan(string(out), &h, &w)
@@ -66,8 +66,8 @@ func (c *client) GetSize() {
 		cmd.Stdin = os.Stdin
 		out, err := cmd.Output()
 		if err != nil {
-			fmt.Println("Fatal error: Unable to retrieve terminal size")
-			os.Exit(5)
+			cui.ExitMessage = "Fatal error: Unable to retrieve terminal size"
+			cui.Exit(5)
 		}
 		var h, w int
 		_, _ = fmt.Sscan(string(out), &h, &w)
@@ -157,7 +157,7 @@ func (c *client) TakeControlInput() {
 		c.Scroll(-1)
 	case 'q', 'Q':
 		// quit bombadillo
-		cui.Exit()
+		cui.Exit(0)
 	case 'g':
 		// scroll to top
 		c.ClearMessage()
@@ -278,7 +278,7 @@ func (c *client) simpleCommand(action string) {
 	action = strings.ToUpper(action)
 	switch action {
 	case "Q", "QUIT":
-		cui.Exit()
+		cui.Exit(0)
 	case "H", "HOME":
 		if c.Options["homeurl"] != "unset" {
 			go c.Visit(c.Options["homeurl"])
