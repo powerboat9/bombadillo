@@ -44,9 +44,12 @@ func moveCursorToward(dir string, amount int) {
 }
 
 // Exit performs cleanup operations before exiting the application
-func Exit() {
+func Exit(exitCode int, msg string) {
 	CleanupTerm()
-	os.Exit(0)
+	if msg != "" {
+		fmt.Print(msg, "\n")
+	}
+	os.Exit(exitCode)
 }
 
 // InitTerm sets the terminal modes appropriate for Bombadillo
