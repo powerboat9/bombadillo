@@ -726,9 +726,13 @@ func (c *client) ReloadPage() error {
 		return fmt.Errorf("There is no page to reload")
 	}
 	url := c.PageState.History[c.PageState.Position].Location.Full
-	err := c.PageState.NavigateHistory(-1)
-	if err != nil {
-		return err
+	if c.PageState.Length == 1 {
+		c.PageState.Position--
+	} else {
+		err := c.PageState.NavigateHistory(-1)
+		if err != nil {
+			return err
+		}
 	}
 	length := c.PageState.Length
 	c.Visit(url)
