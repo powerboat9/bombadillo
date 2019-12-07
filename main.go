@@ -96,7 +96,7 @@ func lowerCaseOpt(opt, val string) string {
 func loadConfig() {
 	err := os.MkdirAll(bombadillo.Options["configlocation"], 0755)
 	if err != nil {
-		exitMsg := fmt.Sprintf("Error creating configlocation: %s", err.Error())
+		exitMsg := fmt.Sprintf("Error creating 'configlocation' directory: %s", err.Error())
 		cui.Exit(3, exitMsg)
 	}
 
@@ -105,7 +105,7 @@ func loadConfig() {
 	if err != nil {
 		err = saveConfig()
 		if err != nil {
-			exitMsg := fmt.Sprintf("Error saving config during bootup: %s", err.Error())
+			exitMsg := fmt.Sprintf("Error writing config file during bootup: %s", err.Error())
 			cui.Exit(4, exitMsg)
 		}
 	}
