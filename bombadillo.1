@@ -210,6 +210,10 @@ configlocation
 The path to the directory that the \fI.bombadillo.ini\fP configuration file is stored in. This is a \fBread only\fP setting and cannot be changed with the \fIset\fP command, but it can be read with the \fIcheck\fP command.
 .TP
 .B
+defaultscheme
+The scheme that should be used when no scheme is present in a given URL. \fIgopher\fP, \fIgemini\fP, \fIhttp\fP, and \fIhttps\fP are valid values.
+.TP
+.B
 homeurl
 The url that \fBbombadillo\fP navigates to when the program loads or when the \fIhome\fP or \fIh\fP LINE COMMAND is issued. This should be a valid url. If a scheme/protocol is not included, gopher will be assumed.
 .TP
