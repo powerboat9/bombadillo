@@ -47,7 +47,7 @@ func (p *Page) ScrollPositionRange(termHeight int) (int, int) {
 // width and updates the WrappedContent
 // of the Page struct width a string slice
 // of the wrapped data
-func (p *Page) WrapContent(width int) {
+func (p *Page) WrapContent(width int, color bool) {
 	counter := 0
 	var content strings.Builder
 	escape := false
@@ -56,6 +56,9 @@ func (p *Page) WrapContent(width int) {
 		if escape {
 			if (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') {
 				escape = false
+			}
+			if color {
+				content.WriteRune(ch)
 			}
 			continue
 		}
@@ -75,6 +78,9 @@ func (p *Page) WrapContent(width int) {
 			continue
 		} else if ch == 27 {
 			escape = true
+			if color {
+				content.WriteRune(ch)
+			}
 			continue
 		} else {
 			if counter < width {

@@ -86,9 +86,12 @@ func (c *client) Draw() {
 	screen.WriteString("\033[0m")
 	screen.WriteString(c.TopBar.Render(c.Width, c.Options["theme"]))
 	screen.WriteString("\n")
-	pageContent := c.PageState.Render(c.Height, c.Width-1)
+	pageContent := c.PageState.Render(c.Height, c.Width-1, (c.Options["theme"] == "color"))
+	var re *regexp.Regexp
 	if c.Options["theme"] == "inverse" {
 		screen.WriteString("\033[7m")
+	} else if c.Options["theme"] == "color" {
+		re = regexp.MustCompile(`\033\[(?:\d*;?)+[A-Za-z]`)
 	}
 	if c.BookMarks.IsOpen {
 		bm := c.BookMarks.Render(c.Width, c.Height)
@@ -97,7 +100,14 @@ func (c *client) Draw() {
 			if c.Width > bmWidth {
 				contentWidth := c.Width - bmWidth
 				if i < len(pageContent) {
-					screen.WriteString(fmt.Sprintf("%-*.*s", contentWidth, contentWidth, pageContent[i]))
+					extra := 0
+					if c.Options["theme"] == "color" {
+						escapes := re.FindAllString(pageContent[i], -1)
+						for _, esc := range escapes {
+							extra += len(esc)
+						}
+					}
+					screen.WriteString(fmt.Sprintf("%-*.*s", contentWidth+extra, contentWidth+extra, pageContent[i]))
 				} else {
 					screen.WriteString(fmt.Sprintf("%-*.*s", contentWidth, contentWidth, " "))
 				}
@@ -110,6 +120,9 @@ func (c *client) Draw() {
 				screen.WriteString("\033[2m")
 			}
 
+			if c.Options["theme"] == "color" {
+				screen.WriteString("\033[0m")
+			}
 			screen.WriteString(bm[i])
 
 			if c.Options["theme"] == "inverse" && !c.BookMarks.IsFocused {
@@ -123,7 +136,14 @@ func (c *client) Draw() {
 	} else {
 		for i := 0; i < c.Height-3; i++ {
 			if i < len(pageContent) {
-				screen.WriteString(fmt.Sprintf("%-*.*s", c.Width, c.Width, pageContent[i]))
+				extra := 0
+				if c.Options["theme"] == "color" {
+					escapes := re.FindAllString(pageContent[i], -1)
+					for _, esc := range escapes {
+						extra += len(esc)
+					}
+				}
+				screen.WriteString(fmt.Sprintf("%-*.*s", c.Width+extra, c.Width+extra, pageContent[i]))
 				screen.WriteString("\n")
 			} else {
 				screen.WriteString(fmt.Sprintf("%-*.*s", c.Width, c.Width, " "))
@@ -219,7 +239,7 @@ func (c *client) TakeControlInput() {
 		// Process a command
 		c.ClearMessage()
 		c.ClearMessageLine()
-		if c.Options["theme"] == "normal" {
+		if c.Options["theme"] == "normal" || c.Options["theme"] == "color" {
 			fmt.Printf("\033[7m%*.*s\r", c.Width, c.Width, "")
 		}
 		entry, err := cui.GetLine()
@@ -620,7 +640,7 @@ func (c *client) search(query, url, question string) {
 	if query == "" {
 		c.ClearMessage()
 		c.ClearMessageLine()
-		if c.Options["theme"] == "normal" {
+		if c.Options["theme"] == "normal" || c.Options["theme"] == "color" {
 			fmt.Printf("\033[7m%*.*s\r", c.Width, c.Width, "")
 		}
 		fmt.Print(question)
@@ -773,7 +793,7 @@ func (c *client) DrawMessage() {
 
 func (c *client) RenderMessage() string {
 	leadIn, leadOut := "", ""
-	if c.Options["theme"] == "normal" {
+	if c.Options["theme"] == "normal" || c.Options["theme"] == "color" {
 		leadIn = "\033[7m"
 		leadOut = "\033[0m"
 	}
@@ -782,7 +802,7 @@ func (c *client) RenderMessage() string {
 		leadIn = "\033[31;1m"
 		leadOut = "\033[0m"
 
-		if c.Options["theme"] == "normal" {
+		if c.Options["theme"] == "normal" || c.Options["theme"] == "color" {
 			leadIn = "\033[41;1;7m"
 		}
 	}
@@ -891,7 +911,7 @@ func (c *client) handleGopher(u Url) {
 			return
 		}
 		pg := MakePage(u, content, links)
-		pg.WrapContent(c.Width - 1)
+		pg.WrapContent(c.Width-1, (c.Options["theme"] == "color"))
 		c.PageState.Add(pg)
 		c.SetPercentRead()
 		c.ClearMessage()
@@ -914,7 +934,7 @@ func (c *client) handleGemini(u Url) {
 	case 2:
 		if capsule.MimeMaj == "text" {
 			pg := MakePage(u, capsule.Content, capsule.Links)
-			pg.WrapContent(c.Width - 1)
+			pg.WrapContent(c.Width-1, (c.Options["theme"] == "color"))
 			c.PageState.Add(pg)
 			c.SetPercentRead()
 			c.ClearMessage()
@@ -962,7 +982,7 @@ func (c *client) handleLocal(u Url) {
 		return
 	}
 	pg := MakePage(u, content, links)
-	pg.WrapContent(c.Width - 1)
+	pg.WrapContent(c.Width-1, (c.Options["theme"] == "color"))
 	c.PageState.Add(pg)
 	c.SetPercentRead()
 	c.ClearMessage()
@@ -978,7 +998,7 @@ func (c *client) handleFinger(u Url) {
 		return
 	}
 	pg := MakePage(u, content, []string{})
-	pg.WrapContent(c.Width - 1)
+	pg.WrapContent(c.Width-1, (c.Options["theme"] == "color"))
 	c.PageState.Add(pg)
 	c.SetPercentRead()
 	c.ClearMessage()
@@ -998,7 +1018,7 @@ func (c *client) handleWeb(u Url) {
 				return
 			}
 			pg := MakePage(u, page.Content, page.Links)
-			pg.WrapContent(c.Width - 1)
+			pg.WrapContent(c.Width-1, (c.Options["theme"] == "color"))
 			c.PageState.Add(pg)
 			c.SetPercentRead()
 			c.ClearMessage()

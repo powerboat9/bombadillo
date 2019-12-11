@@ -47,10 +47,10 @@ func saveConfig() error {
 
 	opts.WriteString("\n[SETTINGS]\n")
 	for k, v := range bombadillo.Options {
-		if k == "theme" && v != "normal" && v != "inverse" {
-			v = "normal"
-			bombadillo.Options["theme"] = "normal"
-		}
+		// if k == "theme" && v != "normal" && v != "inverse" {
+		// v = "normal"
+		// bombadillo.Options["theme"] = "normal"
+		// }
 		opts.WriteString(k)
 		opts.WriteRune('=')
 		opts.WriteString(v)
@@ -67,7 +67,7 @@ func saveConfig() error {
 func validateOpt(opt, val string) bool {
 	var validOpts = map[string][]string{
 		"webmode":       []string{"none", "gui", "lynx", "w3m", "elinks"},
-		"theme":         []string{"normal", "inverse"},
+		"theme":         []string{"normal", "inverse", "color"},
 		"defaultscheme": []string{"gopher", "gemini", "http", "https"},
 	}
 
@@ -117,11 +117,7 @@ func loadConfig() {
 	for _, v := range settings.Settings {
 		lowerkey := strings.ToLower(v.Key)
 		if lowerkey == "configlocation" {
-			// The config defaults to the home folder.
-			// Users cannot really edit this value. But
-			// a compile time override is available.
-			// It is still stored in the ini and as a part
-			// of the options map.
+			// Read only
 			continue
 		}
 
