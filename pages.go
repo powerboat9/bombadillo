@@ -60,13 +60,13 @@ func (p *Pages) Add(pg Page) {
 
 // Render wraps the content for the current page and returns
 // the page content as a string slice
-func (p *Pages) Render(termHeight, termWidth int) []string {
+func (p *Pages) Render(termHeight, termWidth int, color bool) []string {
 	if p.Length < 1 {
 		return make([]string, 0)
 	}
 	pos := p.History[p.Position].ScrollPosition
 	prev := len(p.History[p.Position].WrappedContent)
-	p.History[p.Position].WrapContent(termWidth)
+	p.History[p.Position].WrapContent(termWidth, color)
 	now := len(p.History[p.Position].WrappedContent)
 	if prev > now {
 		diff := prev - now
