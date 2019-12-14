@@ -38,7 +38,7 @@ Basic support is provided for the finger protocol. The format is: \fIfinger://[[
 .TP
 .B
 local
-Local is similar to the \fIfile\fP protocol used in web browsers or the like, with a smaller set of features. Users can use the local scheme to view files on their local system. Directories are supported as viewable text object as well as any files. Wildcards and globbing are not supported. Using \fI~\fP to represent a user's home directory, as well as relative paths, are supported.
+Local is similar to the \fIfile\fP protocol used in web browsers or the like, with a smaller set of features. Users can use the local scheme to view files on their local system. Directories are supported as viewable text object as well as any files. Wildcards and globbing are not supported. Using \fI~\fP to represent a user's home directory, as well as relative paths, are supported. The \fIcolor\fP theme has no effect on this protocol and all terminal escape sequences will be rendered to the screen literally.
 .TP
 .B
 telnet
@@ -231,7 +231,7 @@ Tells the browser what command to use to start a telnet session. Should be a val
 .TP
 .B
 theme
-Can toggle between visual modes. Valid values are \fInormal\fP, \fIcolor\fP, and \fIinverse\fP. When set to inverse, the normal mode colors mode is inverted. When set to color, Bombadillo will render color codes in documents.
+Can toggle between visual modes. Valid values are \fInormal\fP, \fIcolor\fP, and \fIinverse\fP. When set to inverse, the normal mode colors are inverted. Both normal and inverse modes filter out terminal escape sequences. When set to color, Bombadillo will render terminal escape sequences representing colors when it finds them in documents.
 .TP
 .B
 tlscertificate
