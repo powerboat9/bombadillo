@@ -47,10 +47,6 @@ func saveConfig() error {
 
 	opts.WriteString("\n[SETTINGS]\n")
 	for k, v := range bombadillo.Options {
-		// if k == "theme" && v != "normal" && v != "inverse" {
-		// v = "normal"
-		// bombadillo.Options["theme"] = "normal"
-		// }
 		opts.WriteString(k)
 		opts.WriteRune('=')
 		opts.WriteString(v)
