@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -17,6 +18,9 @@ type Page struct {
 	Links          []string
 	Location       Url
 	ScrollPosition int
+	FoundLinkLines []int
+	SearchTerm     string
+	SearchIndex    int
 }
 
 //------------------------------------------------\\
@@ -112,6 +116,27 @@ func (p *Page) WrapContent(width int, color bool) {
 	}
 
 	p.WrappedContent = strings.Split(content.String(), "\n")
+	p.FindText()
+}
+
+func (p *Page) FindText() {
+	matchLines := make([]int, 0)
+	s := p.SearchTerm
+	p.SearchIndex = 0
+	if s == "" {
+		p.FoundLinkLines = matchLines
+		return
+	}
+	for i, ln := range p.WrappedContent {
+		found := strings.Index(ln, s)
+		if found < 0 {
+			continue
+		}
+		ln = strings.ReplaceAll(ln, s, fmt.Sprintf("\033[7m%s\033[0m", s))
+		p.WrappedContent[i] = ln
+		matchLines = append(matchLines, i)
+	}
+	p.FoundLinkLines = matchLines
 }
 
 //------------------------------------------------\\
@@ -120,6 +145,6 @@ func (p *Page) WrapContent(width int, color bool) {
 
 // MakePage returns a Page struct with default values
 func MakePage(url Url, content string, links []string) Page {
-	p := Page{make([]string, 0), content, links, url, 0}
+	p := Page{make([]string, 0), content, links, url, 0, make([]int, 0), "", 0}
 	return p
 }

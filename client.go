@@ -235,6 +235,41 @@ func (c *client) TakeControlInput() {
 		// Toggle bookmark browser focus on/off
 		c.BookMarks.ToggleFocused()
 		c.Draw()
+	case 'n':
+		// Next search item
+		c.ClearMessage()
+		err := c.NextSearchItem()
+		if err != nil {
+			c.SetMessage(err.Error(), false)
+			c.DrawMessage()
+		}
+	case 'N':
+		// Previous search item
+		c.ClearMessage()
+		err := c.PreviousSearchItem()
+		if err != nil {
+			c.SetMessage(err.Error(), false)
+			c.DrawMessage()
+		}
+	case '/':
+		// Search for text
+		c.ClearMessage()
+		c.ClearMessageLine()
+		if c.Options["theme"] == "normal" || c.Options["theme"] == "color" {
+			fmt.Printf("\033[7m%*.*s\r", c.Width, c.Width, "")
+		}
+		entry, err := cui.GetLine("/")
+		c.ClearMessageLine()
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+			break
+		}
+		err = c.find(entry)
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+		}
 	case ':', ' ':
 		// Process a command
 		c.ClearMessage()
@@ -242,7 +277,7 @@ func (c *client) TakeControlInput() {
 		if c.Options["theme"] == "normal" || c.Options["theme"] == "color" {
 			fmt.Printf("\033[7m%*.*s\r", c.Width, c.Width, "")
 		}
-		entry, err := cui.GetLine()
+		entry, err := cui.GetLine(": ")
 		c.ClearMessageLine()
 		if err != nil {
 			c.SetMessage(err.Error(), true)
@@ -644,7 +679,7 @@ func (c *client) search(query, url, question string) {
 			fmt.Printf("\033[7m%*.*s\r", c.Width, c.Width, "")
 		}
 		fmt.Print(question)
-		entry, err = cui.GetLine()
+		entry, err = cui.GetLine("?")
 		c.ClearMessageLine()
 		if err != nil {
 			c.SetMessage(err.Error(), true)
@@ -1049,6 +1084,51 @@ func (c *client) handleWeb(u Url) {
 		c.SetMessage("Current 'webmode' setting does not allow http/https", false)
 		c.DrawMessage()
 	}
+}
+
+func (c *client) find(s string) error {
+	c.PageState.History[c.PageState.Position].SearchTerm = s
+	c.PageState.History[c.PageState.Position].FindText()
+	if len(c.PageState.History[c.PageState.Position].FoundLinkLines) == 0 {
+		return fmt.Errorf("No text matching %q was found", s)
+	}
+	loc := c.PageState.History[c.PageState.Position].ScrollPosition
+	diff := c.PageState.History[c.PageState.Position].FoundLinkLines[0] - loc
+	c.Scroll(diff)
+	c.Draw()
+	return nil
+}
+
+func (c *client) NextSearchItem() error {
+	if len(c.PageState.History[c.PageState.Position].FoundLinkLines) == 0 {
+		return fmt.Errorf("The search is over before it has begun")
+	}
+	c.PageState.History[c.PageState.Position].SearchIndex++
+	if c.PageState.History[c.PageState.Position].SearchIndex >= len(c.PageState.History[c.PageState.Position].FoundLinkLines) {
+		c.PageState.History[c.PageState.Position].SearchIndex = 0
+	}
+
+	loc := c.PageState.History[c.PageState.Position].ScrollPosition
+	diff := c.PageState.History[c.PageState.Position].FoundLinkLines[c.PageState.History[c.PageState.Position].SearchIndex] - loc
+	c.Scroll(diff)
+	c.Draw()
+	return nil
+}
+
+func (c *client) PreviousSearchItem() error {
+	if len(c.PageState.History[c.PageState.Position].FoundLinkLines) == 0 {
+		return fmt.Errorf("The search is over before it has begun")
+	}
+	c.PageState.History[c.PageState.Position].SearchIndex--
+	if c.PageState.History[c.PageState.Position].SearchIndex < 0 {
+		c.PageState.History[c.PageState.Position].SearchIndex = len(c.PageState.History[c.PageState.Position].FoundLinkLines) - 1
+	}
+
+	loc := c.PageState.History[c.PageState.Position].ScrollPosition
+	diff := c.PageState.History[c.PageState.Position].FoundLinkLines[c.PageState.History[c.PageState.Position].SearchIndex] - loc
+	c.Scroll(diff)
+	c.Draw()
+	return nil
 }
 
 //------------------------------------------------\\
