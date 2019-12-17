@@ -49,17 +49,15 @@ func Exit(exitCode int, msg string) {
 	if msg != "" {
 		fmt.Print(msg, "\n")
 	}
-	fmt.Print("\033[23;0t")
+	fmt.Print("\033[23;0t") // Restore window title from terminal stack
 	os.Exit(exitCode)
 }
 
 // InitTerm sets the terminal modes appropriate for Bombadillo
 func InitTerm() {
 	SetCharMode()
-	fmt.Print("\033[22;0t")
 	Tput("rmam")  // turn off line wrapping
 	Tput("smcup") // use alternate screen
-	fmt.Print("\033]0;Bombadillo\007")
 }
 
 // CleanupTerm reverts changs to terminal mode made by InitTerm
