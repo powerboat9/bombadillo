@@ -116,15 +116,28 @@ func (p *Page) WrapContent(width int, color bool) {
 	}
 
 	p.WrappedContent = strings.Split(content.String(), "\n")
-	p.FindText()
+	p.HighlightFoundText()
+}
+
+func (p *Page) HighlightFoundText() {
+	if p.SearchTerm == "" {
+		return
+	}
+	for i, ln := range p.WrappedContent {
+		found := strings.Index(ln, p.SearchTerm)
+		if found < 0 {
+			continue
+		}
+		ln = strings.ReplaceAll(ln, p.SearchTerm, fmt.Sprintf("\033[7m%s\033[0m", p.SearchTerm))
+		p.WrappedContent[i] = ln
+	}
 }
 
 func (p *Page) FindText() {
-	matchLines := make([]int, 0)
+	p.FoundLinkLines = make([]int, 0, 10)
 	s := p.SearchTerm
 	p.SearchIndex = 0
 	if s == "" {
-		p.FoundLinkLines = matchLines
 		return
 	}
 	for i, ln := range p.WrappedContent {
@@ -134,9 +147,8 @@ func (p *Page) FindText() {
 		}
 		ln = strings.ReplaceAll(ln, s, fmt.Sprintf("\033[7m%s\033[0m", s))
 		p.WrappedContent[i] = ln
-		matchLines = append(matchLines, i)
+		p.FoundLinkLines = append(p.FoundLinkLines, i)
 	}
-	p.FoundLinkLines = matchLines
 }
 
 //------------------------------------------------\\

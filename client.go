@@ -238,7 +238,7 @@ func (c *client) TakeControlInput() {
 	case 'n':
 		// Next search item
 		c.ClearMessage()
-		err := c.NextSearchItem()
+		err := c.NextSearchItem(1)
 		if err != nil {
 			c.SetMessage(err.Error(), false)
 			c.DrawMessage()
@@ -246,7 +246,7 @@ func (c *client) TakeControlInput() {
 	case 'N':
 		// Previous search item
 		c.ClearMessage()
-		err := c.PreviousSearchItem()
+		err := c.NextSearchItem(-1)
 		if err != nil {
 			c.SetMessage(err.Error(), false)
 			c.DrawMessage()
@@ -270,6 +270,7 @@ func (c *client) TakeControlInput() {
 			c.SetMessage(err.Error(), true)
 			c.DrawMessage()
 		}
+		c.NextSearchItem(0)
 	case ':', ' ':
 		// Process a command
 		c.ClearMessage()
@@ -1089,46 +1090,61 @@ func (c *client) handleWeb(u Url) {
 func (c *client) find(s string) error {
 	c.PageState.History[c.PageState.Position].SearchTerm = s
 	c.PageState.History[c.PageState.Position].FindText()
+	if s == "" {
+		return nil
+	}
 	if len(c.PageState.History[c.PageState.Position].FoundLinkLines) == 0 {
 		return fmt.Errorf("No text matching %q was found", s)
 	}
-	loc := c.PageState.History[c.PageState.Position].ScrollPosition
-	diff := c.PageState.History[c.PageState.Position].FoundLinkLines[0] - loc
-	c.Scroll(diff)
-	c.Draw()
 	return nil
 }
 
-func (c *client) NextSearchItem() error {
-	if len(c.PageState.History[c.PageState.Position].FoundLinkLines) == 0 {
+func (c *client) NextSearchItem(dir int) error {
+	page := c.PageState.History[c.PageState.Position]
+	if len(page.FoundLinkLines) == 0 {
 		return fmt.Errorf("The search is over before it has begun")
 	}
-	c.PageState.History[c.PageState.Position].SearchIndex++
-	if c.PageState.History[c.PageState.Position].SearchIndex >= len(c.PageState.History[c.PageState.Position].FoundLinkLines) {
+	c.PageState.History[c.PageState.Position].SearchIndex += dir
+	if c.PageState.History[c.PageState.Position].SearchIndex < 0 {
 		c.PageState.History[c.PageState.Position].SearchIndex = 0
 	}
 
-	loc := c.PageState.History[c.PageState.Position].ScrollPosition
-	diff := c.PageState.History[c.PageState.Position].FoundLinkLines[c.PageState.History[c.PageState.Position].SearchIndex] - loc
-	c.Scroll(diff)
+	if page.SearchIndex+dir >= len(page.FoundLinkLines) {
+		c.PageState.History[c.PageState.Position].SearchIndex = len(page.FoundLinkLines) - 1
+		return fmt.Errorf("The search path goes no further")
+	} else if page.SearchIndex+dir < 0 {
+		c.PageState.History[c.PageState.Position].SearchIndex = 0
+		return fmt.Errorf("You are at the beginning of the search path")
+	}
+
+	index := c.PageState.History[c.PageState.Position].SearchIndex
+	diff := c.PageState.History[c.PageState.Position].FoundLinkLines[index] - page.ScrollPosition
+	c.ScrollForSearch(diff)
 	c.Draw()
 	return nil
 }
 
-func (c *client) PreviousSearchItem() error {
-	if len(c.PageState.History[c.PageState.Position].FoundLinkLines) == 0 {
-		return fmt.Errorf("The search is over before it has begun")
-	}
-	c.PageState.History[c.PageState.Position].SearchIndex--
-	if c.PageState.History[c.PageState.Position].SearchIndex < 0 {
-		c.PageState.History[c.PageState.Position].SearchIndex = len(c.PageState.History[c.PageState.Position].FoundLinkLines) - 1
+func (c *client) ScrollForSearch(amount int) {
+	var percentRead int
+	page := c.PageState.History[c.PageState.Position]
+	bottom := len(page.WrappedContent) - c.Height + 3 // 3 for the three bars: top, msg, bottom
+
+	newScrollPosition := page.ScrollPosition + amount
+	if newScrollPosition < 0 {
+		newScrollPosition = 0
+	} else if newScrollPosition > bottom {
+		newScrollPosition = bottom
 	}
 
-	loc := c.PageState.History[c.PageState.Position].ScrollPosition
-	diff := c.PageState.History[c.PageState.Position].FoundLinkLines[c.PageState.History[c.PageState.Position].SearchIndex] - loc
-	c.Scroll(diff)
+	c.PageState.History[c.PageState.Position].ScrollPosition = newScrollPosition
+
+	if len(page.WrappedContent) < c.Height-3 {
+		percentRead = 100
+	} else {
+		percentRead = int(float32(newScrollPosition+c.Height-3) / float32(len(page.WrappedContent)) * 100.0)
+	}
+	c.FootBar.SetPercentRead(percentRead)
 	c.Draw()
-	return nil
 }
 
 //------------------------------------------------\\
