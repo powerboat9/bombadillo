@@ -166,12 +166,10 @@ func handleSignals(c <-chan os.Signal) {
 func printHelp() {
 	art := `Bombadillo - a non-web browser
 
-Syntax:   bombadillo [url] 
-          bombadillo [options...]
-          bombadillo -t [url]
+Syntax:   bombadillo [options] [url] 
 
 Examples: bombadillo gopher://bombadillo.colorfield.space
-          bombadillo -t
+          bombadillo -t 
           bombadillo -v
 
 Options: 
@@ -182,7 +180,7 @@ Options:
 
 func main() {
 	getVersion := flag.Bool("v", false, "Display version information and exit")
-	addTitleToXWindow := flag.Bool("t", false, "Change the window title to Bomabdillo while running")
+	addTitleToXWindow := flag.Bool("t", false, "Set the window title to 'Bombadillo'. Can be used in a GUI environment, however not all terminals support this feature.")
 	flag.Usage = printHelp
 	flag.Parse()
 	if *getVersion {
