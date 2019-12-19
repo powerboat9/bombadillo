@@ -128,7 +128,11 @@ func (p *Page) HighlightFoundText() {
 		if found < 0 {
 			continue
 		}
-		ln = strings.ReplaceAll(ln, p.SearchTerm, fmt.Sprintf("\033[7m%s\033[0m", p.SearchTerm))
+		format := "\033[7m%s\033[27m"
+		if bombadillo.Options["theme"] == "inverse" {
+			format = "\033[27m%s\033[7m"
+		}
+		ln = strings.ReplaceAll(ln, p.SearchTerm, fmt.Sprintf(format, p.SearchTerm))
 		p.WrappedContent[i] = ln
 	}
 }
@@ -140,12 +144,16 @@ func (p *Page) FindText() {
 	if s == "" {
 		return
 	}
+	format := "\033[7m%s\033[27m"
+	if bombadillo.Options["theme"] == "inverse" {
+		format = "\033[27m%s\033[7m"
+	}
 	for i, ln := range p.WrappedContent {
 		found := strings.Index(ln, s)
 		if found < 0 {
 			continue
 		}
-		ln = strings.ReplaceAll(ln, s, fmt.Sprintf("\033[7m%s\033[0m", s))
+		ln = strings.ReplaceAll(ln, s, fmt.Sprintf(format, s))
 		p.WrappedContent[i] = ln
 		p.FoundLinkLines = append(p.FoundLinkLines, i)
 	}

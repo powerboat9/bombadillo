@@ -90,9 +90,8 @@ func (c *client) Draw() {
 	var re *regexp.Regexp
 	if c.Options["theme"] == "inverse" {
 		screen.WriteString("\033[7m")
-	} else if c.Options["theme"] == "color" {
-		re = regexp.MustCompile(`\033\[(?:\d*;?)+[A-Za-z]`)
 	}
+	re = regexp.MustCompile(`\033\[(?:\d*;?)+[A-Za-z]`)
 	if c.BookMarks.IsOpen {
 		bm := c.BookMarks.Render(c.Width, c.Height)
 		bmWidth := len([]rune(bm[0]))
@@ -137,12 +136,12 @@ func (c *client) Draw() {
 		for i := 0; i < c.Height-3; i++ {
 			if i < len(pageContent) {
 				extra := 0
-				if c.Options["theme"] == "color" {
-					escapes := re.FindAllString(pageContent[i], -1)
-					for _, esc := range escapes {
-						extra += len(esc)
-					}
+				// if c.Options["theme"] == "color" {
+				escapes := re.FindAllString(pageContent[i], -1)
+				for _, esc := range escapes {
+					extra += len(esc)
 				}
+				// }
 				screen.WriteString(fmt.Sprintf("%-*.*s", c.Width+extra, c.Width+extra, pageContent[i]))
 				screen.WriteString("\n")
 			} else {
@@ -270,7 +269,10 @@ func (c *client) TakeControlInput() {
 			c.SetMessage(err.Error(), true)
 			c.DrawMessage()
 		}
-		c.NextSearchItem(0)
+		err = c.NextSearchItem(0)
+		if err != nil {
+			c.Draw()
+		}
 	case ':', ' ':
 		// Process a command
 		c.ClearMessage()
@@ -1105,20 +1107,21 @@ func (c *client) NextSearchItem(dir int) error {
 		return fmt.Errorf("The search is over before it has begun")
 	}
 	c.PageState.History[c.PageState.Position].SearchIndex += dir
-	if c.PageState.History[c.PageState.Position].SearchIndex < 0 {
+	page.SearchIndex += dir
+	if page.SearchIndex < 0 {
 		c.PageState.History[c.PageState.Position].SearchIndex = 0
+		page.SearchIndex = 0
 	}
 
-	if page.SearchIndex+dir >= len(page.FoundLinkLines) {
+	if page.SearchIndex >= len(page.FoundLinkLines) {
 		c.PageState.History[c.PageState.Position].SearchIndex = len(page.FoundLinkLines) - 1
 		return fmt.Errorf("The search path goes no further")
-	} else if page.SearchIndex+dir < 0 {
+	} else if page.SearchIndex < 0 {
 		c.PageState.History[c.PageState.Position].SearchIndex = 0
 		return fmt.Errorf("You are at the beginning of the search path")
 	}
 
-	index := c.PageState.History[c.PageState.Position].SearchIndex
-	diff := c.PageState.History[c.PageState.Position].FoundLinkLines[index] - page.ScrollPosition
+	diff := page.FoundLinkLines[page.SearchIndex] - page.ScrollPosition
 	c.ScrollForSearch(diff)
 	c.Draw()
 	return nil
