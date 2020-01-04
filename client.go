@@ -90,9 +90,8 @@ func (c *client) Draw() {
 	var re *regexp.Regexp
 	if c.Options["theme"] == "inverse" {
 		screen.WriteString("\033[7m")
-	} else if c.Options["theme"] == "color" {
-		re = regexp.MustCompile(`\033\[(?:\d*;?)+[A-Za-z]`)
 	}
+	re = regexp.MustCompile(`\033\[(?:\d*;?)+[A-Za-z]`)
 	if c.BookMarks.IsOpen {
 		bm := c.BookMarks.Render(c.Width, c.Height)
 		bmWidth := len([]rune(bm[0]))
@@ -137,11 +136,9 @@ func (c *client) Draw() {
 		for i := 0; i < c.Height-3; i++ {
 			if i < len(pageContent) {
 				extra := 0
-				if c.Options["theme"] == "color" {
-					escapes := re.FindAllString(pageContent[i], -1)
-					for _, esc := range escapes {
-						extra += len(esc)
-					}
+				escapes := re.FindAllString(pageContent[i], -1)
+				for _, esc := range escapes {
+					extra += len(esc)
 				}
 				screen.WriteString(fmt.Sprintf("%-*.*s", c.Width+extra, c.Width+extra, pageContent[i]))
 				screen.WriteString("\n")
@@ -235,6 +232,45 @@ func (c *client) TakeControlInput() {
 		// Toggle bookmark browser focus on/off
 		c.BookMarks.ToggleFocused()
 		c.Draw()
+	case 'n':
+		// Next search item
+		c.ClearMessage()
+		err := c.NextSearchItem(1)
+		if err != nil {
+			c.SetMessage(err.Error(), false)
+			c.DrawMessage()
+		}
+	case 'N':
+		// Previous search item
+		c.ClearMessage()
+		err := c.NextSearchItem(-1)
+		if err != nil {
+			c.SetMessage(err.Error(), false)
+			c.DrawMessage()
+		}
+	case '/':
+		// Search for text
+		c.ClearMessage()
+		c.ClearMessageLine()
+		if c.Options["theme"] == "normal" || c.Options["theme"] == "color" {
+			fmt.Printf("\033[7m%*.*s\r", c.Width, c.Width, "")
+		}
+		entry, err := cui.GetLine("/")
+		c.ClearMessageLine()
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+			break
+		}
+		err = c.find(entry)
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+		}
+		err = c.NextSearchItem(0)
+		if err != nil {
+			c.Draw()
+		}
 	case ':', ' ':
 		// Process a command
 		c.ClearMessage()
@@ -242,7 +278,7 @@ func (c *client) TakeControlInput() {
 		if c.Options["theme"] == "normal" || c.Options["theme"] == "color" {
 			fmt.Printf("\033[7m%*.*s\r", c.Width, c.Width, "")
 		}
-		entry, err := cui.GetLine()
+		entry, err := cui.GetLine(": ")
 		c.ClearMessageLine()
 		if err != nil {
 			c.SetMessage(err.Error(), true)
@@ -644,7 +680,7 @@ func (c *client) search(query, url, question string) {
 			fmt.Printf("\033[7m%*.*s\r", c.Width, c.Width, "")
 		}
 		fmt.Print(question)
-		entry, err = cui.GetLine()
+		entry, err = cui.GetLine("? ")
 		c.ClearMessageLine()
 		if err != nil {
 			c.SetMessage(err.Error(), true)
@@ -1049,6 +1085,67 @@ func (c *client) handleWeb(u Url) {
 		c.SetMessage("Current 'webmode' setting does not allow http/https", false)
 		c.DrawMessage()
 	}
+}
+
+func (c *client) find(s string) error {
+	c.PageState.History[c.PageState.Position].SearchTerm = s
+	c.PageState.History[c.PageState.Position].FindText()
+	if s == "" {
+		return nil
+	}
+	if len(c.PageState.History[c.PageState.Position].FoundLinkLines) == 0 {
+		return fmt.Errorf("No text matching %q was found", s)
+	}
+	return nil
+}
+
+func (c *client) NextSearchItem(dir int) error {
+	page := c.PageState.History[c.PageState.Position]
+	if len(page.FoundLinkLines) == 0 {
+		return fmt.Errorf("The search is over before it has begun")
+	}
+	c.PageState.History[c.PageState.Position].SearchIndex += dir
+	page.SearchIndex += dir
+	if page.SearchIndex < 0 {
+		c.PageState.History[c.PageState.Position].SearchIndex = 0
+		page.SearchIndex = 0
+	}
+
+	if page.SearchIndex >= len(page.FoundLinkLines) {
+		c.PageState.History[c.PageState.Position].SearchIndex = len(page.FoundLinkLines) - 1
+		return fmt.Errorf("The search path goes no further")
+	} else if page.SearchIndex < 0 {
+		c.PageState.History[c.PageState.Position].SearchIndex = 0
+		return fmt.Errorf("You are at the beginning of the search path")
+	}
+
+	diff := page.FoundLinkLines[page.SearchIndex] - page.ScrollPosition
+	c.ScrollForSearch(diff)
+	c.Draw()
+	return nil
+}
+
+func (c *client) ScrollForSearch(amount int) {
+	var percentRead int
+	page := c.PageState.History[c.PageState.Position]
+	bottom := len(page.WrappedContent) - c.Height + 3 // 3 for the three bars: top, msg, bottom
+
+	newScrollPosition := page.ScrollPosition + amount
+	if newScrollPosition < 0 {
+		newScrollPosition = 0
+	} else if newScrollPosition > bottom {
+		newScrollPosition = bottom
+	}
+
+	c.PageState.History[c.PageState.Position].ScrollPosition = newScrollPosition
+
+	if len(page.WrappedContent) < c.Height-3 {
+		percentRead = 100
+	} else {
+		percentRead = int(float32(newScrollPosition+c.Height-3) / float32(len(page.WrappedContent)) * 100.0)
+	}
+	c.FootBar.SetPercentRead(percentRead)
+	c.Draw()
 }
 
 //------------------------------------------------\\

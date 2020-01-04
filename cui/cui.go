@@ -96,11 +96,11 @@ func Getch() rune {
 	return char
 }
 
-func GetLine() (string, error) {
+func GetLine(prefix string) (string, error) {
 	SetLineMode()
 
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Print(": ")
+	fmt.Print(prefix)
 	text, err := reader.ReadString('\n')
 	if err != nil {
 		return "", err

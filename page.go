@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -17,6 +18,9 @@ type Page struct {
 	Links          []string
 	Location       Url
 	ScrollPosition int
+	FoundLinkLines []int
+	SearchTerm     string
+	SearchIndex    int
 }
 
 //------------------------------------------------\\
@@ -95,7 +99,7 @@ func (p *Page) WrapContent(width int, color bool) {
 			}
 			continue
 		} else {
-			if counter < width {
+			if counter <= width {
 				content.WriteRune(ch)
 				counter++
 			} else {
@@ -112,6 +116,47 @@ func (p *Page) WrapContent(width int, color bool) {
 	}
 
 	p.WrappedContent = strings.Split(content.String(), "\n")
+	p.HighlightFoundText()
+}
+
+func (p *Page) HighlightFoundText() {
+	if p.SearchTerm == "" {
+		return
+	}
+	for i, ln := range p.WrappedContent {
+		found := strings.Index(ln, p.SearchTerm)
+		if found < 0 {
+			continue
+		}
+		format := "\033[7m%s\033[27m"
+		if bombadillo.Options["theme"] == "inverse" {
+			format = "\033[27m%s\033[7m"
+		}
+		ln = strings.ReplaceAll(ln, p.SearchTerm, fmt.Sprintf(format, p.SearchTerm))
+		p.WrappedContent[i] = ln
+	}
+}
+
+func (p *Page) FindText() {
+	p.FoundLinkLines = make([]int, 0, 10)
+	s := p.SearchTerm
+	p.SearchIndex = 0
+	if s == "" {
+		return
+	}
+	format := "\033[7m%s\033[27m"
+	if bombadillo.Options["theme"] == "inverse" {
+		format = "\033[27m%s\033[7m"
+	}
+	for i, ln := range p.WrappedContent {
+		found := strings.Index(ln, s)
+		if found < 0 {
+			continue
+		}
+		ln = strings.ReplaceAll(ln, s, fmt.Sprintf(format, s))
+		p.WrappedContent[i] = ln
+		p.FoundLinkLines = append(p.FoundLinkLines, i)
+	}
 }
 
 //------------------------------------------------\\
@@ -120,6 +165,6 @@ func (p *Page) WrapContent(width int, color bool) {
 
 // MakePage returns a Page struct with default values
 func MakePage(url Url, content string, links []string) Page {
-	p := Page{make([]string, 0), content, links, url, 0}
+	p := Page{make([]string, 0), content, links, url, 0, make([]int, 0), "", 0}
 	return p
 }
