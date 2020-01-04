@@ -44,6 +44,7 @@ func MakeUrl(u string) (Url, error) {
 	if len(u) < 1 {
 		return Url{}, fmt.Errorf("Invalid url, unable to parse")
 	}
+
 	if strings.HasPrefix(u, "finger://") {
 		return parseFinger(u)
 	}
@@ -103,7 +104,7 @@ func MakeUrl(u string) (Url, error) {
 	out.Scheme = strings.ToLower(out.Scheme)
 
 	if out.Scheme == "" {
-		out.Scheme = "gopher"
+		out.Scheme = bombadillo.Options["defaultscheme"]
 	}
 
 	if out.Scheme == "gopher" && out.Port == "" {

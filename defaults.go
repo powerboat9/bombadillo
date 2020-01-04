@@ -50,7 +50,8 @@ var defaultOptions = map[string]string{
 	"searchengine":   "gopher://gopher.floodgap.com:70/7/v2/vs",
 	"telnetcommand":  "telnet",
 	"configlocation": xdgConfigPath(),
-	"theme":          "normal", // "normal", "inverted"
+	"defaultscheme":  "gopher", // "gopher", "gemini", "http", "https"
+	"theme":          "normal", // "normal", "inverted", "color"
 	"tlscertificate": "",
 	"tlskey":         "",
 	"webmode":        "none", // "none", "gui", "lynx", "w3m", "elinks"

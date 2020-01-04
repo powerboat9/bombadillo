@@ -47,10 +47,6 @@ func saveConfig() error {
 
 	opts.WriteString("\n[SETTINGS]\n")
 	for k, v := range bombadillo.Options {
-		if k == "theme" && v != "normal" && v != "inverse" {
-			v = "normal"
-			bombadillo.Options["theme"] = "normal"
-		}
 		opts.WriteString(k)
 		opts.WriteRune('=')
 		opts.WriteString(v)
@@ -66,8 +62,9 @@ func saveConfig() error {
 
 func validateOpt(opt, val string) bool {
 	var validOpts = map[string][]string{
-		"webmode": []string{"none", "gui", "lynx", "w3m", "elinks"},
-		"theme":   []string{"normal", "inverse"},
+		"webmode":       []string{"none", "gui", "lynx", "w3m", "elinks"},
+		"theme":         []string{"normal", "inverse", "color"},
+		"defaultscheme": []string{"gopher", "gemini", "http", "https"},
 	}
 
 	opt = strings.ToLower(opt)
@@ -86,19 +83,27 @@ func validateOpt(opt, val string) bool {
 
 func lowerCaseOpt(opt, val string) string {
 	switch opt {
-	case "webmode", "theme":
+	case "webmode", "theme", "defaultscheme":
 		return strings.ToLower(val)
 	default:
 		return val
 	}
 }
 
-func loadConfig() error {
-	file, err := os.Open(bombadillo.Options["configlocation"] + "/.bombadillo.ini")
+func loadConfig() {
+	err := os.MkdirAll(bombadillo.Options["configlocation"], 0755)
+	if err != nil {
+		exitMsg := fmt.Sprintf("Error creating 'configlocation' directory: %s", err.Error())
+		cui.Exit(3, exitMsg)
+	}
+
+	fp := filepath.Join(bombadillo.Options["configlocation"], ".bombadillo.ini")
+	file, err := os.Open(fp)
 	if err != nil {
 		err = saveConfig()
 		if err != nil {
-			return err
+			exitMsg := fmt.Sprintf("Error writing config file during bootup: %s", err.Error())
+			cui.Exit(4, exitMsg)
 		}
 	}
 
@@ -108,11 +113,7 @@ func loadConfig() error {
 	for _, v := range settings.Settings {
 		lowerkey := strings.ToLower(v.Key)
 		if lowerkey == "configlocation" {
-			// The config defaults to the home folder.
-			// Users cannot really edit this value. But
-			// a compile time override is available.
-			// It is still stored in the ini and as a part
-			// of the options map.
+			// Read only
 			continue
 		}
 
@@ -132,17 +133,14 @@ func loadConfig() error {
 	for _, v := range settings.Certs {
 		bombadillo.Certs.Add(v.Key, v.Value)
 	}
-
-	return nil
 }
 
-func initClient() error {
+func initClient() {
 	bombadillo = MakeClient("  ((( Bombadillo )))  ")
-	err := loadConfig()
+	loadConfig()
 	if bombadillo.Options["tlscertificate"] != "" && bombadillo.Options["tlskey"] != "" {
 		bombadillo.Certs.LoadCertificate(bombadillo.Options["tlscertificate"], bombadillo.Options["tlskey"])
 	}
-	return err
 }
 
 // In the event of specific signals, ensure the display is shown correctly.
@@ -159,7 +157,7 @@ func handleSignals(c <-chan os.Signal) {
 			cui.InitTerm()
 			bombadillo.Draw()
 		case syscall.SIGINT:
-			cui.Exit()
+			cui.Exit(130, "")
 		}
 	}
 }
@@ -168,10 +166,10 @@ func handleSignals(c <-chan os.Signal) {
 func printHelp() {
 	art := `Bombadillo - a non-web browser
 
-Syntax:   bombadillo [url] 
-          bombadillo [options...]
+Syntax:   bombadillo [options] [url] 
 
 Examples: bombadillo gopher://bombadillo.colorfield.space
+          bombadillo -t 
           bombadillo -v
 
 Options: 
@@ -182,6 +180,7 @@ Options:
 
 func main() {
 	getVersion := flag.Bool("v", false, "Display version information and exit")
+	addTitleToXWindow := flag.Bool("t", false, "Set the window title to 'Bombadillo'. Can be used in a GUI environment, however not all terminals support this feature.")
 	flag.Usage = printHelp
 	flag.Parse()
 	if *getVersion {
@@ -191,12 +190,14 @@ func main() {
 	args := flag.Args()
 
 	cui.InitTerm()
-	defer cui.Exit()
-	err := initClient()
-	if err != nil {
-		// if we can't initialize we should bail out
-		panic(err)
+
+	if *addTitleToXWindow {
+		fmt.Print("\033[22;0t")            // Store window title on terminal stack
+		fmt.Print("\033]0;Bombadillo\007") // Update window title
 	}
+
+	defer cui.Exit(0, "")
+	initClient()
 
 	// watch for signals, send them to be handled
 	c := make(chan os.Signal, 1)

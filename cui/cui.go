@@ -44,9 +44,13 @@ func moveCursorToward(dir string, amount int) {
 }
 
 // Exit performs cleanup operations before exiting the application
-func Exit() {
+func Exit(exitCode int, msg string) {
 	CleanupTerm()
-	os.Exit(0)
+	if msg != "" {
+		fmt.Print(msg, "\n")
+	}
+	fmt.Print("\033[23;0t") // Restore window title from terminal stack
+	os.Exit(exitCode)
 }
 
 // InitTerm sets the terminal modes appropriate for Bombadillo
@@ -93,11 +97,11 @@ func Getch() rune {
 	return char
 }
 
-func GetLine() (string, error) {
+func GetLine(prefix string) (string, error) {
 	SetLineMode()
 
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Print(": ")
+	fmt.Print(prefix)
 	text, err := reader.ReadString('\n')
 	if err != nil {
 		return "", err

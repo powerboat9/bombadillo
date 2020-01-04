@@ -4,8 +4,7 @@
 .SH SYNOPSIS
 .nf
 .fam C
-\fBbombadillo\fP [\fIurl\fP]
-\fBbombadillo\fP [\fBOPTION\fP] 
+\fBbombadillo\fP [\fIoptions\fP] [\fIurl\fP]
 .fam T
 .fi
 .SH DESCRIPTION
@@ -15,12 +14,16 @@
 .SH OPTIONS
 .TP
 .B
-\fB-v\fP
-Display version information and exit.
+\fB-h\fP
+Display usage help and exit. Provides a list of all command line options with a short description and exits.
 .TP
 .B
-\fB-h\fP
-Usage help. Displays all command line options with a short description.
+\fB-t\fP
+Set the window title to 'Bombadillo'. Can be used in a GUI environment, however not all terminals support this feature.
+.TP
+.B
+\fB-v\fP
+Display version information and exit.
 .SH PROTOCOL SUPPORT
 All of the below protocols are supported. With the exception of gopher, the protocol name must be present as the scheme component of a url in the form of \fI[protocol]://[the rest of the url]\fP.
 .TP
@@ -38,7 +41,7 @@ Basic support is provided for the finger protocol. The format is: \fIfinger://[[
 .TP
 .B
 local
-Local is similar to the \fIfile\fP protocol used in web browsers or the like, with a smaller set of features. Users can use the local scheme to view files on their local system. Directories are supported as viewable text object as well as any files. Wildcards and globbing are not supported. Using \fI~\fP to represent a user's home directory, as well as relative paths, are supported.
+Local is similar to the \fIfile\fP protocol used in web browsers or the like, with a smaller set of features. Users can use the local scheme to view files on their local system. Directories are supported as viewable text object as well as any files. Wildcards and globbing are not supported. Using \fI~\fP to represent a user's home directory, as well as relative paths, are supported. The \fIcolor\fP theme has no effect on this protocol and all terminal escape sequences will be rendered to the screen literally.
 .TP
 .B
 telnet
@@ -88,6 +91,13 @@ k
 Scroll up a single line.
 .TP
 .B
+n
+Jump to next found text item.
+.TP
+.B
+Jump to previous found text item.
+.TP
+.B
 q
 Quit \fBbombadillo\fP.
 .TP
@@ -98,6 +108,10 @@ Reload the current page (does not destroy forward history).
 .B
 u
 Scroll up an amount corresponding to 75% of your terminal window height in the current document.
+.TP
+.B
+/
+Search for text within current document. / followed by a text query will highlight and allow navigation of found text. / with an empty query will clear the current query.
 .TP
 .B
 <tab>
@@ -150,7 +164,7 @@ check [setting name]
 Displays the current value for a given configuration setting. \fIc\fP can be used instead of the full \fIcheck\fP.
 .TP
 .B
-delete [bookmark id]]
+delete [bookmark id]
 Deletes the bookmark matching the bookmark id. \fId\fP can be used instead of the full \fIdelete\fP.
 .TP
 .B
@@ -186,7 +200,7 @@ search [keywords\.\.\.]
 Submits a search to the search engine set by the \fIsearchengine\fP setting, with the query being the provided keyword(s).
 .TP
 .B
-set [setting name]
+set [setting name] [value]
 Sets the value for a given configuration setting. \fIs\fP can be used instead of the full \fIset\fP.
 .TP
 .B
@@ -210,6 +224,10 @@ configlocation
 The path to the directory that the \fI.bombadillo.ini\fP configuration file is stored in. This is a \fBread only\fP setting and cannot be changed with the \fIset\fP command, but it can be read with the \fIcheck\fP command.
 .TP
 .B
+defaultscheme
+The scheme that should be used when no scheme is present in a given URL. \fIgopher\fP, \fIgemini\fP, \fIhttp\fP, and \fIhttps\fP are valid values.
+.TP
+.B
 homeurl
 The url that \fBbombadillo\fP navigates to when the program loads or when the \fIhome\fP or \fIh\fP LINE COMMAND is issued. This should be a valid url. If a scheme/protocol is not included, gopher will be assumed.
 .TP
@@ -227,7 +245,7 @@ Tells the browser what command to use to start a telnet session. Should be a val
 .TP
 .B
 theme
-Can toggle between visual modes. Valid values are \fInormal\fP and \fIinverse\fP. When set to inverse, the terminal color mode is inverted.
+Can toggle between visual modes. Valid values are \fInormal\fP, \fIcolor\fP, and \fIinverse\fP. When set to inverse, the normal mode colors are inverted. Both normal and inverse modes filter out terminal escape sequences. When set to color, Bombadillo will render terminal escape sequences representing colors when it finds them in documents.
 .TP
 .B
 tlscertificate
