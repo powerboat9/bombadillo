@@ -99,7 +99,7 @@ func (p *Page) WrapContent(width int, color bool) {
 			}
 			continue
 		} else {
-			if counter < width {
+			if counter <= width {
 				content.WriteRune(ch)
 				counter++
 			} else {
