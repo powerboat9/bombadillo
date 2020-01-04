@@ -132,7 +132,7 @@ func (p *Page) HighlightFoundText() {
 		if bombadillo.Options["theme"] == "inverse" {
 			format = "\033[27m%s\033[7m"
 		}
-		ln = strings.ReplaceAll(ln, p.SearchTerm, fmt.Sprintf(format, p.SearchTerm))
+		ln = strings.Replace(ln, p.SearchTerm, fmt.Sprintf(format, p.SearchTerm), -1)
 		p.WrappedContent[i] = ln
 	}
 }
@@ -153,7 +153,7 @@ func (p *Page) FindText() {
 		if found < 0 {
 			continue
 		}
-		ln = strings.ReplaceAll(ln, s, fmt.Sprintf(format, s))
+		ln = strings.Replace(ln, s, fmt.Sprintf(format, s), -1)
 		p.WrappedContent[i] = ln
 		p.FoundLinkLines = append(p.FoundLinkLines, i)
 	}
