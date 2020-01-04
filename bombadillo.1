@@ -88,6 +88,13 @@ k
 Scroll up a single line.
 .TP
 .B
+n
+Jump to next found text item.
+.TP
+.B
+Jump to previous found text item.
+.TP
+.B
 q
 Quit \fBbombadillo\fP.
 .TP
@@ -98,6 +105,10 @@ Reload the current page (does not destroy forward history).
 .B
 u
 Scroll up an amount corresponding to 75% of your terminal window height in the current document.
+.TP
+.B
+/
+Search for text within current document. / followed by a text query will highlight and allow navigation of found text. / with an empty query will clear the current query.
 .TP
 .B
 <tab>
