@@ -136,12 +136,10 @@ func (c *client) Draw() {
 		for i := 0; i < c.Height-3; i++ {
 			if i < len(pageContent) {
 				extra := 0
-				// if c.Options["theme"] == "color" {
 				escapes := re.FindAllString(pageContent[i], -1)
 				for _, esc := range escapes {
 					extra += len(esc)
 				}
-				// }
 				screen.WriteString(fmt.Sprintf("%-*.*s", c.Width+extra, c.Width+extra, pageContent[i]))
 				screen.WriteString("\n")
 			} else {
@@ -682,7 +680,7 @@ func (c *client) search(query, url, question string) {
 			fmt.Printf("\033[7m%*.*s\r", c.Width, c.Width, "")
 		}
 		fmt.Print(question)
-		entry, err = cui.GetLine("?")
+		entry, err = cui.GetLine("? ")
 		c.ClearMessageLine()
 		if err != nil {
 			c.SetMessage(err.Error(), true)
