@@ -49,6 +49,7 @@ func Exit(exitCode int, msg string) {
 	if msg != "" {
 		fmt.Print(msg, "\n")
 	}
+	fmt.Print("\033[23;0t") // Restore window title from terminal stack
 	os.Exit(exitCode)
 }
 

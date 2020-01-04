@@ -4,8 +4,7 @@
 .SH SYNOPSIS
 .nf
 .fam C
-\fBbombadillo\fP [\fIurl\fP]
-\fBbombadillo\fP [\fBOPTION\fP] 
+\fBbombadillo\fP [\fIoptions\fP] [\fIurl\fP]
 .fam T
 .fi
 .SH DESCRIPTION
@@ -15,12 +14,16 @@
 .SH OPTIONS
 .TP
 .B
-\fB-v\fP
-Display version information and exit.
+\fB-h\fP
+Display usage help and exit. Provides a list of all command line options with a short description and exits.
 .TP
 .B
-\fB-h\fP
-Usage help. Displays all command line options with a short description.
+\fB-t\fP
+Set the window title to 'Bombadillo'. Can be used in a GUI environment, however not all terminals support this feature.
+.TP
+.B
+\fB-v\fP
+Display version information and exit.
 .SH PROTOCOL SUPPORT
 All of the below protocols are supported. With the exception of gopher, the protocol name must be present as the scheme component of a url in the form of \fI[protocol]://[the rest of the url]\fP.
 .TP
