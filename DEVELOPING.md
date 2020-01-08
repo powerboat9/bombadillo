@@ -34,7 +34,13 @@ Please refer to our [notes on contributing](README.md#contributing) to get an un
 
 ### Incrementing the version number
 
+This process is handled by maintainers after a change has been merged.
+
 Version numbers are comprised of three digits: major version number, minor version number, and patch number.
+
+The version number is incremented in the following situations:
+
+#### New changes
 
 Each new change added to **develop** should increment the patch number. For example, version 2.0.1 would become 2.0.2. After the change is merged from the feature branch to **develop**:
 
@@ -46,22 +52,22 @@ git pull
 # get the commit ID for the recent merge
 git log
 
-# get the current version number
+# get the current version number (the highest number)
 git tag
 
 # add the incremented version number to the commit-id, for example:
-git tag 2.0.2 abcdef 
+git tag 2.0.2 abcdef
 ```
 
+#### Release process
+
 As part of the software release process, any part of the version number may change:
+
 - Urgent changes increment the **patch** number
 - A set of small changes increments the **minor** version number
 - A significant change to large parts of the application increments the **major** version number
 
-The process is very similar to the above commands, however the final command should include an annotation:
-
-```shell
-git tag 2.1.0 abdef -a "This version adds several new features..."
-```
-
-Release information should also be added to the [tildegit releases page](https://tildegit.org/sloum/bombadillo/releases).
+1. The version number in the VERSION file is incremented. This change is committed to the default branch.
+1. The **develop** branch is merged to the default branch.
+1. The commands from the New Changes section are followed, but the final command includes an annotation: `git tag 2.1.0 abdef -a "This version adds several new features..."`
+1. Release information should also be added to the [tildegit releases page](https://tildegit.org/sloum/bombadillo/releases).
