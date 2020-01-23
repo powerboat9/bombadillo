@@ -127,11 +127,7 @@ The maintainers use the [tildegit](https://tildegit.org) issues system to discus
 
 ## Development
 
-Following the standard install instructions should lead you to have nearly everything you need to commence development. The only additions to this are:
-
-- To be able to submit pull requests, you will need to fork this repository first.
-- The build process must be tested with Go 1.11 to ensure backward compatibility. This version can be installed as per the [Go install documentation](https://golang.org/doc/install#extra_versions). Check that changes build with this version using `make test`.
-- Linting must be performed on new changes using `gofmt` and [golangci-lint](https://github.com/golangci/golangci-lint)
+See [DEVELOPING.md](DEVELOPING.md) for information on how changes to Bombadillo are made, along with other technical information for developers.
 
 ## License
 
