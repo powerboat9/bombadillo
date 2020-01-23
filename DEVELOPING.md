@@ -13,12 +13,14 @@ Following the standard install instructions should lead you to have nearly every
 
 A stable version of Bombadillo is kept in the default branch, so that people can easily clone the repo and get a good version of the software.
 
-New changes are introduced to the **develop** branch.
+New changes are implemented to the **develop** branch as **development releases**.
 
-Changes to the default branch occur as part of the software release process. This usually occurs when:
+Changes are implemented to the default branch when:
 
- - there are a set of changes in **develop** that are good enough to be considered stable.
- - an urgent issue is identified in the stable version that requires immediate changes
+ - There are a set of changes in **develop** that are good enough to be considered stable.
+   - This may be a **minor** set of changes for a **minor release**, or
+   - a large **major** change for **major release**.
+ - An urgent issue is identified in the stable version that requires an immediate **patch release**.
 
 
 ### Process for introducing a new change
@@ -29,24 +31,18 @@ Please refer to our [notes on contributing](README.md#contributing) to get an un
 1. Raise a pull request (PR) targeting the **develop** branch.
 1. The PR is reviewed.
 1. If the PR is approved, it is merged.
-1. The version patch number is incremented.
+1. The version number is incremented, along with any other release activity.
 
 
-### Incrementing the version number
+### Process for incrementing the version number
 
-This process is handled by maintainers after a change has been merged.
-
-Version numbers are comprised of three digits: major version number, minor version number, and patch number.
-
-The version number is incremented in the following situations:
-
-#### New changes
-
-Each new change added to **develop** should increment the patch number. For example, version 2.0.1 would become 2.0.2. After the change is merged from the feature branch to **develop**:
+The version number is incremented during a **development release**, **patch release**, and **minor** and **major releases**. This is primarily managed through git tags in the following way: 
 
 ```shell
-# ensure everything is up to date and in the right place
-git checkout develop
+# switch to the branch the release is being performed for
+git checkout branch
+
+# ensure everything is up to date
 git pull
 
 # get the commit ID for the recent merge
@@ -55,19 +51,14 @@ git log
 # get the current version number (the highest number)
 git tag
 
-# add the incremented version number to the commit-id, for example:
+# for a development release, add the incremented version number to the commit-id, for example:
 git tag 2.0.2 abcdef
+
+# for releases to the default branch, this tag can also be added with annotations
+git tag 2.1.0 abdef -a "This version adds several new features..."
 ```
 
-#### Release process
+Releases to the default branch also include the following tasks:
 
-As part of the software release process, any part of the version number may change:
-
-- Urgent changes increment the **patch** number
-- A set of small changes increments the **minor** version number
-- A significant change to large parts of the application increments the **major** version number
-
-1. The version number in the VERSION file is incremented. This change is committed to the default branch.
-1. The **develop** branch is merged to the default branch.
-1. The commands from the New Changes section are followed, but the final command includes an annotation: `git tag 2.1.0 abdef -a "This version adds several new features..."`
-1. Release information should also be added to the [tildegit releases page](https://tildegit.org/sloum/bombadillo/releases).
+1. The version number in the VERSION file is incremented and committed.
+1. Release information should also be verified on the [tildegit releases page](https://tildegit.org/sloum/bombadillo/releases).
