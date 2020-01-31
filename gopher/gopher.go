@@ -133,11 +133,12 @@ func parseMap(text string) (string, []string) {
 			title = line[0][1:]
 		} else {
 			title = ""
+			line[0] = "i "
 		}
 
-		if len(line) > 1 && len(line[0]) > 0 && string(line[0][0]) == "i" {
+		if len(line) < 4 || strings.HasPrefix(line[0], "i") {
 			splitContent[i] = "           " + string(title)
-		} else if len(line) >= 4 {
+		} else {
 			link := buildLink(line[2], line[3], string(line[0][0]), line[1])
 			links = append(links, link)
 			linktext := fmt.Sprintf("(%s) %2d   %s", getType(string(line[0][0])), len(links), title)
