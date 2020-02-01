@@ -131,9 +131,11 @@ func parseMap(text string) (string, []string) {
 
 		if len(line[0]) > 1 {
 			title = line[0][1:]
+		} else if len(line[0]) == 1 {
+			title = ""
 		} else {
 			title = ""
-			line[0] = "i "
+			line[0] = "i"
 		}
 
 		if len(line) < 4 || strings.HasPrefix(line[0], "i") {
