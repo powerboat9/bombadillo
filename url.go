@@ -130,7 +130,7 @@ func MakeUrl(u string) (Url, error) {
 			out.Mime = "1"
 		}
 		switch out.Mime {
-		case "1", "0", "h", "7":
+		case "1", "0", "h", "7", "I", "g":
 			out.DownloadOnly = false
 		default:
 			out.DownloadOnly = true

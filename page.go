@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	"tildegit.org/sloum/bombadillo/tdiv"
 )
 
 //------------------------------------------------\\
@@ -21,6 +23,7 @@ type Page struct {
 	FoundLinkLines []int
 	SearchTerm     string
 	SearchIndex    int
+	FileType       string
 }
 
 //------------------------------------------------\\
@@ -47,11 +50,23 @@ func (p *Page) ScrollPositionRange(termHeight int) (int, int) {
 	return p.ScrollPosition, end
 }
 
+func (p *Page) RenderImage(width int) {
+	w := (width - 5) * 2
+	if w > 300 {
+		w = 300
+	}
+	p.WrappedContent = tdiv.Render([]byte(p.RawContent), w)
+}
+
 // WrapContent performs a hard wrap to the requested
 // width and updates the WrappedContent
 // of the Page struct width a string slice
 // of the wrapped data
 func (p *Page) WrapContent(width int, color bool) {
+	if p.FileType == "image" {
+		p.RenderImage(width)
+		return
+	}
 	counter := 0
 	var content strings.Builder
 	var esc strings.Builder
@@ -165,6 +180,6 @@ func (p *Page) FindText() {
 
 // MakePage returns a Page struct with default values
 func MakePage(url Url, content string, links []string) Page {
-	p := Page{make([]string, 0), content, links, url, 0, make([]int, 0), "", 0}
+	p := Page{make([]string, 0), content, links, url, 0, make([]int, 0), "", 0, ""}
 	return p
 }
