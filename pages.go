@@ -66,7 +66,17 @@ func (p *Pages) Render(termHeight, termWidth int, color bool) []string {
 	}
 	pos := p.History[p.Position].ScrollPosition
 	prev := len(p.History[p.Position].WrappedContent)
+
+	// TODO figure out a way to only do this when needed
+	// it is horribly slow to do this every render.
+	//
+	// Current thought is add a "WrapWidth" to each page
+	// and compare the WrapWidth against the width being
+	// passed in here. If it is different then go through
+	// all of that. Otherwise, just send the already wrapped
+	// data.
 	p.History[p.Position].WrapContent(termWidth, color)
+
 	now := len(p.History[p.Position].WrappedContent)
 	if prev > now {
 		diff := prev - now

@@ -1024,6 +1024,10 @@ func (c *client) handleLocal(u Url) {
 		return
 	}
 	pg := MakePage(u, content, links)
+	ext := strings.ToLower(filepath.Ext(u.Full))
+	if ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".png" {
+		pg.FileType = "image"
+	}
 	pg.WrapContent(c.Width-1, (c.Options["theme"] == "color"))
 	c.PageState.Add(pg)
 	c.SetPercentRead()
