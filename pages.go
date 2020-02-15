@@ -75,7 +75,9 @@ func (p *Pages) Render(termHeight, termWidth int, color bool) []string {
 	// passed in here. If it is different then go through
 	// all of that. Otherwise, just send the already wrapped
 	// data.
-	p.History[p.Position].WrapContent(termWidth, color)
+	if termWidth != p.History[p.Position].WrapWidth {
+		p.History[p.Position].WrapContent(termWidth, color)
+	}
 
 	now := len(p.History[p.Position].WrappedContent)
 	if prev > now {

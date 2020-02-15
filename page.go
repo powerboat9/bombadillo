@@ -24,6 +24,7 @@ type Page struct {
 	SearchTerm     string
 	SearchIndex    int
 	FileType       string
+	WrapWidth      int
 }
 
 //------------------------------------------------\\
@@ -56,6 +57,7 @@ func (p *Page) RenderImage(width int) {
 		w = 300
 	}
 	p.WrappedContent = tdiv.Render([]byte(p.RawContent), w)
+	p.WrapWidth = width
 }
 
 // WrapContent performs a hard wrap to the requested
@@ -131,6 +133,7 @@ func (p *Page) WrapContent(width int, color bool) {
 	}
 
 	p.WrappedContent = strings.Split(content.String(), "\n")
+	p.WrapWidth = width
 	p.HighlightFoundText()
 }
 
@@ -180,6 +183,6 @@ func (p *Page) FindText() {
 
 // MakePage returns a Page struct with default values
 func MakePage(url Url, content string, links []string) Page {
-	p := Page{make([]string, 0), content, links, url, 0, make([]int, 0), "", 0, ""}
+	p := Page{make([]string, 0), content, links, url, 0, make([]int, 0), "", 0, "", 40}
 	return p
 }
