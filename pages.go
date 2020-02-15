@@ -67,7 +67,7 @@ func (p *Pages) Render(termHeight, termWidth int, color bool) []string {
 	pos := p.History[p.Position].ScrollPosition
 	prev := len(p.History[p.Position].WrappedContent)
 
-	if termWidth != p.History[p.Position].WrapWidth {
+	if termWidth != p.History[p.Position].WrapWidth || p.History[p.Position].Color != color {
 		p.History[p.Position].WrapContent(termWidth, color)
 	}
 

@@ -25,6 +25,7 @@ type Page struct {
 	SearchIndex    int
 	FileType       string
 	WrapWidth      int
+	Color          bool
 }
 
 //------------------------------------------------\\
@@ -134,6 +135,7 @@ func (p *Page) WrapContent(width int, color bool) {
 
 	p.WrappedContent = strings.Split(content.String(), "\n")
 	p.WrapWidth = width
+	p.Color = color
 	p.HighlightFoundText()
 }
 
@@ -183,6 +185,6 @@ func (p *Page) FindText() {
 
 // MakePage returns a Page struct with default values
 func MakePage(url Url, content string, links []string) Page {
-	p := Page{make([]string, 0), content, links, url, 0, make([]int, 0), "", 0, "", 40}
+	p := Page{make([]string, 0), content, links, url, 0, make([]int, 0), "", 0, "", 40, false}
 	return p
 }
