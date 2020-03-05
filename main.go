@@ -65,6 +65,7 @@ func validateOpt(opt, val string) bool {
 		"webmode":       []string{"none", "gui", "lynx", "w3m", "elinks"},
 		"theme":         []string{"normal", "inverse", "color"},
 		"defaultscheme": []string{"gopher", "gemini", "http", "https"},
+		"showimages":    []string{"true", "false"},
 	}
 
 	opt = strings.ToLower(opt)
@@ -83,7 +84,7 @@ func validateOpt(opt, val string) bool {
 
 func lowerCaseOpt(opt, val string) string {
 	switch opt {
-	case "webmode", "theme", "defaultscheme":
+	case "webmode", "theme", "defaultscheme", "showimages":
 		return strings.ToLower(val)
 	default:
 		return val
