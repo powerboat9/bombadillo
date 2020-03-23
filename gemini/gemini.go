@@ -339,9 +339,16 @@ func parseGemini(b, rootUrl, currentUrl string) (string, []string) {
 	splitContent := strings.Split(b, "\n")
 	links := make([]string, 0, 10)
 
+	outputIndex := 0
 	for i, ln := range splitContent {
 		splitContent[i] = strings.Trim(ln, "\r\n")
-		if len([]rune(ln)) > 3 && ln[:2] == "=>" {
+		if ln == "```" {
+			// By continuing we create a variance between i and outputIndex
+			// the other branches here will write to the outputIndex rather
+			// than i, thus removing these lines while itterating without
+			// needing mroe allocations.
+			continue
+		} else if len([]rune(ln)) > 3 && ln[:2] == "=>" {
 			var link, decorator string
 			subLn := strings.Trim(ln[2:], "\r\n\t \a")
 			splitPoint := strings.IndexAny(subLn, " \t")
@@ -360,10 +367,14 @@ func parseGemini(b, rootUrl, currentUrl string) (string, []string) {
 
 			links = append(links, link)
 			linknum := fmt.Sprintf("[%d]", len(links))
-			splitContent[i] = fmt.Sprintf("%-5s %s", linknum, decorator)
+			splitContent[outputIndex] = fmt.Sprintf("%-5s %s", linknum, decorator)
+			outputIndex++
+		} else {
+			splitContent[outputIndex] = ln
+			outputIndex++
 		}
 	}
-	return strings.Join(splitContent, "\n"), links
+	return strings.Join(splitContent[:outputIndex], "\n"), links
 }
 
 func handleRelativeUrl(u, root, current string) string {
