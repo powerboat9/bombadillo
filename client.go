@@ -929,7 +929,7 @@ func (c *client) Visit(url string) {
 // +++ Begin Protocol Handlers +++
 
 func (c *client) handleGopher(u Url) {
-	if u.DownloadOnly {
+	if u.DownloadOnly || (c.Options["showimages"] == "false" && (u.Mime == "I" || u.Mime == "g")) {
 		nameSplit := strings.Split(u.Resource, "/")
 		filename := nameSplit[len(nameSplit)-1]
 		filename = strings.Trim(filename, " \t\r\n\v\f\a")
@@ -947,6 +947,11 @@ func (c *client) handleGopher(u Url) {
 			return
 		}
 		pg := MakePage(u, content, links)
+		if u.Mime == "I" || u.Mime == "g" {
+			pg.FileType = "image"
+		} else {
+			pg.FileType = "text"
+		}
 		pg.WrapContent(c.Width-1, (c.Options["theme"] == "color"))
 		c.PageState.Add(pg)
 		c.SetPercentRead()
@@ -968,8 +973,9 @@ func (c *client) handleGemini(u Url) {
 	case 1:
 		c.search("", u.Full, capsule.Content)
 	case 2:
-		if capsule.MimeMaj == "text" {
+		if capsule.MimeMaj == "text" || (c.Options["showimages"] == "true" && capsule.MimeMaj == "image") {
 			pg := MakePage(u, capsule.Content, capsule.Links)
+			pg.FileType = capsule.MimeMaj
 			pg.WrapContent(c.Width-1, (c.Options["theme"] == "color"))
 			c.PageState.Add(pg)
 			c.SetPercentRead()
@@ -1018,6 +1024,10 @@ func (c *client) handleLocal(u Url) {
 		return
 	}
 	pg := MakePage(u, content, links)
+	ext := strings.ToLower(filepath.Ext(u.Full))
+	if ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".png" {
+		pg.FileType = "image"
+	}
 	pg.WrapContent(c.Width-1, (c.Options["theme"] == "color"))
 	c.PageState.Add(pg)
 	c.SetPercentRead()

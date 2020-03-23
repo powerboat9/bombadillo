@@ -45,12 +45,13 @@ var defaultOptions = map[string]string{
 	// the "configlocation" as follows:
 	// "configlocation": xdgConfigPath()
 
+	"configlocation": xdgConfigPath(),
+	"defaultscheme":  "gopher", // "gopher", "gemini", "http", "https"
 	"homeurl":        "gopher://bombadillo.colorfield.space:70/1/user-guide.map",
 	"savelocation":   homePath(),
 	"searchengine":   "gopher://gopher.floodgap.com:70/7/v2/vs",
+	"showimages":     "true",
 	"telnetcommand":  "telnet",
-	"configlocation": xdgConfigPath(),
-	"defaultscheme":  "gopher", // "gopher", "gemini", "http", "https"
 	"theme":          "normal", // "normal", "inverted", "color"
 	"tlscertificate": "",
 	"tlskey":         "",
