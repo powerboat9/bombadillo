@@ -162,6 +162,12 @@ func (c *client) TakeControlInput() {
 	input := cui.Getch()
 
 	switch input {
+	case '1', '2', '3', '4', '5', '6', '7', '8', '9', '0':
+		if input == '0' {
+			c.goToLink("10")
+		} else {
+			c.goToLink(string(input))
+		}
 	case 'j', 'J':
 		// scroll down one line
 		c.ClearMessage()

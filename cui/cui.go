@@ -56,8 +56,8 @@ func Exit(exitCode int, msg string) {
 // InitTerm sets the terminal modes appropriate for Bombadillo
 func InitTerm() {
 	SetCharMode()
-	Tput("rmam")  // turn off line wrapping
 	Tput("smcup") // use alternate screen
+	Tput("rmam")  // turn off line wrapping
 }
 
 // CleanupTerm reverts changs to terminal mode made by InitTerm
