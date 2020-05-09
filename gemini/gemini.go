@@ -49,8 +49,8 @@ func (t *TofuDigest) Purge(host string) error {
 	return fmt.Errorf("Invalid host %q", host)
 }
 
-func (t *TofuDigest) Add(host, hash string) {
-	t.certs[strings.ToLower(host)] = hash
+func (t *TofuDigest) Add(host, hash string, time int64) {
+	t.certs[strings.ToLower(host)] = fmt.Sprintf("%s|%d", hash, time)
 }
 
 func (t *TofuDigest) Exists(host string) bool {
@@ -70,9 +70,10 @@ func (t *TofuDigest) Find(host string) (string, error) {
 func (t *TofuDigest) Match(host string, cState *tls.ConnectionState) error {
 	host = strings.ToLower(host)
 	now := time.Now()
+	localCert := strings.SplitN(t.certs[host], "|", -1)[0]
 
 	for _, cert := range cState.PeerCertificates {
-		if t.certs[host] != hashCert(cert.Raw) {
+		if localCert != hashCert(cert.Raw) {
 			continue
 		}
 
@@ -118,7 +119,7 @@ func (t *TofuDigest) newCert(host string, cState *tls.ConnectionState) error {
 			continue
 		}
 
-		t.Add(host, hashCert(cert.Raw))
+		t.Add(host, hashCert(cert.Raw), cert.NotAfter.Unix())
 		return nil
 	}
 
@@ -132,6 +133,14 @@ func (t *TofuDigest) IniDump() string {
 	var out strings.Builder
 	out.WriteString("[CERTS]\n")
 	for k, v := range t.certs {
+		vals := strings.SplitN(v, "|", -1)
+		now := time.Now()
+		if len(vals) > 1 {
+			ts, err := strconv.ParseInt(vals[1], 10, 64)
+			if err != nil || now.Unix() > ts {
+				continue
+			}
+		}
 		out.WriteString(k)
 		out.WriteString("=")
 		out.WriteString(v)
