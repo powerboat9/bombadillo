@@ -711,11 +711,11 @@ func (c *client) search(query, url, question string) {
 	}
 	switch u.Scheme {
 	case "gopher":
-		go c.Visit(fmt.Sprintf("%s\t%s", u.Full, entry))
+		c.Visit(fmt.Sprintf("%s\t%s", u.Full, entry))
 	case "gemini":
 		// TODO url escape the entry variable
 		escapedEntry := entry
-		go c.Visit(fmt.Sprintf("%s?%s", u.Full, escapedEntry))
+		c.Visit(fmt.Sprintf("%s?%s", u.Full, escapedEntry))
 	case "http", "https":
 		c.Visit(u.Full)
 	default:
@@ -996,7 +996,7 @@ func (c *client) handleGemini(u Url) {
 			c.saveFileFromData(capsule.Content, filename)
 		}
 	case 3:
-		c.SetMessage(fmt.Sprintf("Follow redirect (y/n): %s?", capsule.Content), false)
+		c.SetMessage(fmt.Sprintf("Follow redirect? (y/n): %s", capsule.Content), false)
 		c.DrawMessage()
 		ch := cui.Getch()
 		if ch == 'y' || ch == 'Y' {
