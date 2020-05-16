@@ -66,11 +66,13 @@ func (p *Page) RenderImage(width int) {
 // of the Page struct width a string slice
 // of the wrapped data
 func (p *Page) WrapContent(width int, color bool) {
+	width = min(width, 100)
 	if p.FileType == "image" {
 		p.RenderImage(width)
 		return
 	}
 	counter := 0
+	spacer := "           "
 	var content strings.Builder
 	var esc strings.Builder
 	escape := false
@@ -124,7 +126,6 @@ func (p *Page) WrapContent(width int, color bool) {
 				content.WriteRune('\n')
 				counter = 0
 				if p.Location.Mime == "1" {
-					spacer := "           "
 					content.WriteString(spacer)
 					counter += len(spacer)
 				}
@@ -187,4 +188,11 @@ func (p *Page) FindText() {
 func MakePage(url Url, content string, links []string) Page {
 	p := Page{make([]string, 0), content, links, url, 0, make([]int, 0), "", 0, "", 40, false}
 	return p
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
