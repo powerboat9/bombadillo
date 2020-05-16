@@ -66,11 +66,11 @@ func (p *Page) RenderImage(width int) {
 // of the Page struct width a string slice
 // of the wrapped data
 func (p *Page) WrapContent(width int, color bool) {
-	width = min(width, 100)
 	if p.FileType == "image" {
 		p.RenderImage(width)
 		return
 	}
+	width = min(width, 100)
 	counter := 0
 	spacer := "           "
 	var content strings.Builder
