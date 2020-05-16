@@ -168,15 +168,15 @@ func (c *client) TakeControlInput() {
 		} else {
 			c.goToLink(string(input))
 		}
-	case 'j', 'J':
+	case 'j':
 		// scroll down one line
 		c.ClearMessage()
 		c.Scroll(1)
-	case 'k', 'K':
+	case 'k':
 		// scroll up one line
 		c.ClearMessage()
 		c.Scroll(-1)
-	case 'q', 'Q':
+	case 'q':
 		// quit bombadillo
 		cui.Exit(0, "")
 	case 'g':
@@ -197,7 +197,7 @@ func (c *client) TakeControlInput() {
 		c.ClearMessage()
 		distance := c.Height - c.Height/4
 		c.Scroll(-distance)
-	case 'b':
+	case 'b', 'h':
 		// go back
 		c.ClearMessage()
 		err := c.PageState.NavigateHistory(-1)
@@ -222,7 +222,7 @@ func (c *client) TakeControlInput() {
 		// open the bookmarks browser
 		c.BookMarks.ToggleOpen()
 		c.Draw()
-	case 'f', 'F':
+	case 'f', 'l':
 		// go forward
 		c.ClearMessage()
 		err := c.PageState.NavigateHistory(1)
