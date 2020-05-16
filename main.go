@@ -25,8 +25,10 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"syscall"
+	"time"
 
 	"tildegit.org/sloum/bombadillo/config"
 	"tildegit.org/sloum/bombadillo/cui"
@@ -132,7 +134,20 @@ func loadConfig() {
 	}
 
 	for _, v := range settings.Certs {
-		bombadillo.Certs.Add(v.Key, v.Value)
+		// Remove expired certs
+		vals := strings.SplitN(v.Value, "|", -1)
+		if len(vals) < 2 {
+			continue
+		}
+		ts, err := strconv.ParseInt(vals[1], 10, 64)
+		now := time.Now()
+		if err != nil || now.Unix() > ts {
+			continue
+		}
+		// Satisfied that the cert is not expired
+		// or malformed: add to the current client
+		// instance
+		bombadillo.Certs.Add(v.Key, vals[0], ts)
 	}
 }
 
