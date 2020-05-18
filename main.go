@@ -31,7 +31,6 @@ import (
 	"tildegit.org/sloum/bombadillo/config"
 	"tildegit.org/sloum/bombadillo/cui"
 	"tildegit.org/sloum/bombadillo/gemini"
-	_ "tildegit.org/sloum/bombadillo/gemini"
 )
 
 var version string
