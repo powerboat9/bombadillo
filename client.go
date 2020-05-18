@@ -459,7 +459,7 @@ func (c *client) doCommandAs(action string, values []string) {
 		}
 	case "SEARCH":
 		c.search(strings.Join(values, " "), "", "")
-	case "SET", "S":
+	case "SET", "S": // TODO make the geminiblocks value work
 		if _, ok := c.Options[values[0]]; ok {
 			val := strings.Join(values[1:], " ")
 			if !validateOpt(values[0], val) {
@@ -470,6 +470,8 @@ func (c *client) doCommandAs(action string, values []string) {
 			c.Options[values[0]] = lowerCaseOpt(values[0], val)
 			if values[0] == "tlskey" || values[0] == "tlscertificate" {
 				c.Certs.LoadCertificate(c.Options["tlscertificate"], c.Options["tlskey"])
+			} else if values[0] == "geminiblocks" {
+				gemini.BlockBehavior = c.Options[values[0]]
 			} else if values[0] == "configlocation" {
 				c.SetMessage("Cannot set READ ONLY setting 'configlocation'", true)
 				c.DrawMessage()

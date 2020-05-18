@@ -47,6 +47,7 @@ var defaultOptions = map[string]string{
 
 	"configlocation": xdgConfigPath(),
 	"defaultscheme":  "gopher", // "gopher", "gemini", "http", "https"
+	"geminiblocks":   "block",  // "block", "alt", "neither", "both"
 	"homeurl":        "gopher://bombadillo.colorfield.space:70/1/user-guide.map",
 	"savelocation":   homePath(),
 	"searchengine":   "gopher://gopher.floodgap.com:70/7/v2/vs",
