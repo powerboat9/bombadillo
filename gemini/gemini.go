@@ -381,18 +381,38 @@ func handleRelativeUrl(u, root, current string) string {
 	if len(u) < 1 {
 		return u
 	}
+	currentIsDir := (current[len(current)-1] == '/')
 
 	if u[0] == '/' {
 		return fmt.Sprintf("%s%s", root, u)
+	} else if strings.HasPrefix(u, "../") {
+		currentDir := strings.LastIndex(current, "/")
+		if currentIsDir {
+			upOne := strings.LastIndex(current[:currentDir], "/")
+			dirRoot := current[:upOne]
+			return dirRoot + u[2:]
+		}
+		return current[:currentDir] + u[2:]
+	}
+
+	if strings.HasPrefix(u, "./") {
+		if len(u) == 2 {
+			return current
+		}
+		u = u[2:]
+	}
+
+	if currentIsDir {
+		indPrevDir := strings.LastIndex(current[:len(current)-1], "/")
+		if indPrevDir < 9 {
+			return current + u
+		}
+		return current[:indPrevDir+1] + u
 	}
 
 	ind := strings.LastIndex(current, "/")
-	if ind < 10 {
-		return fmt.Sprintf("%s/%s", root, u)
-	}
-
 	current = current[:ind+1]
-	return fmt.Sprintf("%s%s", current, u)
+	return current + u
 }
 
 func hashCert(cert []byte) string {
