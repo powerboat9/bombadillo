@@ -49,8 +49,8 @@ func (t *TofuDigest) Purge(host string) error {
 	return fmt.Errorf("Invalid host %q", host)
 }
 
-func (t *TofuDigest) Add(host, hash string) {
-	t.certs[strings.ToLower(host)] = hash
+func (t *TofuDigest) Add(host, hash string, time int64) {
+	t.certs[strings.ToLower(host)] = fmt.Sprintf("%s|%d", hash, time)
 }
 
 func (t *TofuDigest) Exists(host string) bool {
@@ -67,12 +67,11 @@ func (t *TofuDigest) Find(host string) (string, error) {
 	return "", fmt.Errorf("Invalid hostname, no key saved")
 }
 
-func (t *TofuDigest) Match(host string, cState *tls.ConnectionState) error {
-	host = strings.ToLower(host)
+func (t *TofuDigest) Match(host, localCert string, cState *tls.ConnectionState) error {
 	now := time.Now()
 
 	for _, cert := range cState.PeerCertificates {
-		if t.certs[host] != hashCert(cert.Raw) {
+		if localCert != hashCert(cert.Raw) {
 			continue
 		}
 
@@ -118,11 +117,38 @@ func (t *TofuDigest) newCert(host string, cState *tls.ConnectionState) error {
 			continue
 		}
 
-		t.Add(host, hashCert(cert.Raw))
+		t.Add(host, hashCert(cert.Raw), cert.NotAfter.Unix())
 		return nil
 	}
 
 	return fmt.Errorf(reasons.String())
+}
+
+func (t *TofuDigest) GetCertAndTimestamp(host string) (string, int64, error) {
+	certTs, err := t.Find(host)
+	if err != nil {
+		return "", -1, err
+	}
+	certTsSplit := strings.SplitN(certTs, "|", -1)
+	if len(certTsSplit) < 2 {
+		_ = t.Purge(host)
+		return certTsSplit[0], -1, fmt.Errorf("Invalid certstring, no delimiter")
+	}
+	ts, err := strconv.ParseInt(certTsSplit[1], 10, 64)
+	if err != nil {
+		_ = t.Purge(host)
+		return certTsSplit[0], -1, err
+	}
+	now := time.Now()
+	if ts < now.Unix() {
+		// Ignore error return here since an error would indicate
+		// the host does not exist and we have already checked for
+		// that and the desired outcome of the action is that the
+		// host will no longer exist, so we are good either way
+		_ = t.Purge(host)
+		return "", -1, fmt.Errorf("Expired cert")
+	}
+	return certTsSplit[0], ts, nil
 }
 
 func (t *TofuDigest) IniDump() string {
@@ -176,9 +202,11 @@ func Retrieve(host, port, resource string, td *TofuDigest) (string, error) {
 		return "", fmt.Errorf("Insecure, no certificates offered by server")
 	}
 
-	if td.Exists(host) {
+	localCert, localTs, err := td.GetCertAndTimestamp(host)
+
+	if localTs > 0 {
 		// See if we have a matching cert
-		err := td.Match(host, &connState)
+		err := td.Match(host, localCert, &connState)
 		if err != nil && err.Error() != "EXP" {
 			// If there is no match and it isnt because of an expiration
 			// just return the error
