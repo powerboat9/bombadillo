@@ -459,7 +459,7 @@ func (c *client) doCommandAs(action string, values []string) {
 		}
 	case "SEARCH":
 		c.search(strings.Join(values, " "), "", "")
-	case "SET", "S": // TODO make the geminiblocks value work
+	case "SET", "S":
 		if _, ok := c.Options[values[0]]; ok {
 			val := strings.Join(values[1:], " ")
 			if !validateOpt(values[0], val) {
