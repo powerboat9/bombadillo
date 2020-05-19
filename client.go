@@ -977,8 +977,10 @@ func (c *client) handleGemini(u Url) {
 	go saveConfig()
 	switch capsule.Status {
 	case 1:
+		// Query
 		c.search("", u.Full, capsule.Content)
 	case 2:
+		// Success
 		if capsule.MimeMaj == "text" || (c.Options["showimages"] == "true" && capsule.MimeMaj == "image") {
 			pg := MakePage(u, capsule.Content, capsule.Links)
 			pg.FileType = capsule.MimeMaj
@@ -996,14 +998,21 @@ func (c *client) handleGemini(u Url) {
 			c.saveFileFromData(capsule.Content, filename)
 		}
 	case 3:
-		c.SetMessage(fmt.Sprintf("Follow redirect? (y/n): %s", capsule.Content), false)
-		c.DrawMessage()
-		ch := cui.Getch()
-		if ch == 'y' || ch == 'Y' {
+		// Redirect
+		lowerRedirect := strings.ToLower(capsule.Content)
+		lowerOriginal := strings.ToLower(u.Full)
+		if strings.Replace(lowerRedirect, lowerOriginal, "", 1) == "/" {
 			c.Visit(capsule.Content)
 		} else {
-			c.SetMessage("Redirect aborted", false)
+			c.SetMessage(fmt.Sprintf("Follow redirect (y/n): %s?", capsule.Content), false)
 			c.DrawMessage()
+			ch := cui.Getch()
+			if ch == 'y' || ch == 'Y' {
+				c.Visit(capsule.Content)
+			} else {
+				c.SetMessage("Redirect aborted", false)
+				c.DrawMessage()
+			}
 		}
 	}
 }
