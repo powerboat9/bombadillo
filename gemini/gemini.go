@@ -24,6 +24,8 @@ type TofuDigest struct {
 	ClientCert tls.Certificate
 }
 
+var BlockBehavior = "block"
+
 //------------------------------------------------\\
 // + + +          R E C E I V E R S          + + + \\
 //--------------------------------------------------\\
@@ -367,16 +369,23 @@ func parseGemini(b, rootUrl, currentUrl string) (string, []string) {
 	splitContent := strings.Split(b, "\n")
 	links := make([]string, 0, 10)
 
+	inPreBlock := false
+
 	outputIndex := 0
 	for i, ln := range splitContent {
 		splitContent[i] = strings.Trim(ln, "\r\n")
-		if ln == "```" {
-			// By continuing we create a variance between i and outputIndex
-			// the other branches here will write to the outputIndex rather
-			// than i, thus removing these lines while itterating without
-			// needing mroe allocations.
-			continue
-		} else if len([]rune(ln)) > 3 && ln[:2] == "=>" {
+		isPreBlockDeclaration := strings.HasPrefix(ln, "```")
+		if isPreBlockDeclaration && !inPreBlock && (BlockBehavior == "both" || BlockBehavior == "alt") {
+			inPreBlock = !inPreBlock
+			alt := strings.TrimSpace(ln)
+			if len(alt) > 3 {
+				alt = strings.TrimSpace(alt[3:])
+				splitContent[outputIndex] = fmt.Sprintf("[ %s ]", alt)
+				outputIndex++
+			}
+		} else if isPreBlockDeclaration {
+			inPreBlock = !inPreBlock
+		} else if len([]rune(ln)) > 3 && ln[:2] == "=>" && !inPreBlock {
 			var link, decorator string
 			subLn := strings.Trim(ln[2:], "\r\n\t \a")
 			splitPoint := strings.IndexAny(subLn, " \t")
@@ -398,6 +407,9 @@ func parseGemini(b, rootUrl, currentUrl string) (string, []string) {
 			splitContent[outputIndex] = fmt.Sprintf("%-5s %s", linknum, decorator)
 			outputIndex++
 		} else {
+			if inPreBlock && (BlockBehavior == "alt" || BlockBehavior == "neither") {
+				continue
+			}
 			splitContent[outputIndex] = ln
 			outputIndex++
 		}

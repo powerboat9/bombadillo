@@ -32,7 +32,7 @@ import (
 
 	"tildegit.org/sloum/bombadillo/config"
 	"tildegit.org/sloum/bombadillo/cui"
-	_ "tildegit.org/sloum/bombadillo/gemini"
+	"tildegit.org/sloum/bombadillo/gemini"
 )
 
 var version string
@@ -68,6 +68,7 @@ func validateOpt(opt, val string) bool {
 		"theme":         []string{"normal", "inverse", "color"},
 		"defaultscheme": []string{"gopher", "gemini", "http", "https"},
 		"showimages":    []string{"true", "false"},
+		"geminiblocks":  []string{"block", "neither", "alt", "both"},
 	}
 
 	opt = strings.ToLower(opt)
@@ -86,7 +87,7 @@ func validateOpt(opt, val string) bool {
 
 func lowerCaseOpt(opt, val string) string {
 	switch opt {
-	case "webmode", "theme", "defaultscheme", "showimages":
+	case "webmode", "theme", "defaultscheme", "showimages", "geminiblocks":
 		return strings.ToLower(val)
 	default:
 		return val
@@ -123,6 +124,9 @@ func loadConfig() {
 		if _, ok := bombadillo.Options[lowerkey]; ok {
 			if validateOpt(lowerkey, v.Value) {
 				bombadillo.Options[lowerkey] = v.Value
+				if lowerkey == "geminiblocks" {
+					gemini.BlockBehavior = v.Value
+				}
 			} else {
 				bombadillo.Options[lowerkey] = defaultOptions[lowerkey]
 			}
