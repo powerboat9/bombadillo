@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -19,6 +18,7 @@ import (
 	"tildegit.org/sloum/bombadillo/http"
 	"tildegit.org/sloum/bombadillo/local"
 	"tildegit.org/sloum/bombadillo/telnet"
+	"tildegit.org/sloum/bombadillo/termios"
 )
 
 //------------------------------------------------\\
@@ -43,14 +43,7 @@ type client struct {
 //--------------------------------------------------\\
 
 func (c *client) GetSizeOnce() {
-	cmd := exec.Command("stty", "size")
-	cmd.Stdin = os.Stdin
-	out, err := cmd.Output()
-	if err != nil {
-		cui.Exit(5, "Fatal error: Unable to retrieve terminal size")
-	}
-	var h, w int
-	_, _ = fmt.Sscan(string(out), &h, &w)
+	var w, h = termios.GetWindowSize()
 	c.Height = h
 	c.Width = w
 }
@@ -61,14 +54,7 @@ func (c *client) GetSize() {
 	c.Draw()
 
 	for {
-		cmd := exec.Command("stty", "size")
-		cmd.Stdin = os.Stdin
-		out, err := cmd.Output()
-		if err != nil {
-			cui.Exit(5, "Fatal error: Unable to retrieve terminal size")
-		}
-		var h, w int
-		_, _ = fmt.Sscan(string(out), &h, &w)
+		var w, h = termios.GetWindowSize()
 		if h != c.Height || w != c.Width {
 			c.Height = h
 			c.Width = w
