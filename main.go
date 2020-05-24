@@ -25,12 +25,14 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"syscall"
+	"time"
 
 	"tildegit.org/sloum/bombadillo/config"
 	"tildegit.org/sloum/bombadillo/cui"
-	_ "tildegit.org/sloum/bombadillo/gemini"
+	"tildegit.org/sloum/bombadillo/gemini"
 )
 
 var version string
@@ -66,6 +68,7 @@ func validateOpt(opt, val string) bool {
 		"theme":         []string{"normal", "inverse", "color"},
 		"defaultscheme": []string{"gopher", "gemini", "http", "https"},
 		"showimages":    []string{"true", "false"},
+		"geminiblocks":  []string{"block", "neither", "alt", "both"},
 	}
 
 	opt = strings.ToLower(opt)
@@ -84,7 +87,7 @@ func validateOpt(opt, val string) bool {
 
 func lowerCaseOpt(opt, val string) string {
 	switch opt {
-	case "webmode", "theme", "defaultscheme", "showimages":
+	case "webmode", "theme", "defaultscheme", "showimages", "geminiblocks":
 		return strings.ToLower(val)
 	default:
 		return val
@@ -121,6 +124,9 @@ func loadConfig() {
 		if _, ok := bombadillo.Options[lowerkey]; ok {
 			if validateOpt(lowerkey, v.Value) {
 				bombadillo.Options[lowerkey] = v.Value
+				if lowerkey == "geminiblocks" {
+					gemini.BlockBehavior = v.Value
+				}
 			} else {
 				bombadillo.Options[lowerkey] = defaultOptions[lowerkey]
 			}
@@ -132,7 +138,20 @@ func loadConfig() {
 	}
 
 	for _, v := range settings.Certs {
-		bombadillo.Certs.Add(v.Key, v.Value)
+		// Remove expired certs
+		vals := strings.SplitN(v.Value, "|", -1)
+		if len(vals) < 2 {
+			continue
+		}
+		ts, err := strconv.ParseInt(vals[1], 10, 64)
+		now := time.Now()
+		if err != nil || now.Unix() > ts {
+			continue
+		}
+		// Satisfied that the cert is not expired
+		// or malformed: add to the current client
+		// instance
+		bombadillo.Certs.Add(v.Key, vals[0], ts)
 	}
 }
 

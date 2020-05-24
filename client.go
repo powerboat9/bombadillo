@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -19,6 +18,7 @@ import (
 	"tildegit.org/sloum/bombadillo/http"
 	"tildegit.org/sloum/bombadillo/local"
 	"tildegit.org/sloum/bombadillo/telnet"
+	"tildegit.org/sloum/bombadillo/termios"
 )
 
 //------------------------------------------------\\
@@ -43,14 +43,7 @@ type client struct {
 //--------------------------------------------------\\
 
 func (c *client) GetSizeOnce() {
-	cmd := exec.Command("stty", "size")
-	cmd.Stdin = os.Stdin
-	out, err := cmd.Output()
-	if err != nil {
-		cui.Exit(5, "Fatal error: Unable to retrieve terminal size")
-	}
-	var h, w int
-	_, _ = fmt.Sscan(string(out), &h, &w)
+	var w, h = termios.GetWindowSize()
 	c.Height = h
 	c.Width = w
 }
@@ -61,14 +54,7 @@ func (c *client) GetSize() {
 	c.Draw()
 
 	for {
-		cmd := exec.Command("stty", "size")
-		cmd.Stdin = os.Stdin
-		out, err := cmd.Output()
-		if err != nil {
-			cui.Exit(5, "Fatal error: Unable to retrieve terminal size")
-		}
-		var h, w int
-		_, _ = fmt.Sscan(string(out), &h, &w)
+		var w, h = termios.GetWindowSize()
 		if h != c.Height || w != c.Width {
 			c.Height = h
 			c.Width = w
@@ -162,15 +148,21 @@ func (c *client) TakeControlInput() {
 	input := cui.Getch()
 
 	switch input {
-	case 'j', 'J':
+	case '1', '2', '3', '4', '5', '6', '7', '8', '9', '0':
+		if input == '0' {
+			c.goToLink("10")
+		} else {
+			c.goToLink(string(input))
+		}
+	case 'j':
 		// scroll down one line
 		c.ClearMessage()
 		c.Scroll(1)
-	case 'k', 'K':
+	case 'k':
 		// scroll up one line
 		c.ClearMessage()
 		c.Scroll(-1)
-	case 'q', 'Q':
+	case 'q':
 		// quit bombadillo
 		cui.Exit(0, "")
 	case 'g':
@@ -191,7 +183,7 @@ func (c *client) TakeControlInput() {
 		c.ClearMessage()
 		distance := c.Height - c.Height/4
 		c.Scroll(-distance)
-	case 'b':
+	case 'b', 'h':
 		// go back
 		c.ClearMessage()
 		err := c.PageState.NavigateHistory(-1)
@@ -216,7 +208,7 @@ func (c *client) TakeControlInput() {
 		// open the bookmarks browser
 		c.BookMarks.ToggleOpen()
 		c.Draw()
-	case 'f', 'F':
+	case 'f', 'l':
 		// go forward
 		c.ClearMessage()
 		err := c.PageState.NavigateHistory(1)
@@ -464,6 +456,8 @@ func (c *client) doCommandAs(action string, values []string) {
 			c.Options[values[0]] = lowerCaseOpt(values[0], val)
 			if values[0] == "tlskey" || values[0] == "tlscertificate" {
 				c.Certs.LoadCertificate(c.Options["tlscertificate"], c.Options["tlskey"])
+			} else if values[0] == "geminiblocks" {
+				gemini.BlockBehavior = c.Options[values[0]]
 			} else if values[0] == "configlocation" {
 				c.SetMessage("Cannot set READ ONLY setting 'configlocation'", true)
 				c.DrawMessage()
@@ -670,7 +664,7 @@ func (c *client) doLinkCommand(action, target string) {
 
 }
 
-func (c *client) search(query, url, question string) {
+func (c *client) search(query, uri, question string) {
 	var entry string
 	var err error
 	if query == "" {
@@ -694,22 +688,32 @@ func (c *client) search(query, url, question string) {
 	} else {
 		entry = query
 	}
-	if url == "" {
-		url = c.Options["searchengine"]
+	if uri == "" {
+		uri = c.Options["searchengine"]
 	}
-	u, err := MakeUrl(url)
+	u, err := MakeUrl(uri)
 	if err != nil {
-		c.SetMessage("The search url is not a valid url", true)
+		c.SetMessage("The search url is not valid", true)
 		c.DrawMessage()
 		return
 	}
+	var rootUrl string
 	switch u.Scheme {
 	case "gopher":
-		go c.Visit(fmt.Sprintf("%s\t%s", u.Full, entry))
+		if ind := strings.Index(entry, "\t"); ind >= 0 {
+			rootUrl = u.Full[:ind]
+		} else {
+			rootUrl = u.Full
+		}
+		c.Visit(fmt.Sprintf("%s\t%s", rootUrl, entry))
 	case "gemini":
-		// TODO url escape the entry variable
-		escapedEntry := entry
-		go c.Visit(fmt.Sprintf("%s?%s", u.Full, escapedEntry))
+		if ind := strings.Index(entry, "?"); ind >= 0 {
+			rootUrl = u.Full[:ind]
+		} else {
+			rootUrl = u.Full
+		}
+		// escapedEntry := url.QueryEscape(entry) // TODO confirm expected behavior re: escaping
+		c.Visit(fmt.Sprintf("%s?%s", rootUrl, entry))
 	case "http", "https":
 		c.Visit(u.Full)
 	default:
@@ -971,8 +975,10 @@ func (c *client) handleGemini(u Url) {
 	go saveConfig()
 	switch capsule.Status {
 	case 1:
+		// Query
 		c.search("", u.Full, capsule.Content)
 	case 2:
+		// Success
 		if capsule.MimeMaj == "text" || (c.Options["showimages"] == "true" && capsule.MimeMaj == "image") {
 			pg := MakePage(u, capsule.Content, capsule.Links)
 			pg.FileType = capsule.MimeMaj
@@ -990,14 +996,21 @@ func (c *client) handleGemini(u Url) {
 			c.saveFileFromData(capsule.Content, filename)
 		}
 	case 3:
-		c.SetMessage(fmt.Sprintf("Follow redirect (y/n): %s?", capsule.Content), false)
-		c.DrawMessage()
-		ch := cui.Getch()
-		if ch == 'y' || ch == 'Y' {
+		// Redirect
+		lowerRedirect := strings.ToLower(capsule.Content)
+		lowerOriginal := strings.ToLower(u.Full)
+		if strings.Replace(lowerRedirect, lowerOriginal, "", 1) == "/" {
 			c.Visit(capsule.Content)
 		} else {
-			c.SetMessage("Redirect aborted", false)
+			c.SetMessage(fmt.Sprintf("Follow redirect (y/n): %s?", capsule.Content), false)
 			c.DrawMessage()
+			ch := cui.Getch()
+			if ch == 'y' || ch == 'Y' {
+				c.Visit(capsule.Content)
+			} else {
+				c.SetMessage("Redirect aborted", false)
+				c.DrawMessage()
+			}
 		}
 	}
 }

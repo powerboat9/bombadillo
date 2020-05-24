@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+
+	"tildegit.org/sloum/bombadillo/termios"
 )
 
 var Shapes = map[string]string{
@@ -55,16 +57,17 @@ func Exit(exitCode int, msg string) {
 
 // InitTerm sets the terminal modes appropriate for Bombadillo
 func InitTerm() {
-	SetCharMode()
-	Tput("rmam")  // turn off line wrapping
-	Tput("smcup") // use alternate screen
+	termios.SetCharMode()
+	Tput("smcup")          // use alternate screen
+	Tput("rmam")           // turn off line wrapping
+	fmt.Print("\033[?25l") // hide cursor
 }
 
 // CleanupTerm reverts changs to terminal mode made by InitTerm
 func CleanupTerm() {
 	moveCursorToward("down", 500)
 	moveCursorToward("right", 500)
-	SetLineMode()
+	termios.SetLineMode()
 
 	fmt.Print("\n")
 	fmt.Print("\033[?25h") // reenables cursor blinking
@@ -98,7 +101,7 @@ func Getch() rune {
 }
 
 func GetLine(prefix string) (string, error) {
-	SetLineMode()
+	termios.SetLineMode()
 
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print(prefix)
@@ -107,30 +110,8 @@ func GetLine(prefix string) (string, error) {
 		return "", err
 	}
 
-	SetCharMode()
+	termios.SetCharMode()
 	return text[:len(text)-1], nil
-}
-
-func SetCharMode() {
-	cmd := exec.Command("stty", "cbreak", "-echo")
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	err := cmd.Run()
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Print("\033[?25l")
-}
-
-func SetLineMode() {
-	cmd := exec.Command("stty", "-cbreak", "echo")
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	err := cmd.Run()
-	if err != nil {
-		panic(err)
-	}
 }
 
 func Tput(opt string) {
