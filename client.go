@@ -676,7 +676,7 @@ func (c *client) doLinkCommand(action, target string) {
 
 }
 
-func (c *client) search(query, url, question string) {
+func (c *client) search(query, uri, question string) {
 	var entry string
 	var err error
 	if query == "" {
@@ -700,22 +700,32 @@ func (c *client) search(query, url, question string) {
 	} else {
 		entry = query
 	}
-	if url == "" {
-		url = c.Options["searchengine"]
+	if uri == "" {
+		uri = c.Options["searchengine"]
 	}
-	u, err := MakeUrl(url)
+	u, err := MakeUrl(uri)
 	if err != nil {
-		c.SetMessage("The search url is not a valid url", true)
+		c.SetMessage("The search url is not valid", true)
 		c.DrawMessage()
 		return
 	}
+	var rootUrl string
 	switch u.Scheme {
 	case "gopher":
-		go c.Visit(fmt.Sprintf("%s\t%s", u.Full, entry))
+		if ind := strings.Index(entry, "\t"); ind >= 0 {
+			rootUrl = u.Full[:ind]
+		} else {
+			rootUrl = u.Full
+		}
+		c.Visit(fmt.Sprintf("%s\t%s", rootUrl, entry))
 	case "gemini":
-		// TODO url escape the entry variable
-		escapedEntry := entry
-		go c.Visit(fmt.Sprintf("%s?%s", u.Full, escapedEntry))
+		if ind := strings.Index(entry, "?"); ind >= 0 {
+			rootUrl = u.Full[:ind]
+		} else {
+			rootUrl = u.Full
+		}
+		// escapedEntry := url.QueryEscape(entry) // TODO confirm expected behavior re: escaping
+		c.Visit(fmt.Sprintf("%s?%s", rootUrl, entry))
 	case "http", "https":
 		c.Visit(u.Full)
 	default:
