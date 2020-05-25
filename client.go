@@ -121,15 +121,11 @@ func (c *client) Draw() {
 	} else {
 		for i := 0; i < c.Height-3; i++ {
 			if i < len(pageContent) {
-				extra := 0
-				escapes := re.FindAllString(pageContent[i], -1)
-				for _, esc := range escapes {
-					extra += len(esc)
-				}
-				screen.WriteString(fmt.Sprintf("%-*.*s", c.Width+extra, c.Width+extra, pageContent[i]))
+				screen.WriteString(pageContent[i])
+				screen.WriteString("\033[0K")
 				screen.WriteString("\n")
 			} else {
-				screen.WriteString(fmt.Sprintf("%-*.*s", c.Width, c.Width, " "))
+				screen.WriteString("\033[0K")
 				screen.WriteString("\n")
 			}
 		}
