@@ -417,25 +417,33 @@ func parseGemini(b, rootUrl, currentUrl string) (string, []string) {
 	return strings.Join(splitContent[:outputIndex], "\n"), links
 }
 
+// handleRelativeUrl provides link completion
+// takes:
+//    - u       : the relative link as written on the page
+//    - root    : the root url for the site
+//    - current : the current url a user is on
 func handleRelativeUrl(u, root, current string) string {
 	if len(u) < 1 {
 		return u
 	}
-	currentIsDir := (current[len(current)-1] == '/')
+	currentIsDir := strings.HasSuffix(current, "/")
 
 	if u[0] == '/' {
+		// Handle relative off of root
 		return fmt.Sprintf("%s%s", root, u)
 	} else if strings.HasPrefix(u, "../") {
+		// Handle up one dir
 		currentDir := strings.LastIndex(current, "/")
-		if currentIsDir {
-			upOne := strings.LastIndex(current[:currentDir], "/")
-			dirRoot := current[:upOne]
-			return dirRoot + u[2:]
+		upOne := strings.LastIndex(current[:currentDir], "/")
+		dirRoot := current[:upOne]
+		if upOne < len(root) {
+			return fmt.Sprintf("%s%s", root, u[2:])
 		}
-		return current[:currentDir] + u[2:]
+		return dirRoot + u[2:]
 	}
 
 	if strings.HasPrefix(u, "./") {
+		// Handle explicit same dir
 		if len(u) == 2 {
 			return current
 		}
@@ -443,16 +451,15 @@ func handleRelativeUrl(u, root, current string) string {
 	}
 
 	if currentIsDir {
-		indPrevDir := strings.LastIndex(current[:len(current)-1], "/")
-		if indPrevDir < 9 {
-			return current + u
-		}
-		return current[:indPrevDir+1] + u
+		// Handle non-prefixed relative link when current URL is a directory
+		ind := strings.LastIndex(current, "/")
+		current = current[:ind+1]
+		return current + u
 	}
 
-	ind := strings.LastIndex(current, "/")
-	current = current[:ind+1]
-	return current + u
+	// Handle non-prefixed relative link when current URL is a file
+	indPrevDir := strings.LastIndex(current, "/")
+	return current[:indPrevDir+1] + u
 }
 
 func hashCert(cert []byte) string {
