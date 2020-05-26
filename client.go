@@ -700,14 +700,14 @@ func (c *client) search(query, uri, question string) {
 	var rootUrl string
 	switch u.Scheme {
 	case "gopher":
-		if ind := strings.Index(entry, "\t"); ind >= 0 {
+		if ind := strings.Index(u.Full, "\t"); ind >= 0 {
 			rootUrl = u.Full[:ind]
 		} else {
 			rootUrl = u.Full
 		}
 		c.Visit(fmt.Sprintf("%s\t%s", rootUrl, entry))
 	case "gemini":
-		if ind := strings.Index(entry, "?"); ind >= 0 {
+		if ind := strings.Index(u.Full, "?"); ind >= 0 {
 			rootUrl = u.Full[:ind]
 		} else {
 			rootUrl = u.Full
