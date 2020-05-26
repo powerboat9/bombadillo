@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -712,8 +713,8 @@ func (c *client) search(query, uri, question string) {
 		} else {
 			rootUrl = u.Full
 		}
-		// escapedEntry := url.QueryEscape(entry) // TODO confirm expected behavior re: escaping
-		c.Visit(fmt.Sprintf("%s?%s", rootUrl, entry))
+		escapedEntry := url.PathEscape(entry)
+		c.Visit(fmt.Sprintf("%s?%s", rootUrl, escapedEntry))
 	case "http", "https":
 		c.Visit(u.Full)
 	default:
