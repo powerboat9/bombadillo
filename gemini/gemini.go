@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -343,8 +344,7 @@ func Visit(host, port, resource string, td *TofuDigest) (Capsule, error) {
 				resource = "/"
 			}
 			currentUrl := fmt.Sprintf("gemini://%s:%s%s", host, port, resource)
-			rootUrl := fmt.Sprintf("gemini://%s:%s", host, port)
-			capsule.Content, capsule.Links = parseGemini(body, rootUrl, currentUrl)
+			capsule.Content, capsule.Links = parseGemini(body, currentUrl)
 		} else {
 			capsule.Content = body
 		}
@@ -365,7 +365,7 @@ func Visit(host, port, resource string, td *TofuDigest) (Capsule, error) {
 	}
 }
 
-func parseGemini(b, rootUrl, currentUrl string) (string, []string) {
+func parseGemini(b, currentUrl string) (string, []string) {
 	splitContent := strings.Split(b, "\n")
 	links := make([]string, 0, 10)
 
@@ -399,7 +399,7 @@ func parseGemini(b, rootUrl, currentUrl string) (string, []string) {
 			}
 
 			if strings.Index(link, "://") < 0 {
-				link = handleRelativeUrl(link, rootUrl, currentUrl)
+				link, _ = handleRelativeUrl(link, currentUrl)
 			}
 
 			links = append(links, link)
@@ -418,48 +418,16 @@ func parseGemini(b, rootUrl, currentUrl string) (string, []string) {
 }
 
 // handleRelativeUrl provides link completion
-// takes:
-//    - u       : the relative link as written on the page
-//    - root    : the root url for the site
-//    - current : the current url a user is on
-func handleRelativeUrl(u, root, current string) string {
-	if len(u) < 1 {
-		return u
+func handleRelativeUrl(relLink, current string) (string, error) {
+	base, err := url.Parse(current)
+	if err != nil {
+		return relLink, err
 	}
-	currentIsDir := strings.HasSuffix(current, "/")
-
-	if u[0] == '/' {
-		// Handle relative off of root
-		return fmt.Sprintf("%s%s", root, u)
-	} else if strings.HasPrefix(u, "../") {
-		// Handle up one dir
-		currentDir := strings.LastIndex(current, "/")
-		upOne := strings.LastIndex(current[:currentDir], "/")
-		dirRoot := current[:upOne]
-		if upOne < len(root) {
-			return fmt.Sprintf("%s%s", root, u[2:])
-		}
-		return dirRoot + u[2:]
+	rel, err := url.Parse(relLink)
+	if err != nil {
+		return relLink, err
 	}
-
-	if strings.HasPrefix(u, "./") {
-		// Handle explicit same dir
-		if len(u) == 2 {
-			return current
-		}
-		u = u[2:]
-	}
-
-	if currentIsDir {
-		// Handle non-prefixed relative link when current URL is a directory
-		ind := strings.LastIndex(current, "/")
-		current = current[:ind+1]
-		return current + u
-	}
-
-	// Handle non-prefixed relative link when current URL is a file
-	indPrevDir := strings.LastIndex(current, "/")
-	return current[:indPrevDir+1] + u
+	return base.ResolveReference(rel).String(), nil
 }
 
 func hashCert(cert []byte) string {
