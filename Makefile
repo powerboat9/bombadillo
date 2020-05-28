@@ -57,6 +57,7 @@ install-bin: build
 clean: 
 	${GOCMD} clean
 	rm -f ./bombadillo.1.gz 2> /dev/null
+	rm -f ./${BINARY}_* 2> /dev/null
 
 .PHONY: uninstall
 uninstall: clean
@@ -65,6 +66,13 @@ uninstall: clean
 	rm -f ${DESTDIR}${DATAROOTDIR}/applications/bombadillo.desktop
 	rm -f ${DESTDIR}${DATAROOTDIR}/pixmaps/bombadillo-icon.png
 	-update-desktop-database 2> /dev/null
+
+.PHONY: release
+release:
+	GOOS=linux GOARCH=amd64 ${GOCMD} build ${LDFLAGS} -o ${BINARY}_linux_64
+	GOOS=linux GOARCH=arm ${GOCMD} build ${LDFLAGS} -o ${BINARY}_linux_arm
+	GOOS=linux GOARCH=386 ${GOCMD} build ${LDFLAGS} -o ${BINARY}_linux_32
+	GOOS=darwin GOARCH=amd64 ${GOCMD} build ${LDFLAGS} -o ${BINARY}_darwin_64
 
 
 .PHONY: test
