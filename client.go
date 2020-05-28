@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -700,20 +701,20 @@ func (c *client) search(query, uri, question string) {
 	var rootUrl string
 	switch u.Scheme {
 	case "gopher":
-		if ind := strings.Index(entry, "\t"); ind >= 0 {
+		if ind := strings.Index(u.Full, "\t"); ind >= 0 {
 			rootUrl = u.Full[:ind]
 		} else {
 			rootUrl = u.Full
 		}
 		c.Visit(fmt.Sprintf("%s\t%s", rootUrl, entry))
 	case "gemini":
-		if ind := strings.Index(entry, "?"); ind >= 0 {
+		if ind := strings.Index(u.Full, "?"); ind >= 0 {
 			rootUrl = u.Full[:ind]
 		} else {
 			rootUrl = u.Full
 		}
-		// escapedEntry := url.QueryEscape(entry) // TODO confirm expected behavior re: escaping
-		c.Visit(fmt.Sprintf("%s?%s", rootUrl, entry))
+		escapedEntry := url.PathEscape(entry)
+		c.Visit(fmt.Sprintf("%s?%s", rootUrl, escapedEntry))
 	case "http", "https":
 		c.Visit(u.Full)
 	default:
