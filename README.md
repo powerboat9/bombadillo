@@ -27,6 +27,7 @@ These instructions will get a copy of the project up and running on your local m
 ### Prerequisites
 
 You will need to have [Go](https://golang.org/) version >= 1.11.
+To use the Makefile you will need a make that is GNU Make compatible (sorry BSD folks)
 
 ### Building, Installing, Uninstalling
 
