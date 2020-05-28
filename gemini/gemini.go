@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -343,8 +344,7 @@ func Visit(host, port, resource string, td *TofuDigest) (Capsule, error) {
 				resource = "/"
 			}
 			currentUrl := fmt.Sprintf("gemini://%s:%s%s", host, port, resource)
-			rootUrl := fmt.Sprintf("gemini://%s:%s", host, port)
-			capsule.Content, capsule.Links = parseGemini(body, rootUrl, currentUrl)
+			capsule.Content, capsule.Links = parseGemini(body, currentUrl)
 		} else {
 			capsule.Content = body
 		}
@@ -365,7 +365,7 @@ func Visit(host, port, resource string, td *TofuDigest) (Capsule, error) {
 	}
 }
 
-func parseGemini(b, rootUrl, currentUrl string) (string, []string) {
+func parseGemini(b, currentUrl string) (string, []string) {
 	splitContent := strings.Split(b, "\n")
 	links := make([]string, 0, 10)
 
@@ -399,7 +399,7 @@ func parseGemini(b, rootUrl, currentUrl string) (string, []string) {
 			}
 
 			if strings.Index(link, "://") < 0 {
-				link = handleRelativeUrl(link, rootUrl, currentUrl)
+				link, _ = handleRelativeUrl(link, currentUrl)
 			}
 
 			links = append(links, link)
@@ -417,42 +417,17 @@ func parseGemini(b, rootUrl, currentUrl string) (string, []string) {
 	return strings.Join(splitContent[:outputIndex], "\n"), links
 }
 
-func handleRelativeUrl(u, root, current string) string {
-	if len(u) < 1 {
-		return u
+// handleRelativeUrl provides link completion
+func handleRelativeUrl(relLink, current string) (string, error) {
+	base, err := url.Parse(current)
+	if err != nil {
+		return relLink, err
 	}
-	currentIsDir := (current[len(current)-1] == '/')
-
-	if u[0] == '/' {
-		return fmt.Sprintf("%s%s", root, u)
-	} else if strings.HasPrefix(u, "../") {
-		currentDir := strings.LastIndex(current, "/")
-		if currentIsDir {
-			upOne := strings.LastIndex(current[:currentDir], "/")
-			dirRoot := current[:upOne]
-			return dirRoot + u[2:]
-		}
-		return current[:currentDir] + u[2:]
+	rel, err := url.Parse(relLink)
+	if err != nil {
+		return relLink, err
 	}
-
-	if strings.HasPrefix(u, "./") {
-		if len(u) == 2 {
-			return current
-		}
-		u = u[2:]
-	}
-
-	if currentIsDir {
-		indPrevDir := strings.LastIndex(current[:len(current)-1], "/")
-		if indPrevDir < 9 {
-			return current + u
-		}
-		return current[:indPrevDir+1] + u
-	}
-
-	ind := strings.LastIndex(current, "/")
-	current = current[:ind+1]
-	return current + u
+	return base.ResolveReference(rel).String(), nil
 }
 
 func hashCert(cert []byte) string {
