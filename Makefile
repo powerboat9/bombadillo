@@ -14,7 +14,7 @@ test : GOCMD := go1.11.13
 BUILD_TIME := ${shell date "+%Y-%m-%dT%H:%M%z"}
 
 # If VERSION is empty or not defined use the contents of the VERSION file
-VERSION    := ${shell git describe --tags 2> /dev/null}
+VERSION    := ${shell git describe --exact-match 2> /dev/null}
 ifndef VERSION
 	VERSION  := ${shell cat ./VERSION}
 endif
