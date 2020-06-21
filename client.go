@@ -22,20 +22,6 @@ import (
 	"tildegit.org/sloum/bombadillo/termios"
 )
 
-var ERRS = map[string]string{
-	"ADD": "`add [target] [name...]`",
-	"DELETE": "`delete [bookmark-id]`",
-	"BOOKMARKS": "`bookmarks [[bookmark-id]]`",
-	"CHECK": "`check [link_id]` or `check [setting]`",
-	"HOME": "`home`",
-	"PURGE": "`purge [host]`",
-	"QUIT": "`quit`",
-	"RELOAD": "`reload`",
-	"SEARCH": "`search [[keyword(s)...]]`",
-	"SET": "`set [setting] [value]`",
-	"WRITE": "`write [target]`",
-	"HELP": "`help [[topic]]`",
-}
 
 //------------------------------------------------\\
 // + + +             T Y P E S               + + + \\
@@ -401,8 +387,13 @@ func (c *client) doCommand(action string, values []string) {
 		c.SetMessage(syntaxErrorMessage("DELETE"), true)
 		c.DrawMessage()
 	case "?", "HELP":
-		c.SetMessage(syntaxErrorMessage("HELP"), true)
-		c.DrawMessage()
+		path, err := helpAddress(values[0])
+		if err != nil {
+			c.SetMessage(err.Error(), true)
+			c.DrawMessage()
+		} else {
+			c.Visit(path)
+		}
 	case "H", "HOME":
 		c.SetMessage(syntaxErrorMessage("HOME"), true)
 		c.DrawMessage()
