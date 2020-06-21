@@ -6,81 +6,76 @@ It is easy to add, view, navigate to, and delete bookmarks in Bombadillo. Let's 
 
 
 
-+---------------------------+
-+      Adding Bookmarks     +
-+---------------------------+
+-- Adding Bookmarks --
 
 
 Adding a bookmark is done with the add command and has the following syntax:
 
-`:add [target] [name...]`
+`add [target] [name...]`
 
-Like many commands in Bombadillo, you can use an abbreviated form and just type `:a [target] [name...]`
+Like many commands in Bombadillo, you can use an abbreviated form and just type `a [target] [name...]`
 
 The available target valies are a url, a link ID that appears on the current page, or the character `.`, which represents the current page itself.
 
 Examples:
 
-- `:add gopher://bombadillo.colorfield.space Bombadillo`
-- `:a 5 My Favorite Phlog`
-- `:add . Dave's Gopherhole`
+- `add gopher://bombadillo.colorfield.space Bombadillo`
+- `a 5 My Favorite Phlog`
+- `add . Dave's Gopherhole`
 
 If you are missing an element, or the link ID does not exist, Bombadillo will let you know the issue and/or show you the correct syntax.
 
 
 
-+---------------------------+
-+     Viewing Bookmarks     +
-+---------------------------+
+-- Viewing Bookmarks --
 
 
-Viewing your bookmarks is quite easy. You can use a command or a "hot" key. To toggle the bookmarks bar into and out of view you can press the key `B` (the key combination `shift + b`). The command version is as follows:
+Viewing your bookmarks is quite easy. You can use a command or a "hot" key. To toggle the bookmarks bar into and out of view you can press the key "B" (the key combination "shift" + "b"). The command version, including the abbreviated form, is as follows:
 
-`:bookmarks` or the abbreviated `:b`
+- `bookmarks`
+- `b`
 
 In general, the hot key is likely more comfortable for most users.
 
-Once the bookmarks bar is visible you can scroll up and down in it with the regular `j` and `k` keys to view your bookmarks if you have more than the height of your temrinal allows on screen at one time. You may notice that you can no longer scroll the page with these keys. This is because the bookmark bar has focus when it is first opened. You can switch focus between the main content and the bookmarks bar by pressing the tab key (`<tab>`), which will allow you to scroll in whichever area is needed at a given time.
+Once the bookmarks bar is visible you can scroll up and down in it with the regular "j" and "k" keys to view your bookmarks if you have more than the height of your temrinal allows on screen at one time. You may notice that you can no longer scroll the page with these keys. This is because the bookmark bar has focus when it is first opened. You can switch focus between the main content and the bookmarks bar by pressing the "tab" key, which will allow you to scroll in whichever area is needed at a given time.
 
 Closing the bookmarks bar is done the same way as opening it.
 
 
 
-+---------------------------+
-+  Navigating To Bookmarks  +
-+---------------------------+
+-- Navigating To Bookmarks --
 
 
-Navigating to a bookmark is done in much the same way as navigating to a regular link, except there is an additional command paramater. The syntax is as follows:
+Navigating to a bookmark is done in much the same way as navigating to a regular link, except there is an additional command paramater. The syntax, including the abbreviated version, is as follows:
 
-`:bookmarks [bookmark-id]` or the abbreviated `:b [bookmark-id]`
+- `bookmarks [bookmark-id]` 
+- `b [bookmark-id]`
 
 The bookmark-id is shown in the bookmarks bar next to the bookmark name.
 
 Examples:
 
-- `:bookmarks 3`
-- `:b 21`
+- `bookmarks 3`
+- `b 21`
 
 If the bookmark-id you provide does not exist, Bombadillo will let you know. Otherwise, the URL that the selected bookmark represents will be loaded.
 
 
 
-+---------------------------+
-+    Deleting  Bookmarks    +
-+---------------------------+
+-- Deleting  Bookmarks --
 
 
 To delete a bookmark you will need to know its ID. This can be found in the bookmarks bar (see above: 'Viewing Bookmarks') next to the bookmark's name.
 
-The syntax for deleting a bookmark is as follows:
+The syntax for deleting a bookmark, including the abbreviated form, is as follows:
 
-`:delete [bookmark-id]` or the abbreviated `:d [bookmark-id]`
+- `delete [bookmark-id]`
+- `d [bookmark-id]`
 
 Examples:
 
-- `:delete 3`
-- `:d 21`
+- `delete 3`
+- `d 21`
 
 If the bookmark-id you provide does not exist, Bombadillo will let you know. Otherwise, the bookmark will be deleted.
 
@@ -90,4 +85,27 @@ ________________________________
 This concludes the help section brought up by the following keywords:
 
 bookmark, bookmarks, a, b, d, add, delete
+
+
+
+Other sections of the help document:
+
+`help help`
+`help general`
+`help navigation`
+`help saving`
+`help commands`
+`help keys`
+`help search`
+`help settings`
+`help protocols`
+  `help gemini`
+  `help gopher`
+  `help http`
+  `help finger`
+  `help telnet`
+  `help local`
+`help resources`
+`help license`
+
 

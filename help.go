@@ -28,6 +28,10 @@ func helpAddress(section string) (string, error) {
 	switch strings.ToLower(section) {
 	case "add", "a", "delete", "d", "bookmarks", "bookmark", "b":
 		addr = "bookmarks.help"
+	case "quit", "quitting", "q", "flags", "runtime", "options", "exiting", "exit", "general", "startup", "version", "title":
+		addr = "general.help"
+	case "help", "info", "?", "information":
+		addr = "help.help"
 	default:
 		return "", fmt.Errorf("No help section for %q exists", section)
 	}

@@ -1,0 +1,87 @@
+
+General Opperation
+---------------------------
+
+This help guide will walk you through starting Bombadillo, including the various flags/options avialable at startup. It will also cover quitting Bombadillo and a few other simple commands that are not covered elsewhere.
+
+
+
+-- Starting Bombadillo --
+
+
+If Bombadillo has been installed somewhere on your system path the starting Bombadillo can be done by opening a terminal and typing `bombadillo` at the prompt. Bombadillo should open up in the existing terminal window.
+
+If Bombadillo is not on your system path you can either add it to the path and follow the above instructions, or you can navigate to the directory containing the Bombadillo executable and run it. For example, if I was the user "dave" and had the executable in my home folder I might run the following in my terminal's shell:
+
+- `~/bombadillo`
+- `cd && ./bombadillo`.
+
+Users on Linux that support desktop files can also launch Bombadillo by clicking on the desktop icon (it may be found in a menu or launcher, depending on the system).
+
+Bombadillo supports a few command line flags to modify its behavior at run time.
+
+To see the command usage, you can run the following in your terminal's shell:
+
+`bombadillo -h`
+
+This will print out the available command line options, as well as the command syntax, and exit.
+
+To see the version of Bombadillo you are using, you can run the following in your terminal's shell:
+
+`bombadillo -v`
+
+This will print out the version and build information, and exit.
+
+The last command line flag will, for terminal's that support this, change the name of the tab or window that Bombadillo is running in to "Bombadillo". Not all terminals support this behavior, and some that do support it do not support removing it automatically. Most users will not need or want to use this flag, but some users that have a lot of terminal windows open might like to have the name as a reference, so this flag is made available. It can be run as follows:
+
+`bombadillo -t`
+
+The last item in this section is not a flag/option, but an argument. Bombadillo accepts a URL when it is invoked. This will cause Bombadillo to navigate directly to the given URL, rather than load your home page. This behavior can be combined with the `-t` flag, but not with the others.
+
+Examples (run from your terminal's shell):
+
+- `bombadillo bombadillo.colorfield.space`
+- `bombadillo -t gopher://bombadillo.colorfield.space`
+
+
+
+-- Exiting Bombadillo --
+
+
+Exiting Bombadillo can be done four different ways. The simplest is to just press the "q" key. This will exit immediately. Alternatively you may use a command (and an abbreviated form of that command) to exit:
+
+`quit`
+`q`
+
+Lastly, you can break out of the program by pressing "control" + "c" (while holding the "control" key, press the "c" key). This option should only be used if the program has frozen or you need to exit but the other three ways are not working.
+
+
+________________________________
+
+This concludes the help section brought up by the following keywords:
+
+quit, quitting, q, flags, runtime, options, exit, exiting, general, startup, version, title
+
+
+
+Other sections of the help document:
+
+`help help`
+`help navigation`
+`help bookmarks`
+`help saving`
+`help commands`
+`help keys`
+`help search`
+`help settings`
+`help protocols`
+  `help gemini`
+  `help gopher`
+  `help http`
+  `help finger`
+  `help telnet`
+  `help local`
+`help resources`
+`help license`
+
+
