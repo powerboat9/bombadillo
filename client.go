@@ -22,6 +22,21 @@ import (
 	"tildegit.org/sloum/bombadillo/termios"
 )
 
+var ERRS = map[string]string{
+	"ADD": "`add [target] [name...]`",
+	"DELETE": "`delete [bookmark-id]`",
+	"BOOKMARKS": "`bookmarks [[bookmark-id]]`",
+	"CHECK": "`check [link_id]` or `check [setting]`",
+	"HOME": "`home`",
+	"PURGE": "`purge [host]`",
+	"QUIT": "`quit`",
+	"RELOAD": "`reload`",
+	"SEARCH": "`search [[keyword(s)...]]`",
+	"SET": "`set [setting] [value]`",
+	"WRITE": "`write [target]`",
+	"HELP": "`help [[topic]]`",
+}
+
 //------------------------------------------------\\
 // + + +             T Y P E S               + + + \\
 //--------------------------------------------------\\
@@ -317,9 +332,28 @@ func (c *client) routeCommandInput(com *cmdparse.Command) error {
 
 }
 
+
 func (c *client) simpleCommand(action string) {
 	action = strings.ToUpper(action)
 	switch action {
+	case "A", "ADD":
+		c.SetMessage(syntaxErrorMessage("ADD"), true)
+		c.DrawMessage()
+	case "S", "SET":
+		c.SetMessage(syntaxErrorMessage("SET"), true)
+		c.DrawMessage()
+	case "D", "DELETE":
+		c.SetMessage(syntaxErrorMessage("DELETE"), true)
+		c.DrawMessage()
+	case "W", "WRITE":
+		c.SetMessage(syntaxErrorMessage("WRITE"), true)
+		c.DrawMessage()
+	case "P", "PURGE":
+		c.SetMessage(syntaxErrorMessage("PURGE"), true)
+		c.DrawMessage()
+	case "C", "CHECK":
+		c.SetMessage(syntaxErrorMessage("CHECK"), true)
+		c.DrawMessage()
 	case "Q", "QUIT":
 		cui.Exit(0, "")
 	case "H", "HOME":
@@ -351,16 +385,36 @@ func (c *client) simpleCommand(action string) {
 	}
 }
 
-func (c *client) doCommand(action string, values []string) {
-	if length := len(values); length != 1 {
-		c.SetMessage(fmt.Sprintf("Expected 1 argument, received %d", len(values)), true)
-		c.DrawMessage()
-		return
-	}
 
+func (c *client) doCommand(action string, values []string) {
 	switch action {
-	case "CHECK", "C":
+	case "A", "ADD":
+		c.SetMessage(syntaxErrorMessage("ADD"), true)
+		c.DrawMessage()
+	case "B", "BOOKMARKS":
+		c.SetMessage(syntaxErrorMessage("BOOKMARKS"), true)
+		c.DrawMessage()
+	case "C", "CHECK":
 		c.displayConfigValue(values[0])
+		c.DrawMessage()
+	case "D", "DELETE":
+		c.SetMessage(syntaxErrorMessage("DELETE"), true)
+		c.DrawMessage()
+	case "?", "HELP":
+		c.SetMessage(syntaxErrorMessage("HELP"), true)
+		c.DrawMessage()
+	case "H", "HOME":
+		c.SetMessage(syntaxErrorMessage("HOME"), true)
+		c.DrawMessage()
+	case "Q", "QUIT":
+		c.SetMessage(syntaxErrorMessage("QUIT"), true)
+		c.DrawMessage()
+	case "R", "RELOAD":
+		c.SetMessage(syntaxErrorMessage("QUIT"), true)
+		c.DrawMessage()
+	case "S", "SET":
+		c.SetMessage(syntaxErrorMessage("SET"), true)
+		c.DrawMessage()
 	case "PURGE", "P":
 		err := c.Certs.Purge(values[0])
 		if err != nil {
@@ -411,18 +465,43 @@ func (c *client) doCommand(action string, values []string) {
 }
 
 func (c *client) doCommandAs(action string, values []string) {
-	if len(values) < 2 {
-		c.SetMessage(fmt.Sprintf("Expected 2+ arguments, received %d", len(values)), true)
-		c.DrawMessage()
-		return
-	}
-
-	if values[0] == "." {
-		values[0] = c.PageState.History[c.PageState.Position].Location.Full
-	}
-
 	switch action {
+	case "B", "BOOKMARKS":
+		c.SetMessage(syntaxErrorMessage("BOOKMARKS"), true)
+		c.DrawMessage()
+	case "C", "CHECK":
+		c.displayConfigValue(values[0])
+		c.DrawMessage()
+	case "D", "DELETE":
+		c.SetMessage(syntaxErrorMessage("DELETE"), true)
+		c.DrawMessage()
+	case "?", "HELP":
+		c.SetMessage(syntaxErrorMessage("HELP"), true)
+		c.DrawMessage()
+	case "H", "HOME":
+		c.SetMessage(syntaxErrorMessage("HOME"), true)
+		c.DrawMessage()
+	case "P", "PURGE":
+		c.SetMessage(syntaxErrorMessage("PURGE"), true)
+		c.DrawMessage()
+	case "Q", "QUIT":
+		c.SetMessage(syntaxErrorMessage("QUIT"), true)
+		c.DrawMessage()
+	case "R", "RELOAD":
+		c.SetMessage(syntaxErrorMessage("QUIT"), true)
+		c.DrawMessage()
+	case "W", "WRITE":
+		c.SetMessage(syntaxErrorMessage("WRITE"), true)
+		c.DrawMessage()
 	case "ADD", "A":
+		if len(values) < 2 {
+			c.SetMessage(syntaxErrorMessage("ADD"), true)
+			c.DrawMessage()
+			return
+		}
+		if values[0] == "." {
+			values[0] = c.PageState.History[c.PageState.Position].Location.Full
+		}
 		msg, err := c.BookMarks.Add(values)
 		if err != nil {
 			c.SetMessage(err.Error(), true)
@@ -441,8 +520,18 @@ func (c *client) doCommandAs(action string, values []string) {
 			c.Draw()
 		}
 	case "SEARCH":
+		if len(values) < 2 {
+			c.SetMessage(syntaxErrorMessage("SEARCH"), true)
+			c.DrawMessage()
+			return
+		}
 		c.search(strings.Join(values, " "), "", "")
 	case "SET", "S":
+		if len(values) < 2 {
+			c.SetMessage(syntaxErrorMessage("SET"), true)
+			c.DrawMessage()
+			return
+		}
 		if _, ok := c.Options[values[0]]; ok {
 			val := strings.Join(values[1:], " ")
 			if !validateOpt(values[0], val) {
@@ -496,6 +585,36 @@ func (c *client) doLinkCommandAs(action, target string, values []string) {
 	}
 
 	switch action {
+	case "B", "BOOKMARKS":
+		c.SetMessage(syntaxErrorMessage("BOOKMARKS"), true)
+		c.DrawMessage()
+	case "C", "CHECK":
+		c.displayConfigValue(values[0])
+		c.DrawMessage()
+	case "D", "DELETE":
+		c.SetMessage(syntaxErrorMessage("DELETE"), true)
+		c.DrawMessage()
+	case "?", "HELP":
+		c.SetMessage(syntaxErrorMessage("HELP"), true)
+		c.DrawMessage()
+	case "H", "HOME":
+		c.SetMessage(syntaxErrorMessage("HOME"), true)
+		c.DrawMessage()
+	case "P", "PURGE":
+		c.SetMessage(syntaxErrorMessage("PURGE"), true)
+		c.DrawMessage()
+	case "Q", "QUIT":
+		c.SetMessage(syntaxErrorMessage("QUIT"), true)
+		c.DrawMessage()
+	case "R", "RELOAD":
+		c.SetMessage(syntaxErrorMessage("QUIT"), true)
+		c.DrawMessage()
+	case "SEARCH":
+		c.SetMessage(syntaxErrorMessage("SEARCH"), true)
+		c.DrawMessage()
+	case "S", "SET":
+		c.SetMessage(syntaxErrorMessage("SET"), true)
+		c.DrawMessage()
 	case "ADD", "A":
 		bm := make([]string, 0, 5)
 		bm = append(bm, links[num])
@@ -593,6 +712,30 @@ func (c *client) doLinkCommand(action, target string) {
 	}
 
 	switch action {
+	case "A", "ADD":
+		c.SetMessage(syntaxErrorMessage("ADD"), true)
+		c.DrawMessage()
+	case "?", "HELP":
+		c.SetMessage(syntaxErrorMessage("HELP"), true)
+		c.DrawMessage()
+	case "H", "HOME":
+		c.SetMessage(syntaxErrorMessage("HOME"), true)
+		c.DrawMessage()
+	case "P", "PURGE":
+		c.SetMessage(syntaxErrorMessage("PURGE"), true)
+		c.DrawMessage()
+	case "Q", "QUIT":
+		c.SetMessage(syntaxErrorMessage("QUIT"), true)
+		c.DrawMessage()
+	case "R", "RELOAD":
+		c.SetMessage(syntaxErrorMessage("QUIT"), true)
+		c.DrawMessage()
+	case "SEARCH":
+		c.SetMessage(syntaxErrorMessage("SEARCH"), true)
+		c.DrawMessage()
+	case "S", "SET":
+		c.SetMessage(syntaxErrorMessage("SET"), true)
+		c.DrawMessage()
 	case "DELETE", "D":
 		msg, err := c.BookMarks.Delete(num)
 		if err != nil {
@@ -1194,4 +1337,11 @@ func findAvailableFileName(fpath, fname string) (string, error) {
 	}
 
 	return savePath, nil
+}
+
+func syntaxErrorMessage(action string) string {
+	if val, ok := ERRS[action]; ok {
+		return fmt.Sprintf("Incorrect syntax. Try: %s", val)
+	}
+	return fmt.Sprintf("Unknown command %q", action)
 }
