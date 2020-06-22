@@ -53,6 +53,12 @@ install-bin: build
 	install -d ${DESTDIR}${BINDIR}
 	install -m 0755 ./${BINARY} ${DESTDIR}${BINDIR}
 
+.PHONY: install-help
+install-help:
+	install -d ${DESTDIR}${DATAROOTDIR}/bombadillo/help
+	install -m 0644 ./help/* ${DESTDIR}${DATAROOTDIR}/bombadillo/help
+
+
 .PHONY: clean
 clean: 
 	${GOCMD} clean
@@ -65,6 +71,7 @@ uninstall: clean
 	rm -f ${DESTDIR}${BINDIR}/${BINARY}
 	rm -f ${DESTDIR}${DATAROOTDIR}/applications/bombadillo.desktop
 	rm -f ${DESTDIR}${DATAROOTDIR}/pixmaps/bombadillo-icon.png
+	rm -rf ${DESTDIR}${DATAROOTDIR}/bombadillo
 	-update-desktop-database 2> /dev/null
 
 .PHONY: release
@@ -73,7 +80,6 @@ release:
 	GOOS=linux GOARCH=arm ${GOCMD} build ${LDFLAGS} -o ${BINARY}_linux_arm
 	GOOS=linux GOARCH=386 ${GOCMD} build ${LDFLAGS} -o ${BINARY}_linux_32
 	GOOS=darwin GOARCH=amd64 ${GOCMD} build ${LDFLAGS} -o ${BINARY}_darwin_64
-
 
 .PHONY: test
 test: clean build

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -32,8 +33,21 @@ func helpAddress(section string) (string, error) {
 		addr = "general.help"
 	case "help", "info", "?", "information":
 		addr = "help.help"
+	case "write", "save", "saving", "w", "file", "writing", "download", "downloading", "downloads":
+		addr = "saving.help"
+	case "license":
+		addr = "license.help"
 	default:
 		return "", fmt.Errorf("No help section for %q exists", section)
 	}
-	return filepath.Join(helpRoot, addr), nil
+
+	fp := filepath.Join(helpRoot, addr)
+
+	_, err := os.Stat(fp)
+
+	if err != nil {
+		return "", fmt.Errorf("No help section for %q exists", section)
+	}
+
+	return fp, nil
 }

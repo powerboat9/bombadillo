@@ -1,0 +1,61 @@
+
+Saving To File
+---------------------------
+
+Bombadillo is able to save your documents for you. In some cases it will try to do so automatically. Bombadillo will attempt to save any document it does not think it can display. For example, an executable file, a zip file, an image (if you have the setting "showimages" set to "false"), etc. In these cases Bombadillo will download the requested file to the path held in the setting "savelocation". This usually defaults to your home directory. For more information on the two settings mentioned above see:
+
+`help settings`
+
+There is not a 'save as' option, so all files will be saved as whatever their name is from the server. In the event that a file is loaded from a directory (an index.gmi file, or a gophermap, perhaps), the file will be saved as 'index'. In the event that there is already a file with the same name at your "savelocation" Bombadillo will add a number to the end of the filename (starting at 1 and going up as needed until it finds a name that does not yet exist). This way no files on your system get deleted accidentally.
+
+
+
+-- The Write Command --
+
+
+To write content to a file you will use the `write` command. The syntax is as follows:
+
+- `write [url]`
+- `write [link_id]`
+- `write .`
+
+In the first instance you pass the exact url to the file you would like to download. Bombadillo will download it directly without displaying its contents to you. The same goes for the second example, except instead of a URL you pass it the ID of a link found on the page you are currently viewing.
+
+The third option works a little bit differently. You pass the character '.', which symbolizes your current location. Bombadillo will not redownload the content and will instead write the contents of its buffer to file. There should be no difference between the two ways of going about it, but it is good to know the difference anyway. 
+
+Examples:
+
+- `write gopher://bombadillo.colorfield.space/I/images/screenshot1.png`
+- `write 3`
+- `write .`
+
+
+________________________________
+
+This concludes the help section brought up by the following keywords:
+
+write, w, save, saving, file, writing, download, downloading, downloads
+
+
+Other sections of the help document:
+
+`help help`
+`help general`
+`help navigation`
+`help bookmarks`
+`help saving`
+`help commands`
+`help keys`
+`help search`
+`help settings`
+`help protocols`
+  `help gemini`
+  `help gopher`
+  `help http`
+  `help finger`
+  `help telnet`
+  `help local`
+`help resources`
+`help license`
+
+
