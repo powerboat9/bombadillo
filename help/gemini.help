@@ -1,0 +1,60 @@
+
+Gemini Protocol
+---------------------------
+
+Gemini is a recent internet protocol. As Bombadillo 2.0 was being developed its design was really just getting started and Bombadillo was an early adopter and Bombadillo developers were involved in the discussions around the creation of the protocol.
+
+Bombadillo's implementation of the gemini protocol is centered around document retrieval, rather than applications. As such, client certificates were tested out but are deprecated in the client. Due to the terminal nature of Bombadillo and a desire to be simple and reliable headings, lists, and blockquotes are rendered literally in text/gemini documents.
+
+
+
+-- Bombadillo Gemini Support --
+
+
+- TLS for every connection to a gemini server
+- A TOFU security model when interacting with servers
+- Query fields (used for searching/interaction)
+- Redirects
+- Error messaging support (server errors, client errors, etc)
+- Links for text/gemini documents
+- Pre-formatted blocks for text/gemini documents (including alt text support)
+- Support for relative links in text/gemini documents
+
+
+
+-- More information about gemini --
+
+
+- https://gemini.circumlunar.space/
+- gemini://gemini.circumlunar.space/
+
+
+________________________________
+
+This concludes the help section brought up by the following keywords:
+
+gemini, text/gemini
+
+
+
+Other sections of the help document:
+
+`help help`
+`help general`
+`help bookmarks`
+`help navigation`
+`help saving`
+`help commands`
+`help keys`
+`help search`
+`help settings`
+`help protocols`
+  `help gopher`
+  `help http`
+  `help finger`
+  `help telnet`
+  `help local`
+`help resources`
+`help license`
+
+

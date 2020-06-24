@@ -1,0 +1,98 @@
+
+Bombadillo Key Bindings
+---------------------------
+
+This help page functions as an appendix to let you know the various key bindings avialable to you and their functions. This information is also avialable in your terminal's shell by running `man bombadillo`.
+
+
+
+-- Navigating Within A Document --
+
+
+`j` -> SCROLL DOWN one line in the current document
+
+`k` -> SCROLL UP one line in the current document
+
+`d` -> PAGE DOWN in the current document (3/4 page scroll)
+
+`u` -> PAGE UP in the current document (3/4 page scroll)
+
+`g` -> SCROLL TO TOP of the current document
+
+`G` -> SCROLL TO TOP of the current document
+
+
+
+-- Navigating Between Documents --
+
+
+`h` or `b` -> BACK to previously viewed document
+
+`l` or `f` -> FORWARD to next document
+
+`R` -> RELOAD the current document
+
+`0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, or `9`
+  -> VISIT a LINK in the current document corresponding to the pressed number (`0`, in this case, represents the link labeled "10")
+
+
+
+-- Bookmarks --
+
+
+`B` -> TOGGLE the BOOKMARKS bar in and out of VIEW
+
+`TAB` -> TOGGLE the FOCUS between the document and the bookmarks bar
+
+
+
+-- Search --
+
+
+`/` -> INITIATE SEARCH in the current document (press `/` then type your query and press `enter` to search)
+
+`n` -> Scroll to NEXT SEARCH result
+
+`N` -> Scroll to PREVIOUS SEARCH
+
+
+
+-- Other --
+
+
+`:` or `space` -> INITIATE COMMAND MODE. See: `help commands` for more information on commands
+
+`q` -> QUIT Bombadillo
+
+
+
+________________________________
+
+This concludes the help section brought up by the following keywords:
+
+keys, key, hotkeys, hotkey, keymap, controls
+
+
+
+Other sections of the help document:
+
+`help help`
+`help general`
+`help bookmarks`
+`help navigation`
+`help saving`
+`help commands`
+`help search`
+`help settings`
+`help protocols`
+  `help gemini`
+  `help gopher`
+  `help http`
+  `help finger`
+  `help telnet`
+  `help local`
+`help resources`
+`help license`
+
+
+

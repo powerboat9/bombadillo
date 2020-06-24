@@ -37,6 +37,12 @@ func helpAddress(section string) (string, error) {
 		addr = "saving.help"
 	case "license":
 		addr = "license.help"
+	case "finger":
+		addr = "finger.help"
+	case "gemini", "text/gemini":
+		addr = "gemini.help"
+	case "keys", "key", "hotkeys", "hotkey", "keymap", "controls":
+		addr = "keys.help"
 	default:
 		return "", fmt.Errorf("No help section for %q exists", section)
 	}

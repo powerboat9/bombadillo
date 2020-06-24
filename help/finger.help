@@ -1,0 +1,59 @@
+
+Finger Protocol
+---------------------------
+
+The finger protocol originated in the 1970s. It had a long period of usage and then had some serious security flaws found that lead to trouble. Since then the security issues have largely been patched up. Finger can be used to retrieve user and/or system information from a host.
+
+Gnerally speaking, if a host supports the finger protocol you can often get a list of logged in users, uptime stats, or other information by just querying the host. Querying a user at the host will, if the user provides it, yield the contents of their ".plan" and/or ".project" files.
+
+Some users and sysadmins get quite creative with what shows up on finger. Some are known to blog, have games, offer weird system stats (cpu temperature), etc.
+
+
+
+-- URL Format --
+
+
+The URL format in Bombadillo is as follows:
+
+`finger://[user@][host][:port]`
+
+The user section is optional, but if present must end in `@` (after the user's name). The host is required. The port is also optional, as a default finger port will be used if it is not included (this is fine for most use cases).
+
+
+
+-- More Information About Finger --
+
+
+- https://en.wikipedia.org/wiki/Finger_protocol
+
+
+________________________________
+
+This concludes the help section brought up by the following keywords:
+
+finger
+
+
+
+Other sections of the help document:
+
+`help help`
+`help general`
+`help bookmarks`
+`help navigation`
+`help saving`
+`help commands`
+`help keys`
+`help search`
+`help settings`
+`help protocols`
+  `help gopher`
+  `help gemini`
+  `help http`
+  `help telnet`
+  `help local`
+`help resources`
+`help license`
+
+
+
