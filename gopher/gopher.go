@@ -49,7 +49,7 @@ var types = map[string]string{
 // be better.
 func Retrieve(host, port, resource string) ([]byte, error) {
 	nullRes := make([]byte, 0)
-	timeOut := time.Duration(5) * time.Second
+	timeOut := time.Duration(15) * time.Second
 
 	if host == "" || port == "" {
 		return nullRes, errors.New("Incomplete request url")

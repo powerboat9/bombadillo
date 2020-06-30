@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/url"
 	"strconv"
 	"strings"
@@ -26,6 +27,7 @@ type TofuDigest struct {
 }
 
 var BlockBehavior = "block"
+var TlsTimeout = time.Duration(15) * time.Second
 
 //------------------------------------------------\\
 // + + +          R E C E I V E R S          + + + \\
@@ -189,7 +191,7 @@ func Retrieve(host, port, resource string, td *TofuDigest) (string, error) {
 		return &td.ClientCert, nil
 	}
 
-	conn, err := tls.Dial("tcp", addr, conf)
+	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: TlsTimeout}, "tcp", addr, conf)
 	if err != nil {
 		return "", fmt.Errorf("TLS Dial Error: %s", err.Error())
 	}
