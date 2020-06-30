@@ -26,8 +26,8 @@ type TofuDigest struct {
 	ClientCert tls.Certificate
 }
 
-var BlockBehavior = "block"
-var TlsTimeout = time.Duration(15) * time.Second
+var BlockBehavior string = "block"
+var TlsTimeout time.Duration = time.Duration(15) * time.Second
 
 //------------------------------------------------\\
 // + + +          R E C E I V E R S          + + + \\
