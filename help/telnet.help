@@ -1,0 +1,49 @@
+
+Telnet Protocol
+---------------------------
+
+Telnet is a protocol for connecting to a remote server. Unlike ssh, this is not a secure connection. Bombadillo does not have a built-in telnet system but will reach out to the "telnet" application and use it to open telnet connections from inside of Bombadillo. For this feature to work a suitable program must be avialable on the system. For most users this will be "telnet", though Bombadillo does support using other applications via a user configurable setting (see `help settings`).
+
+This proxying of responsibility to a remote program works pretty well, but in some cases has been known to provide buggy output.
+
+
+
+-- Telnet URL Structure --
+
+
+Generally speaking, the following structure will be the most common (though Bombadillo will support any structure that the underlying telnet application supports, so long as the scheme "telnet://" is included at the beginning):
+
+telnet://[host][:port]
+
+
+________________________________
+
+This concludes the help section brought up by the following keywords:
+
+telnet
+
+
+
+Other sections of the help document:
+
+`help help`
+`help general`
+`help bookmarks`
+`help navigation`
+`help saving`
+`help commands`
+`help keys`
+`help search`
+`help settings`
+`help protocols`
+  `help gemini`
+  `help gopher`
+  `help http`
+  `help finger`
+  `help local`
+`help resources`
+`help license`
+
+
+
+
