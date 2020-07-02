@@ -399,7 +399,7 @@ func parseGemini(b, currentUrl string) (string, []string) {
 			}
 
 			if strings.Index(link, "://") < 0 {
-				link, _ = handleRelativeUrl(link, currentUrl)
+				link, _ = HandleRelativeUrl(link, currentUrl)
 			}
 
 			links = append(links, link)
@@ -418,7 +418,7 @@ func parseGemini(b, currentUrl string) (string, []string) {
 }
 
 // handleRelativeUrl provides link completion
-func handleRelativeUrl(relLink, current string) (string, error) {
+func HandleRelativeUrl(relLink, current string) (string, error) {
 	base, err := url.Parse(current)
 	if err != nil {
 		return relLink, err

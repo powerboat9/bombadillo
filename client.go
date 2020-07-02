@@ -999,6 +999,13 @@ func (c *client) handleGemini(u Url) {
 		if strings.Replace(lowerRedirect, lowerOriginal, "", 1) == "/" {
 			c.Visit(capsule.Content)
 		} else {
+			if !strings.Contains(capsule.Content, "://") {
+				lnk, lnkErr := gemini.HandleRelativeUrl(capsule.Content, u.Full)
+				if lnkErr == nil {
+					capsule.Content = lnk
+				}
+			}
+
 			c.SetMessage(fmt.Sprintf("Follow redirect (y/n): %s?", capsule.Content), false)
 			c.DrawMessage()
 			ch := cui.Getch()
