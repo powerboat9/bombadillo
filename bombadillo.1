@@ -33,7 +33,7 @@ Gopher is the default protocol for \fBbombadillo\fP. Any textual item types will
 .TP
 .B
 gemini
-Gemini is supported, but as a new protocol with an incomplete specification, features may change over time. At present Bombadillo supports TLS with a trust on first use certificate pinning system (similar to SSH). Client certificates are also supported as a configurable option. Gemini maps and other text types are rendered in the browser and non-text types will be downloaded.
+Gemini is supported, but as a new protocol with an incomplete specification, features may change over time. At present Bombadillo supports TLS with a trust on first use certificate pinning system (similar to SSH). Gemini maps and other text types are rendered in the browser and non-text types will be downloaded.
 .TP
 .B
 finger
@@ -255,14 +255,6 @@ Tells the browser what command to use to start a telnet session. Should be a val
 .B
 theme
 Can toggle between visual modes. Valid values are \fInormal\fP, \fIcolor\fP, and \fIinverse\fP. When set to inverse, the normal mode colors are inverted. Both normal and inverse modes filter out terminal escape sequences. When set to color, Bombadillo will render terminal escape sequences representing colors when it finds them in documents.
-.TP
-.B
-tlscertificate
-A path to a tls certificate file on a user's local filesystem. Defaults to NULL. Both \fItlscertificate\fP and \fItlskey\fP must be set for client certificates to work in gemini.
-.TP
-.B
-tlskey
-A path to a tls key that pairs with the tlscertificate setting, on a user's local filesystem. Defaults to NULL. Both \fItlskey\fP and \fItlscertificate\fP must be set for client certificates to work in gemini.
 .TP
 .B
 webmode

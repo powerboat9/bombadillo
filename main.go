@@ -143,8 +143,8 @@ func loadConfig() {
 		if len(vals) < 2 {
 			continue
 		}
-		ts, err := strconv.ParseInt(vals[1], 10, 64)
 		now := time.Now()
+		ts, err := strconv.ParseInt(vals[1], 10, 64)
 		if err != nil || now.Unix() > ts {
 			continue
 		}
@@ -158,9 +158,6 @@ func loadConfig() {
 func initClient() {
 	bombadillo = MakeClient("  ((( Bombadillo )))  ")
 	loadConfig()
-	if bombadillo.Options["tlscertificate"] != "" && bombadillo.Options["tlskey"] != "" {
-		bombadillo.Certs.LoadCertificate(bombadillo.Options["tlscertificate"], bombadillo.Options["tlskey"])
-	}
 }
 
 // In the event of specific signals, ensure the display is shown correctly.
