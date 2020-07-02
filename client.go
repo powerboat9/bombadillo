@@ -122,8 +122,8 @@ func (c *client) Draw() {
 	} else {
 		for i := 0; i < c.Height-3; i++ {
 			if i < len(pageContent) {
-				screen.WriteString(pageContent[i])
 				screen.WriteString("\033[0K")
+				screen.WriteString(pageContent[i])
 				screen.WriteString("\n")
 			} else {
 				screen.WriteString("\033[0K")

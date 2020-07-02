@@ -130,6 +130,7 @@ func (p *Page) WrapContent(width int, color bool) {
 					counter += len(spacer)
 				}
 				content.WriteRune(ch)
+				counter++
 			}
 		}
 	}
