@@ -11,6 +11,8 @@ Bombadillo's implementation of the gemini protocol is centered around document r
 -- Bombadillo Gemini Support --
 
 
+Bombadillo supports:
+
 - TLS for every connection to a gemini server
 - A TOFU security model when interacting with servers
 - Query fields (used for searching/interaction)
@@ -19,6 +21,13 @@ Bombadillo's implementation of the gemini protocol is centered around document r
 - Links for text/gemini documents
 - Pre-formatted blocks for text/gemini documents (including alt text support)
 - Support for relative links in text/gemini documents
+
+
+Bombadillo does not support:
+
+- Client certificates
+- Special rendering for lists, headings, and blockquotes in text/gemini documents
+   - Special rendering here refers to font changes or similar
 
 
 
