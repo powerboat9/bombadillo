@@ -317,6 +317,9 @@ func Visit(host, port, resource string, td *TofuDigest) (Capsule, error) {
 	case 2:
 		mimeAndCharset := strings.Split(header[1], ";")
 		meta = mimeAndCharset[0]
+		if meta == "" {
+			meta = "text/gemini"
+		}
 		minMajMime := strings.Split(meta, "/")
 		if len(minMajMime) < 2 {
 			return capsule, fmt.Errorf("Improperly formatted mimetype received from server")
