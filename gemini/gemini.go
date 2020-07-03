@@ -268,7 +268,7 @@ func Fetch(host, port, resource string, td *TofuDigest) ([]byte, error) {
 		case 5:
 			return make([]byte, 0), fmt.Errorf("[5] Permanent Failure.")
 		case 6:
-			return make([]byte, 0), fmt.Errorf("[6] Client Certificate Required")
+			return make([]byte, 0), fmt.Errorf("[6] Client Certificate Required (Unsupported)")
 		default:
 			return make([]byte, 0), fmt.Errorf("Invalid response status from server")
 		}
@@ -345,7 +345,7 @@ func Visit(host, port, resource string, td *TofuDigest) (Capsule, error) {
 	case 5:
 		return capsule, fmt.Errorf("[5] Permanent Failure. %s", header[1])
 	case 6:
-		return capsule, fmt.Errorf("[6] Client Certificate Required")
+		return capsule, fmt.Errorf("[6] Client Certificate Required (Unsupported)")
 	default:
 		return capsule, fmt.Errorf("Invalid response status from server")
 	}
