@@ -23,7 +23,6 @@ type Capsule struct {
 
 type TofuDigest struct {
 	certs      map[string]string
-	ClientCert tls.Certificate
 }
 
 var BlockBehavior string = "block"
@@ -32,15 +31,6 @@ var TlsTimeout time.Duration = time.Duration(15) * time.Second
 //------------------------------------------------\\
 // + + +          R E C E I V E R S          + + + \\
 //--------------------------------------------------\\
-
-func (t *TofuDigest) LoadCertificate(cert, key string) {
-	certificate, err := tls.LoadX509KeyPair(cert, key)
-	if err != nil {
-		t.ClientCert = tls.Certificate{}
-		return
-	}
-	t.ClientCert = certificate
-}
 
 func (t *TofuDigest) Purge(host string) error {
 	host = strings.ToLower(host)
@@ -187,10 +177,6 @@ func Retrieve(host, port, resource string, td *TofuDigest) (string, error) {
 		InsecureSkipVerify: true,
 	}
 
-	conf.GetClientCertificate = func(*tls.CertificateRequestInfo) (*tls.Certificate, error) {
-		return &td.ClientCert, nil
-	}
-
 	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: TlsTimeout}, "tcp", addr, conf)
 	if err != nil {
 		return "", fmt.Errorf("TLS Dial Error: %s", err.Error())
@@ -284,7 +270,7 @@ func Fetch(host, port, resource string, td *TofuDigest) ([]byte, error) {
 		case 5:
 			return make([]byte, 0), fmt.Errorf("[5] Permanent Failure.")
 		case 6:
-			return make([]byte, 0), fmt.Errorf("[6] Client Certificate Required")
+			return make([]byte, 0), fmt.Errorf("[6] Client Certificate Required (Unsupported)")
 		default:
 			return make([]byte, 0), fmt.Errorf("Invalid response status from server")
 		}
@@ -364,7 +350,7 @@ func Visit(host, port, resource string, td *TofuDigest) (Capsule, error) {
 	case 5:
 		return capsule, fmt.Errorf("[5] Permanent Failure. %s", header[1])
 	case 6:
-		return capsule, fmt.Errorf("[6] Client Certificate Required")
+		return capsule, fmt.Errorf("[6] Client Certificate Required (Unsupported)")
 	default:
 		return capsule, fmt.Errorf("Invalid response status from server")
 	}
@@ -449,5 +435,5 @@ func MakeCapsule() Capsule {
 }
 
 func MakeTofuDigest() TofuDigest {
-	return TofuDigest{make(map[string]string), tls.Certificate{}}
+	return TofuDigest{make(map[string]string)}
 }

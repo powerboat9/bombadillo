@@ -33,7 +33,7 @@ Gopher is the default protocol for \fBbombadillo\fP. Any textual item types will
 .TP
 .B
 gemini
-Gemini is supported, but as a new protocol with an incomplete specification, features may change over time. At present Bombadillo supports TLS with a trust on first use certificate pinning system (similar to SSH). Client certificates are also supported as a configurable option. Gemini maps and other text types are rendered in the browser and non-text types will be downloaded.
+Gemini is supported, but as a new protocol with an incomplete specification, features may change over time. At present Bombadillo supports TLS with a trust on first use certificate pinning system (similar to SSH). Gemini maps and other text types are rendered in the browser and non-text types will be downloaded.
 .TP
 .B
 finger
@@ -259,16 +259,6 @@ Can toggle between visual modes. Valid values are \fInormal\fP, \fIcolor\fP, and
 .B
 timeout
 The number of seconds after which connections to gopher or gemini servers should time out if the server has not responded.
-.TP
-.B
-tlscertificate
-A path to a tls certificate file on a user's local filesystem. Defaults to NULL. Both \fItlscertificate\fP and \fItlskey\fP must be set for client certificates to work in gemini.
-.TP
-.B
-tlskey
-A path to a tls key that pairs with the tlscertificate setting, on a user's local filesystem. Defaults to NULL. Both \fItlskey\fP and \fItlscertificate\fP must be set for client certificates to work in gemini.
-.TP
-.B
 webmode
 Controls behavior when following web links. The following values are valid: \fInone\fP will disable following web links, \fIgui\fP will have the browser attempt to open web links in a user's default graphical web browser; \fIlynx\fP, \fIw3m\fP, and \fIelinks\fP will have the browser attempt to use the selected terminal web browser to handle the rendering of web pages and will display the pages directly in Bombadillo.
 

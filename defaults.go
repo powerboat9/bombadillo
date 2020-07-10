@@ -55,8 +55,6 @@ var defaultOptions = map[string]string{
 	"telnetcommand":  "telnet",
 	"theme":          "normal", // "normal", "inverted", "color"
 	"timeout":        "15",     // connection timeout for gopher/gemini in seconds
-	"tlscertificate": "",
-	"tlskey":         "",
 	"webmode":        "none",   // "none", "gui", "lynx", "w3m", "elinks"
 }
 
