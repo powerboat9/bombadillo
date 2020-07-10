@@ -455,6 +455,8 @@ func (c *client) doCommandAs(action string, values []string) {
 				c.Certs.LoadCertificate(c.Options["tlscertificate"], c.Options["tlskey"])
 			} else if values[0] == "geminiblocks" {
 				gemini.BlockBehavior = c.Options[values[0]]
+			} else if values[0] == "timeout" {
+				updateTimeouts(c.Options[values[0]])
 			} else if values[0] == "configlocation" {
 				c.SetMessage("Cannot set READ ONLY setting 'configlocation'", true)
 				c.DrawMessage()
@@ -1194,4 +1196,17 @@ func findAvailableFileName(fpath, fname string) (string, error) {
 	}
 
 	return savePath, nil
+}
+
+func updateTimeouts(timeoutString string) error {
+	sec, err := strconv.Atoi(timeoutString)
+	if err != nil {
+		return err
+	}
+	timeout := time.Duration(sec) * time.Second
+
+	gopher.Timeout = timeout
+	gemini.TlsTimeout = timeout
+
+	return nil
 }

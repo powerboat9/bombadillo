@@ -82,6 +82,14 @@ func validateOpt(opt, val string) bool {
 		}
 		return false
 	}
+
+	if opt == "timeout" {
+		_, err := strconv.Atoi(val)
+		if err != nil {
+			return false
+		}
+	}
+
 	return true
 }
 
@@ -126,6 +134,8 @@ func loadConfig() {
 				bombadillo.Options[lowerkey] = v.Value
 				if lowerkey == "geminiblocks" {
 					gemini.BlockBehavior = v.Value
+				} else if lowerkey == "timeout" {
+					updateTimeouts(v.Value)
 				}
 			} else {
 				bombadillo.Options[lowerkey] = defaultOptions[lowerkey]
