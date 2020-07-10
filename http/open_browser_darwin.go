@@ -1,4 +1,4 @@
-// +build darwin
+// This will build for osx without a build tag based on the filename
 
 package http
 
