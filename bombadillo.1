@@ -257,6 +257,8 @@ theme
 Can toggle between visual modes. Valid values are \fInormal\fP, \fIcolor\fP, and \fIinverse\fP. When set to inverse, the normal mode colors are inverted. Both normal and inverse modes filter out terminal escape sequences. When set to color, Bombadillo will render terminal escape sequences representing colors when it finds them in documents.
 .TP
 .B
+timeout
+The number of seconds after which connections to gopher or gemini servers should time out if the server has not responded.
 webmode
 Controls behavior when following web links. The following values are valid: \fInone\fP will disable following web links, \fIgui\fP will have the browser attempt to open web links in a user's default graphical web browser; \fIlynx\fP, \fIw3m\fP, and \fIelinks\fP will have the browser attempt to use the selected terminal web browser to handle the rendering of web pages and will display the pages directly in Bombadillo.
 

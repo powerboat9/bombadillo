@@ -54,7 +54,8 @@ var defaultOptions = map[string]string{
 	"showimages":     "true",
 	"telnetcommand":  "telnet",
 	"theme":          "normal", // "normal", "inverted", "color"
-	"webmode":        "none", // "none", "gui", "lynx", "w3m", "elinks"
+	"timeout":        "15",     // connection timeout for gopher/gemini in seconds
+	"webmode":        "none",   // "none", "gui", "lynx", "w3m", "elinks"
 }
 
 // homePath will return the path to your home directory as a string

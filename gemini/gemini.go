@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/url"
 	"strconv"
 	"strings"
@@ -24,7 +25,8 @@ type TofuDigest struct {
 	certs      map[string]string
 }
 
-var BlockBehavior = "block"
+var BlockBehavior string = "block"
+var TlsTimeout time.Duration = time.Duration(15) * time.Second
 
 //------------------------------------------------\\
 // + + +          R E C E I V E R S          + + + \\
@@ -175,7 +177,7 @@ func Retrieve(host, port, resource string, td *TofuDigest) (string, error) {
 		InsecureSkipVerify: true,
 	}
 
-	conn, err := tls.Dial("tcp", addr, conf)
+	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: TlsTimeout}, "tcp", addr, conf)
 	if err != nil {
 		return "", fmt.Errorf("TLS Dial Error: %s", err.Error())
 	}
@@ -388,7 +390,7 @@ func parseGemini(b, currentUrl string) (string, []string) {
 			}
 
 			if strings.Index(link, "://") < 0 {
-				link, _ = handleRelativeUrl(link, currentUrl)
+				link, _ = HandleRelativeUrl(link, currentUrl)
 			}
 
 			links = append(links, link)
@@ -407,7 +409,7 @@ func parseGemini(b, currentUrl string) (string, []string) {
 }
 
 // handleRelativeUrl provides link completion
-func handleRelativeUrl(relLink, current string) (string, error) {
+func HandleRelativeUrl(relLink, current string) (string, error) {
 	base, err := url.Parse(current)
 	if err != nil {
 		return relLink, err
