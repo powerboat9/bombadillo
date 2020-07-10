@@ -257,6 +257,10 @@ theme
 Can toggle between visual modes. Valid values are \fInormal\fP, \fIcolor\fP, and \fIinverse\fP. When set to inverse, the normal mode colors are inverted. Both normal and inverse modes filter out terminal escape sequences. When set to color, Bombadillo will render terminal escape sequences representing colors when it finds them in documents.
 .TP
 .B
+timeout
+The number of seconds after which connections to gopher or gemini servers should time out if the server has not responded.
+.TP
+.B
 tlscertificate
 A path to a tls certificate file on a user's local filesystem. Defaults to NULL. Both \fItlscertificate\fP and \fItlskey\fP must be set for client certificates to work in gemini.
 .TP
