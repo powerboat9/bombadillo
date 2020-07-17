@@ -37,9 +37,11 @@ func helpAddress(section string) (string, error) {
 		addr = "saving.help"
 	case "license":
 		addr = "license.help"
+	case "local", "file":
+		addr = "local.help"
 	case "finger":
 		addr = "finger.help"
-	case "gemini", "text/gemini":
+	case "gemini", "text/gemini", "tls", "tofu":
 		addr = "gemini.help"
 	case "gopher":
 		addr = "gopher.help"
@@ -51,6 +53,10 @@ func helpAddress(section string) (string, error) {
 		addr = "navigation.help"
 	case "command", "commands", "functions":
 		addr = "commands.help"
+	case "protocol", "protocols":
+		addr = "protocols.help"
+	case "resources", "links":
+		addr = "resources.go"
 	default:
 		return "", fmt.Errorf("No help section for %q exists", section)
 	}

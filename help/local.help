@@ -1,0 +1,51 @@
+
+Local protocol
+---------------------------
+
+The local protocol works very similarly to the 'file` protocol implemented in many modern web browsers. It allows you to view and navigate your files and filesystem.
+
+
+
+-- Syntax / Usage --
+
+
+When using the local protocol you should prefix the path you want with 'local://', so to view '/usr/local/bin' you would enter the following address into Bombadillo:
+
+`local:///user/local/bin`
+
+You may notice there is a third slash after 'local:', this represents the root directory and must be included in full paths.
+
+Bombadillo's local protocol will also expand tildes for your home directory ('local://~').
+
+Other than those things, navigation works like any other protocol, enter the link ID to navigate around folders or view files. When navigating to a folder the output will appear similar to running 'ls -la' in your shell. It will show hidden files and will output file permissions along with the file names. It does not, however, show file sizes.
+
+
+________________________________
+
+This concludes the help section brought up by the following keywords:
+
+local, file
+
+
+
+Other sections of the help document:
+
+`help help`
+`help general`
+`help navigation`
+`help bookmarks`
+`help saving`
+`help commands`
+`help keys`
+`help search`
+`help settings`
+`help protocols`
+  `help gemini`
+  `help gopher`
+  `help http`
+  `help finger`
+  `help telnet`
+`help resources`
+`help license`
+
+
