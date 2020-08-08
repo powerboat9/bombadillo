@@ -38,6 +38,8 @@ var types = map[string]string{
 	"T": "TEL",
 }
 
+var Timeout time.Duration = time.Duration(15) * time.Second
+
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\
 //--------------------------------------------------\\
@@ -49,7 +51,6 @@ var types = map[string]string{
 // be better.
 func Retrieve(host, port, resource string) ([]byte, error) {
 	nullRes := make([]byte, 0)
-	timeOut := time.Duration(5) * time.Second
 
 	if host == "" || port == "" {
 		return nullRes, errors.New("Incomplete request url")
@@ -57,7 +58,7 @@ func Retrieve(host, port, resource string) ([]byte, error) {
 
 	addr := host + ":" + port
 
-	conn, err := net.DialTimeout("tcp", addr, timeOut)
+	conn, err := net.DialTimeout("tcp", addr, Timeout)
 	if err != nil {
 		return nullRes, err
 	}

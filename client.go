@@ -122,8 +122,8 @@ func (c *client) Draw() {
 	} else {
 		for i := 0; i < c.Height-3; i++ {
 			if i < len(pageContent) {
-				screen.WriteString(pageContent[i])
 				screen.WriteString("\033[0K")
+				screen.WriteString(pageContent[i])
 				screen.WriteString("\n")
 			} else {
 				screen.WriteString("\033[0K")
@@ -451,10 +451,10 @@ func (c *client) doCommandAs(action string, values []string) {
 				return
 			}
 			c.Options[values[0]] = lowerCaseOpt(values[0], val)
-			if values[0] == "tlskey" || values[0] == "tlscertificate" {
-				c.Certs.LoadCertificate(c.Options["tlscertificate"], c.Options["tlskey"])
-			} else if values[0] == "geminiblocks" {
+			if values[0] == "geminiblocks" {
 				gemini.BlockBehavior = c.Options[values[0]]
+			} else if values[0] == "timeout" {
+				updateTimeouts(c.Options[values[0]])
 			} else if values[0] == "configlocation" {
 				c.SetMessage("Cannot set READ ONLY setting 'configlocation'", true)
 				c.DrawMessage()
@@ -999,6 +999,13 @@ func (c *client) handleGemini(u Url) {
 		if strings.Replace(lowerRedirect, lowerOriginal, "", 1) == "/" {
 			c.Visit(capsule.Content)
 		} else {
+			if !strings.Contains(capsule.Content, "://") {
+				lnk, lnkErr := gemini.HandleRelativeUrl(capsule.Content, u.Full)
+				if lnkErr == nil {
+					capsule.Content = lnk
+				}
+			}
+
 			c.SetMessage(fmt.Sprintf("Follow redirect (y/n): %s?", capsule.Content), false)
 			c.DrawMessage()
 			ch := cui.Getch()
@@ -1194,4 +1201,17 @@ func findAvailableFileName(fpath, fname string) (string, error) {
 	}
 
 	return savePath, nil
+}
+
+func updateTimeouts(timeoutString string) error {
+	sec, err := strconv.Atoi(timeoutString)
+	if err != nil {
+		return err
+	}
+	timeout := time.Duration(sec) * time.Second
+
+	gopher.Timeout = timeout
+	gemini.TlsTimeout = timeout
+
+	return nil
 }
