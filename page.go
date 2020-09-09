@@ -72,7 +72,8 @@ func (p *Page) WrapContent(width int, color bool) {
 	}
 	width = min(width, 100)
 	counter := 0
-	spacer := "           "
+	gopherspacer := "           "
+	geminispacer := "      "
 	var content strings.Builder
 	var esc strings.Builder
 	escape := false
@@ -126,8 +127,11 @@ func (p *Page) WrapContent(width int, color bool) {
 				content.WriteRune('\n')
 				counter = 0
 				if p.Location.Mime == "1" {
-					content.WriteString(spacer)
-					counter += len(spacer)
+					content.WriteString(gopherspacer)
+					counter += len(gopherspacer)
+				} else if strings.HasSuffix(p.Location.Mime, "gemini") {
+					content.WriteString(geminispacer)
+					counter += len(geminispacer)
 				}
 				content.WriteRune(ch)
 				counter++
