@@ -1,5 +1,5 @@
-// +build windows
-
+// This will only build for windows based on the filename
+// no build tag required
 package http
 
 import "os/exec"
