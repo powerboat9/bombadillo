@@ -407,9 +407,6 @@ func (c *client) doCommand(action string, values []string) {
 
 func (c *client) doCommandAs(action string, values []string) {
 	switch action {
-	case "C", "CHECK":
-		c.displayConfigValue(values[0])
-		c.DrawMessage()
 	case "ADD", "A":
 		if len(values) < 2 {
 			c.SetMessage(syntaxErrorMessage(action), true)
@@ -502,9 +499,6 @@ func (c *client) doLinkCommandAs(action, target string, values []string) {
 	}
 
 	switch action {
-	case "C", "CHECK":
-		c.displayConfigValue(values[0])
-		c.DrawMessage()
 	case "ADD", "A":
 		bm := make([]string, 0, 5)
 		bm = append(bm, links[num])

@@ -1,6 +1,6 @@
 package main
 
-// ERRS maps commands to their help text
+// ERRS maps commands to their syntax error message
 var ERRS = map[string]string{
 	"A":         "`a [target] [name...]`",
 	"ADD":       "`add [target] [name...]`",
