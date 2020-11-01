@@ -144,7 +144,8 @@ func parseMap(text string) (string, []string) {
 		} else {
 			link := buildLink(line[2], line[3], string(line[0][0]), line[1])
 			links = append(links, link)
-			linktext := fmt.Sprintf("(%s) %2d   %s", getType(string(line[0][0])), len(links), title)
+			linkNum := fmt.Sprintf("[%d]",len(links))
+			linktext := fmt.Sprintf("%s %5s  %s", getType(string(line[0][0])), linkNum, title)
 			splitContent[i] = linktext
 		}
 	}
