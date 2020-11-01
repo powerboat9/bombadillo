@@ -980,6 +980,7 @@ func (c *client) handleGemini(u Url) {
 	case 2:
 		// Success
 		if capsule.MimeMaj == "text" || (c.Options["showimages"] == "true" && capsule.MimeMaj == "image") {
+			u.Mime = capsule.MimeMin
 			pg := MakePage(u, capsule.Content, capsule.Links)
 			pg.FileType = capsule.MimeMaj
 			pg.WrapContent(c.Width-1, (c.Options["theme"] == "color"))
