@@ -23,6 +23,6 @@ var ERRS = map[string]string{
 	"SET":       "`set [setting] [value]`",
 	"W":         "`w [target]`",
 	"WRITE":     "`write [target]`",
-	"?":         "`?`",
-	"HELP":      "`help`",
+	"?":         "`? [[command]]`",
+	"HELP":      "`help [[command]]`",
 }
