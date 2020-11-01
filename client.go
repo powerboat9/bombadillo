@@ -346,21 +346,16 @@ func (c *client) simpleCommand(action string) {
 	case "HELP", "?":
 		go c.Visit(helplocation)
 	default:
-		c.SetMessage(fmt.Sprintf("Unknown action %q", action), true)
+		c.SetMessage(syntaxErrorMessage(action), true)
 		c.DrawMessage()
 	}
 }
 
 func (c *client) doCommand(action string, values []string) {
-	if length := len(values); length != 1 {
-		c.SetMessage(fmt.Sprintf("Expected 1 argument, received %d", len(values)), true)
-		c.DrawMessage()
-		return
-	}
-
 	switch action {
-	case "CHECK", "C":
+	case "C", "CHECK":
 		c.displayConfigValue(values[0])
+		c.DrawMessage()
 	case "PURGE", "P":
 		err := c.Certs.Purge(values[0])
 		if err != nil {
@@ -405,24 +400,22 @@ func (c *client) doCommand(action string, values []string) {
 		c.saveFile(u, fn)
 
 	default:
-		c.SetMessage(fmt.Sprintf("Unknown action %q", action), true)
+		c.SetMessage(syntaxErrorMessage(action), true)
 		c.DrawMessage()
 	}
 }
 
 func (c *client) doCommandAs(action string, values []string) {
-	if len(values) < 2 {
-		c.SetMessage(fmt.Sprintf("Expected 2+ arguments, received %d", len(values)), true)
-		c.DrawMessage()
-		return
-	}
-
-	if values[0] == "." {
-		values[0] = c.PageState.History[c.PageState.Position].Location.Full
-	}
-
 	switch action {
 	case "ADD", "A":
+		if len(values) < 2 {
+			c.SetMessage(syntaxErrorMessage(action), true)
+			c.DrawMessage()
+			return
+		}
+		if values[0] == "." {
+			values[0] = c.PageState.History[c.PageState.Position].Location.Full
+		}
 		msg, err := c.BookMarks.Add(values)
 		if err != nil {
 			c.SetMessage(err.Error(), true)
@@ -441,8 +434,18 @@ func (c *client) doCommandAs(action string, values []string) {
 			c.Draw()
 		}
 	case "SEARCH":
+		if len(values) < 2 {
+			c.SetMessage(syntaxErrorMessage(action), true)
+			c.DrawMessage()
+			return
+		}
 		c.search(strings.Join(values, " "), "", "")
 	case "SET", "S":
+		if len(values) < 2 {
+			c.SetMessage(syntaxErrorMessage(action), true)
+			c.DrawMessage()
+			return
+		}
 		if _, ok := c.Options[values[0]]; ok {
 			val := strings.Join(values[1:], " ")
 			if !validateOpt(values[0], val) {
@@ -473,7 +476,7 @@ func (c *client) doCommandAs(action string, values []string) {
 		c.SetMessage(fmt.Sprintf("Unable to set %s, it does not exist", values[0]), true)
 		c.DrawMessage()
 	default:
-		c.SetMessage(fmt.Sprintf("Unknown command structure"), true)
+		c.SetMessage(syntaxErrorMessage(action), true)
 		c.DrawMessage()
 	}
 }
@@ -523,7 +526,7 @@ func (c *client) doLinkCommandAs(action, target string, values []string) {
 		out = append(out, values...)
 		c.doCommandAs(action, out)
 	default:
-		c.SetMessage(fmt.Sprintf("Unknown command structure"), true)
+		c.SetMessage(syntaxErrorMessage(action), true)
 		c.DrawMessage()
 	}
 }
@@ -655,7 +658,7 @@ func (c *client) doLinkCommand(action, target string) {
 		}
 		c.saveFile(u, fn)
 	default:
-		c.SetMessage("Unknown command structure", true)
+		c.SetMessage(syntaxErrorMessage(action), true)
 		c.DrawMessage()
 	}
 
@@ -1202,6 +1205,13 @@ func findAvailableFileName(fpath, fname string) (string, error) {
 	}
 
 	return savePath, nil
+}
+
+func syntaxErrorMessage(action string) string {
+	if val, ok := ERRS[action]; ok {
+		return fmt.Sprintf("Incorrect syntax. Try: %s", val)
+	}
+	return fmt.Sprintf("Unknown command %q", action)
 }
 
 func updateTimeouts(timeoutString string) error {
