@@ -345,6 +345,9 @@ func (c *client) simpleCommand(action string) {
 		c.search("", "", "?")
 	case "HELP", "?":
 		go c.Visit(helplocation)
+	case "VERSION":
+		c.SetMessage("Bombadillo version: " + version, false)
+		c.DrawMessage()
 	default:
 		c.SetMessage(syntaxErrorMessage(action), true)
 		c.DrawMessage()

@@ -25,4 +25,5 @@ var ERRS = map[string]string{
 	"WRITE":     "`write [target]`",
 	"?":         "`?`",
 	"HELP":      "`help`",
+	"VERSION":   "`version`",
 }
