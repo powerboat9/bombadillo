@@ -358,7 +358,7 @@ func (c *client) doCommand(action string, values []string) {
 		c.DrawMessage()
 	case "HELP", "?":
 		if val, ok := ERRS[values[0]]; ok {
-			c.SetMessage(val, false)
+			c.SetMessage("Usage: " + val, false)
 		} else {
 			msg := fmt.Sprintf("%q is not a valid command; help syntax: %s", values[0], ERRS[action])
 			c.SetMessage(msg, false)
