@@ -72,11 +72,17 @@ func (p *Page) WrapContent(width int, color bool) {
 	}
 	width = min(width, 100)
 	counter := 0
-	spacer := "           "
+	spacer := ""
 	var content strings.Builder
 	var esc strings.Builder
 	escape := false
 	content.Grow(len(p.RawContent))
+
+	if p.Location.Mime == "1" { // gopher document
+		spacer = "           "
+	} else if strings.HasSuffix(p.Location.Mime, "gemini") { //gemini document
+		spacer = "      "
+	}
 	for _, ch := range []rune(p.RawContent) {
 		if escape {
 			if color {
@@ -125,10 +131,8 @@ func (p *Page) WrapContent(width int, color bool) {
 			} else {
 				content.WriteRune('\n')
 				counter = 0
-				if p.Location.Mime == "1" {
-					content.WriteString(spacer)
-					counter += len(spacer)
-				}
+				content.WriteString(spacer)
+				counter += len(spacer)
 				content.WriteRune(ch)
 				counter++
 			}

@@ -94,10 +94,10 @@ func (p *Parser) parseAction() (*Command, error) {
 	case Value:
 		cm.Target = t.val
 		cm.Type = DOLINK
-	case Word:
+	case Word, Action:
 		cm.Value = append(cm.Value, t.val)
 		cm.Type = DO
-	case Action, Whitespace:
+	case Whitespace:
 		return nil, fmt.Errorf("Found %q (%d), expected value", t.val, t.kind)
 	}
 	t = p.scan()

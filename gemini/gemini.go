@@ -361,6 +361,7 @@ func parseGemini(b, currentUrl string) (string, []string) {
 	links := make([]string, 0, 10)
 
 	inPreBlock := false
+	spacer := "      "
 
 	outputIndex := 0
 	for i, ln := range splitContent {
@@ -371,7 +372,7 @@ func parseGemini(b, currentUrl string) (string, []string) {
 			alt := strings.TrimSpace(ln)
 			if len(alt) > 3 {
 				alt = strings.TrimSpace(alt[3:])
-				splitContent[outputIndex] = fmt.Sprintf("[ %s ]", alt)
+				splitContent[outputIndex] = fmt.Sprintf("%s[ALT][ %s ]", spacer, alt)
 				outputIndex++
 			}
 		} else if isPreBlockDeclaration {
@@ -401,7 +402,12 @@ func parseGemini(b, currentUrl string) (string, []string) {
 			if inPreBlock && (BlockBehavior == "alt" || BlockBehavior == "neither") {
 				continue
 			}
-			splitContent[outputIndex] = ln
+			var leader, tail string = "", ""
+			if len(ln) > 0 && ln[0] == '#' {
+				leader = "\033[1m"
+				tail = "\033[0m"
+			}
+			splitContent[outputIndex] = fmt.Sprintf("%s%s%s%s", spacer, leader, ln, tail)
 			outputIndex++
 		}
 	}

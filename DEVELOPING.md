@@ -25,10 +25,10 @@ Changes are implemented to the default branch when:
 
 ### Process for introducing a new change
 
-Please refer to our [notes on contributing](README.md#contributing) to get an understanding of how new changes are initiated, the type of changes accepted and the review process.
+Before you begin, please refer to our [notes on contributing](README.md#contributing) to get an understanding of how new changes are initiated, the type of changes accepted and the review process.
 
 1. Create a new feature branch based on the **develop** branch.
-1. Raise a pull request (PR) targeting the **develop** branch.
+1. Raise a pull request (PR) targeting the current release branch (confirm this in the issue comments before proceeding).
 1. The PR is reviewed.
 1. If the PR is approved, it is merged.
 1. The version number is incremented, along with any other release activity.
