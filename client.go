@@ -344,7 +344,7 @@ func (c *client) simpleCommand(action string) {
 	case "SEARCH":
 		c.search("", "", "?")
 	case "HELP", "?":
-		go c.Visit(helplocation)
+		c.Visit(helplocation)
 	case "VERSION":
 		c.SetMessage("Bombadillo version: " + version, false)
 		c.DrawMessage()
@@ -358,6 +358,14 @@ func (c *client) doCommand(action string, values []string) {
 	switch action {
 	case "C", "CHECK":
 		c.displayConfigValue(values[0])
+		c.DrawMessage()
+	case "HELP", "?":
+		if val, ok := ERRS[values[0]]; ok {
+			c.SetMessage("Usage: " + val, false)
+		} else {
+			msg := fmt.Sprintf("%q is not a valid command; help syntax: %s", values[0], ERRS[action])
+			c.SetMessage(msg, false)
+		}
 		c.DrawMessage()
 	case "PURGE", "P":
 		err := c.Certs.Purge(values[0])

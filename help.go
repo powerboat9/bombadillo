@@ -8,7 +8,7 @@ var ERRS = map[string]string{
 	"DELETE":    "`delete [bookmark-id]`",
 	"B":         "`b [[bookmark-id]]`",
 	"BOOKMARKS": "`bookmarks [[bookmark-id]]`",
-	"C":         "`c [link_id]` or `check [setting]`",
+	"C":         "`c [link_id]` or `c [setting]`",
 	"CHECK":     "`check [link_id]` or `check [setting]`",
 	"H":         "`h`",
 	"HOME":      "`home`",
@@ -23,7 +23,7 @@ var ERRS = map[string]string{
 	"SET":       "`set [setting] [value]`",
 	"W":         "`w [target]`",
 	"WRITE":     "`write [target]`",
-	"?":         "`?`",
-	"HELP":      "`help`",
 	"VERSION":   "`version`",
+	"?":         "`? [[command]]`",
+	"HELP":      "`help [[command]]`",
 }
