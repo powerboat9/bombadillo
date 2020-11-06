@@ -33,7 +33,7 @@ func Visit(webmode, url string, width int) (Page, error) {
 		return Page{}, fmt.Errorf("Invalid webmode setting")
 	}
 	c, err := exec.Command(webmode, "-dump", w, fmt.Sprintf("%d", width), url).Output()
-	if err != nil {
+	if err != nil && c == nil {
 		return Page{}, err
 	}
 	return parseLinks(string(c)), nil
