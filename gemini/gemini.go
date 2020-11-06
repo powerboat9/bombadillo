@@ -78,7 +78,7 @@ func (t *TofuDigest) Match(host, localCert string, cState *tls.ConnectionState) 
 			return fmt.Errorf("EXP")
 		}
 
-		if err := cert.VerifyHostname(host); err != nil {
+		if err := cert.VerifyHostname(host); err != nil && cert.Subject.CommonName != host {
 			return fmt.Errorf("Certificate error: %s", err)
 		}
 
@@ -107,7 +107,7 @@ func (t *TofuDigest) newCert(host string, cState *tls.ConnectionState) error {
 			continue
 		}
 
-		if err := cert.VerifyHostname(host); err != nil {
+		if err := cert.VerifyHostname(host); err != nil && cert.Subject.CommonName != host {
 			reasons.WriteString(fmt.Sprintf("Cert [%d] hostname does not match", index+1))
 			continue
 		}
