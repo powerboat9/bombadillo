@@ -61,6 +61,26 @@ func Test_WrapContent_Wrapped_Line_Length(t *testing.T) {
 				false,
 			},
 		},
+		{
+			"Unicode line endings that should not wrap",
+			"LF\u000A" +
+				"CR+LF\u000D\u000A" +
+				"NEL\u0085" +
+				"LS\u2028" +
+				"PS\u2029",
+			[]string{
+				"LF",
+				"CR+LF",
+				"NEL",
+				"LS",
+				"PS",
+				"",
+			},
+			args{
+				10,
+				false,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
