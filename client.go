@@ -346,7 +346,11 @@ func (c *client) simpleCommand(action string) {
 	case "HELP", "?":
 		c.Visit(helplocation)
 	case "VERSION":
-		c.SetMessage("Bombadillo version: " + version, false)
+		ver := version
+		if ver == "" {
+			ver = "Improperly compiled, no version information"
+		}
+		c.SetMessage("Bombadillo version: " + ver, false)
 		c.DrawMessage()
 	default:
 		c.SetMessage(syntaxErrorMessage(action), true)
