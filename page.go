@@ -97,8 +97,8 @@ func (p *Page) WrapContent(width int, color bool) {
 			}
 			continue
 		}
-		if ch == '\n' {
-			content.WriteRune(ch)
+		if ch == '\n' || ch == '\u0085' || ch == '\u2028' || ch == '\u2029' {
+			content.WriteRune('\n')
 			counter = 0
 		} else if ch == '\t' {
 			if counter+4 < width {
