@@ -258,6 +258,7 @@ func (c *client) TakeControlInput() {
 		}
 		err = c.NextSearchItem(0)
 		if err != nil {
+			c.PageState.History[c.PageState.Position].WrapContent(c.Width-1,(c.Options["theme"] == "color"))
 			c.Draw()
 		}
 	case ':', ' ':
