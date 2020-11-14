@@ -38,7 +38,7 @@ func (p *Pages) NavigateHistory(qty int) error {
 }
 
 // Add gets passed a Page, which gets added to the history
-// arrayr. Add also updates the current length and position
+// array. Add also updates the current length and position
 // of the Pages struct to which it belongs. Add also shifts
 // off array items if necessary.
 func (p *Pages) Add(pg Page) {
@@ -90,6 +90,18 @@ func (p *Pages) Render(termHeight, termWidth int, color bool) []string {
 	p.History[p.Position].ScrollPosition = pos
 
 	return p.History[p.Position].WrappedContent[pos:]
+}
+
+func (p *Pages) CopyHistory(pos int) error {
+	if p.Length < 2 || pos > p.Position {
+		return fmt.Errorf("There are not enough history locations available")
+	}
+	if pos < 0 {
+		pos = p.Position-1
+	}
+
+	p.Add(p.History[pos])
+	return nil
 }
 
 //------------------------------------------------\\

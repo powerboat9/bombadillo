@@ -12,6 +12,8 @@ var ERRS = map[string]string{
 	"CHECK":     "`check [link_id]` or `check [setting]`",
 	"H":         "`h`",
 	"HOME":      "`home`",
+	"J":         "`jump [[history_position]]`",
+	"JUMP":         "`jump [[history_position]]`",
 	"P":         "`p [host]`",
 	"PURGE":     "`purge [host]`",
 	"Q":         "`q`",
