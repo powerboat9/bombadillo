@@ -13,17 +13,9 @@ test : GOCMD := go1.11.13
 # %:z - so settle for %z.
 BUILD_TIME := ${shell date "+%Y-%m-%dT%H:%M%z"}
 
-# If VERSION is empty or not defined use the contents of the VERSION file
-VERSION    := ${shell git describe --exact-match 2> /dev/null}
-ifndef VERSION
-	VERSION  := ${shell cat ./VERSION}
-endif
-
-LDFLAGS  := -ldflags "-s -X main.version=${VERSION} -X main.build=${BUILD_TIME}"
-
 .PHONY: build
 build:
-	${GOCMD} build ${LDFLAGS} -o ${BINARY}
+	${GOCMD} build -o ${BINARY}
 
 .PHONY: install
 install: install-bin install-man install-desktop clean

@@ -78,7 +78,7 @@ func (t *TofuDigest) Match(host, localCert string, cState *tls.ConnectionState) 
 			return fmt.Errorf("EXP")
 		}
 
-		if err := cert.VerifyHostname(host); err != nil {
+		if err := cert.VerifyHostname(host); err != nil && cert.Subject.CommonName != host {
 			return fmt.Errorf("Certificate error: %s", err)
 		}
 
@@ -107,7 +107,7 @@ func (t *TofuDigest) newCert(host string, cState *tls.ConnectionState) error {
 			continue
 		}
 
-		if err := cert.VerifyHostname(host); err != nil {
+		if err := cert.VerifyHostname(host); err != nil && cert.Subject.CommonName != host {
 			reasons.WriteString(fmt.Sprintf("Cert [%d] hostname does not match", index+1))
 			continue
 		}
@@ -361,6 +361,7 @@ func parseGemini(b, currentUrl string) (string, []string) {
 	links := make([]string, 0, 10)
 
 	inPreBlock := false
+	spacer := "      "
 
 	outputIndex := 0
 	for i, ln := range splitContent {
@@ -371,7 +372,7 @@ func parseGemini(b, currentUrl string) (string, []string) {
 			alt := strings.TrimSpace(ln)
 			if len(alt) > 3 {
 				alt = strings.TrimSpace(alt[3:])
-				splitContent[outputIndex] = fmt.Sprintf("[ %s ]", alt)
+				splitContent[outputIndex] = fmt.Sprintf("%s[ALT][ %s ]", spacer, alt)
 				outputIndex++
 			}
 		} else if isPreBlockDeclaration {
@@ -401,7 +402,12 @@ func parseGemini(b, currentUrl string) (string, []string) {
 			if inPreBlock && (BlockBehavior == "alt" || BlockBehavior == "neither") {
 				continue
 			}
-			splitContent[outputIndex] = ln
+			var leader, tail string = "", ""
+			if len(ln) > 0 && ln[0] == '#' {
+				leader = "\033[1m"
+				tail = "\033[0m"
+			}
+			splitContent[outputIndex] = fmt.Sprintf("%s%s%s%s", spacer, leader, ln, tail)
 			outputIndex++
 		}
 	}

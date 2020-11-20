@@ -72,7 +72,7 @@ func (s *scanner) scanText() Token {
 		"S", "SET", "R", "RELOAD", "SEARCH",
 		"Q", "QUIT", "B", "BOOKMARKS", "H",
 		"HOME", "?", "HELP", "C", "CHECK",
-		"P", "PURGE":
+		"P", "PURGE", "JUMP", "J", "VERSION":
 		return Token{Action, capInput}
 	}
 

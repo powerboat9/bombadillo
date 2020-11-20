@@ -102,6 +102,7 @@ func Getch() rune {
 
 func GetLine(prefix string) (string, error) {
 	termios.SetLineMode()
+	defer termios.SetCharMode()
 
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print(prefix)
@@ -110,7 +111,6 @@ func GetLine(prefix string) (string, error) {
 		return "", err
 	}
 
-	termios.SetCharMode()
 	return text[:len(text)-1], nil
 }
 
