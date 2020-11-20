@@ -258,6 +258,7 @@ func (c *client) TakeControlInput() {
 		}
 		err = c.NextSearchItem(0)
 		if err != nil {
+			c.PageState.History[c.PageState.Position].WrapContent(c.Width-1,(c.Options["theme"] == "color"))
 			c.Draw()
 		}
 	case ':', ' ':
@@ -353,6 +354,13 @@ func (c *client) simpleCommand(action string) {
 		} else {
 			c.Draw()
 		}
+	case "VERSION":
+		ver := version
+		if ver == "" {
+			ver = "Improperly compiled, no version information"
+		}
+		c.SetMessage("Bombadillo version: " + ver, false)
+		c.DrawMessage()
 	default:
 		c.SetMessage(syntaxErrorMessage(action), true)
 		c.DrawMessage()

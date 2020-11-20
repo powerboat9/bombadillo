@@ -35,8 +35,7 @@ import (
 	"tildegit.org/sloum/bombadillo/gemini"
 )
 
-var version string
-var build string
+var version string = "2.3.3"
 
 var bombadillo *client
 var helplocation string = "gopher://bombadillo.colorfield.space:70/1/user-guide.map"
@@ -211,7 +210,7 @@ func main() {
 	flag.Usage = printHelp
 	flag.Parse()
 	if *getVersion {
-		fmt.Printf("Bombadillo %s - build %s\n", version, build)
+		fmt.Printf("Bombadillo %s\n", version)
 		os.Exit(0)
 	}
 	args := flag.Args()
