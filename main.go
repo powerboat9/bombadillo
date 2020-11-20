@@ -35,8 +35,7 @@ import (
 	"tildegit.org/sloum/bombadillo/gemini"
 )
 
-var version string
-var build string
+var version string = "2.3.3"
 
 var bombadillo *client
 var helplocation string = "gopher://bombadillo.colorfield.space:70/1/user-guide.map"
@@ -82,6 +81,14 @@ func validateOpt(opt, val string) bool {
 		}
 		return false
 	}
+
+	if opt == "timeout" {
+		_, err := strconv.Atoi(val)
+		if err != nil {
+			return false
+		}
+	}
+
 	return true
 }
 
@@ -126,6 +133,8 @@ func loadConfig() {
 				bombadillo.Options[lowerkey] = v.Value
 				if lowerkey == "geminiblocks" {
 					gemini.BlockBehavior = v.Value
+				} else if lowerkey == "timeout" {
+					updateTimeouts(v.Value)
 				}
 			} else {
 				bombadillo.Options[lowerkey] = defaultOptions[lowerkey]
@@ -143,8 +152,8 @@ func loadConfig() {
 		if len(vals) < 2 {
 			continue
 		}
-		ts, err := strconv.ParseInt(vals[1], 10, 64)
 		now := time.Now()
+		ts, err := strconv.ParseInt(vals[1], 10, 64)
 		if err != nil || now.Unix() > ts {
 			continue
 		}
@@ -158,9 +167,6 @@ func loadConfig() {
 func initClient() {
 	bombadillo = MakeClient("  ((( Bombadillo )))  ")
 	loadConfig()
-	if bombadillo.Options["tlscertificate"] != "" && bombadillo.Options["tlskey"] != "" {
-		bombadillo.Certs.LoadCertificate(bombadillo.Options["tlscertificate"], bombadillo.Options["tlskey"])
-	}
 }
 
 // In the event of specific signals, ensure the display is shown correctly.
@@ -204,7 +210,7 @@ func main() {
 	flag.Usage = printHelp
 	flag.Parse()
 	if *getVersion {
-		fmt.Printf("Bombadillo %s - build %s\n", version, build)
+		fmt.Printf("Bombadillo %s\n", version)
 		os.Exit(0)
 	}
 	args := flag.Args()

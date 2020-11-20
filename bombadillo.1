@@ -33,7 +33,7 @@ Gopher is the default protocol for \fBbombadillo\fP. Any textual item types will
 .TP
 .B
 gemini
-Gemini is supported, but as a new protocol with an incomplete specification, features may change over time. At present Bombadillo supports TLS with a trust on first use certificate pinning system (similar to SSH). Client certificates are also supported as a configurable option. Gemini maps and other text types are rendered in the browser and non-text types will be downloaded.
+Gemini is supported, but as a new protocol with an incomplete specification, features may change over time. At present Bombadillo supports TLS with a trust on first use certificate pinning system (similar to SSH). Gemini maps and other text types are rendered in the browser and non-text types will be downloaded.
 .TP
 .B
 finger
@@ -181,6 +181,14 @@ home
 Navigates to the document set by the \fIhomeurl\fP setting. \fIh\fP can be entered, rather than the full \fIhome\fP.
 .TP
 .B
+jump
+Navigates to the previous page in history from the current page. Useful for keeping the current page in your history while still browsing. \fIj\fP can be used instead of the full \fIjump\fP.
+.TP
+.B
+jump [history location]
+Navigates to the given history location. The history location should be an integer between 0 and 20. \fIj\fP can be used instead of the full \fIjump\fP.
+.TP
+.B
 purge *
 Deletes all pinned gemini server certificates. \fIp\fP can be used instead of the full \fIpurge\fP.
 .TP
@@ -207,6 +215,10 @@ Submits a search to the search engine set by the \fIsearchengine\fP setting, wit
 .B
 set [setting name] [value]
 Sets the value for a given configuration setting. \fIs\fP can be used instead of the full \fIset\fP.
+.TP
+.B
+version
+Shows the current Bombadillo version number.
 .TP
 .B
 write .
@@ -246,7 +258,7 @@ The path to the directory that \fBbombadillo\fP should write files to. This must
 .TP
 .B
 searchengine
-The url to use for the LINE COMMANDs \fI?\fP and \fIsearch\fP. Should be a valid search path that terms may be appended to.
+The url to use for the LINE COMMAND \fIsearch\fP. Should be a valid search path that terms may be appended to.
 .TP
 .B
 telnetcommand
@@ -257,12 +269,8 @@ theme
 Can toggle between visual modes. Valid values are \fInormal\fP, \fIcolor\fP, and \fIinverse\fP. When set to inverse, the normal mode colors are inverted. Both normal and inverse modes filter out terminal escape sequences. When set to color, Bombadillo will render terminal escape sequences representing colors when it finds them in documents.
 .TP
 .B
-tlscertificate
-A path to a tls certificate file on a user's local filesystem. Defaults to NULL. Both \fItlscertificate\fP and \fItlskey\fP must be set for client certificates to work in gemini.
-.TP
-.B
-tlskey
-A path to a tls key that pairs with the tlscertificate setting, on a user's local filesystem. Defaults to NULL. Both \fItlskey\fP and \fItlscertificate\fP must be set for client certificates to work in gemini.
+timeout
+The number of seconds after which connections to gopher or gemini servers should time out if the server has not responded.
 .TP
 .B
 webmode

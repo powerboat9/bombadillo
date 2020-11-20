@@ -38,6 +38,8 @@ var types = map[string]string{
 	"T": "TEL",
 }
 
+var Timeout time.Duration = time.Duration(15) * time.Second
+
 //------------------------------------------------\\
 // + + +          F U N C T I O N S          + + + \\
 //--------------------------------------------------\\
@@ -49,7 +51,6 @@ var types = map[string]string{
 // be better.
 func Retrieve(host, port, resource string) ([]byte, error) {
 	nullRes := make([]byte, 0)
-	timeOut := time.Duration(5) * time.Second
 
 	if host == "" || port == "" {
 		return nullRes, errors.New("Incomplete request url")
@@ -57,7 +58,7 @@ func Retrieve(host, port, resource string) ([]byte, error) {
 
 	addr := host + ":" + port
 
-	conn, err := net.DialTimeout("tcp", addr, timeOut)
+	conn, err := net.DialTimeout("tcp", addr, Timeout)
 	if err != nil {
 		return nullRes, err
 	}
@@ -143,7 +144,8 @@ func parseMap(text string) (string, []string) {
 		} else {
 			link := buildLink(line[2], line[3], string(line[0][0]), line[1])
 			links = append(links, link)
-			linktext := fmt.Sprintf("(%s) %2d   %s", getType(string(line[0][0])), len(links), title)
+			linkNum := fmt.Sprintf("[%d]",len(links))
+			linktext := fmt.Sprintf("%s %5s  %s", getType(string(line[0][0])), linkNum, title)
 			splitContent[i] = linktext
 		}
 	}

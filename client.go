@@ -122,8 +122,8 @@ func (c *client) Draw() {
 	} else {
 		for i := 0; i < c.Height-3; i++ {
 			if i < len(pageContent) {
-				screen.WriteString(pageContent[i])
 				screen.WriteString("\033[0K")
+				screen.WriteString(pageContent[i])
 				screen.WriteString("\n")
 			} else {
 				screen.WriteString("\033[0K")
@@ -258,6 +258,7 @@ func (c *client) TakeControlInput() {
 		}
 		err = c.NextSearchItem(0)
 		if err != nil {
+			c.PageState.History[c.PageState.Position].WrapContent(c.Width-1,(c.Options["theme"] == "color"))
 			c.Draw()
 		}
 	case ':', ' ':
@@ -344,23 +345,41 @@ func (c *client) simpleCommand(action string) {
 	case "SEARCH":
 		c.search("", "", "?")
 	case "HELP", "?":
-		go c.Visit(helplocation)
+		c.Visit(helplocation)
+	case "JUMP", "J":
+		err := c.PageState.CopyHistory(-1)
+		if err != nil {
+			c.SetMessage(err.Error(), false)
+			c.DrawMessage()
+		} else {
+			c.Draw()
+		}
+	case "VERSION":
+		ver := version
+		if ver == "" {
+			ver = "Improperly compiled, no version information"
+		}
+		c.SetMessage("Bombadillo version: " + ver, false)
+		c.DrawMessage()
 	default:
-		c.SetMessage(fmt.Sprintf("Unknown action %q", action), true)
+		c.SetMessage(syntaxErrorMessage(action), true)
 		c.DrawMessage()
 	}
 }
 
 func (c *client) doCommand(action string, values []string) {
-	if length := len(values); length != 1 {
-		c.SetMessage(fmt.Sprintf("Expected 1 argument, received %d", len(values)), true)
-		c.DrawMessage()
-		return
-	}
-
 	switch action {
-	case "CHECK", "C":
+	case "C", "CHECK":
 		c.displayConfigValue(values[0])
+		c.DrawMessage()
+	case "HELP", "?":
+		if val, ok := ERRS[values[0]]; ok {
+			c.SetMessage("Usage: " + val, false)
+		} else {
+			msg := fmt.Sprintf("%q is not a valid command; help syntax: %s", values[0], ERRS[action])
+			c.SetMessage(msg, false)
+		}
+		c.DrawMessage()
 	case "PURGE", "P":
 		err := c.Certs.Purge(values[0])
 		if err != nil {
@@ -403,26 +422,23 @@ func (c *client) doCommand(action string, values []string) {
 			fn = "index"
 		}
 		c.saveFile(u, fn)
-
 	default:
-		c.SetMessage(fmt.Sprintf("Unknown action %q", action), true)
+		c.SetMessage(syntaxErrorMessage(action), true)
 		c.DrawMessage()
 	}
 }
 
 func (c *client) doCommandAs(action string, values []string) {
-	if len(values) < 2 {
-		c.SetMessage(fmt.Sprintf("Expected 2+ arguments, received %d", len(values)), true)
-		c.DrawMessage()
-		return
-	}
-
-	if values[0] == "." {
-		values[0] = c.PageState.History[c.PageState.Position].Location.Full
-	}
-
 	switch action {
 	case "ADD", "A":
+		if len(values) < 2 {
+			c.SetMessage(syntaxErrorMessage(action), true)
+			c.DrawMessage()
+			return
+		}
+		if values[0] == "." {
+			values[0] = c.PageState.History[c.PageState.Position].Location.Full
+		}
 		msg, err := c.BookMarks.Add(values)
 		if err != nil {
 			c.SetMessage(err.Error(), true)
@@ -441,8 +457,18 @@ func (c *client) doCommandAs(action string, values []string) {
 			c.Draw()
 		}
 	case "SEARCH":
+		if len(values) < 2 {
+			c.SetMessage(syntaxErrorMessage(action), true)
+			c.DrawMessage()
+			return
+		}
 		c.search(strings.Join(values, " "), "", "")
 	case "SET", "S":
+		if len(values) < 2 {
+			c.SetMessage(syntaxErrorMessage(action), true)
+			c.DrawMessage()
+			return
+		}
 		if _, ok := c.Options[values[0]]; ok {
 			val := strings.Join(values[1:], " ")
 			if !validateOpt(values[0], val) {
@@ -451,10 +477,10 @@ func (c *client) doCommandAs(action string, values []string) {
 				return
 			}
 			c.Options[values[0]] = lowerCaseOpt(values[0], val)
-			if values[0] == "tlskey" || values[0] == "tlscertificate" {
-				c.Certs.LoadCertificate(c.Options["tlscertificate"], c.Options["tlskey"])
-			} else if values[0] == "geminiblocks" {
+			if values[0] == "geminiblocks" {
 				gemini.BlockBehavior = c.Options[values[0]]
+			} else if values[0] == "timeout" {
+				updateTimeouts(c.Options[values[0]])
 			} else if values[0] == "configlocation" {
 				c.SetMessage("Cannot set READ ONLY setting 'configlocation'", true)
 				c.DrawMessage()
@@ -473,7 +499,7 @@ func (c *client) doCommandAs(action string, values []string) {
 		c.SetMessage(fmt.Sprintf("Unable to set %s, it does not exist", values[0]), true)
 		c.DrawMessage()
 	default:
-		c.SetMessage(fmt.Sprintf("Unknown command structure"), true)
+		c.SetMessage(syntaxErrorMessage(action), true)
 		c.DrawMessage()
 	}
 }
@@ -523,7 +549,7 @@ func (c *client) doLinkCommandAs(action, target string, values []string) {
 		out = append(out, values...)
 		c.doCommandAs(action, out)
 	default:
-		c.SetMessage(fmt.Sprintf("Unknown command structure"), true)
+		c.SetMessage(syntaxErrorMessage(action), true)
 		c.DrawMessage()
 	}
 }
@@ -630,6 +656,15 @@ func (c *client) doLinkCommand(action, target string) {
 		link := links[num]
 		c.SetMessage(fmt.Sprintf("[%d] %s", num+1, link), false)
 		c.DrawMessage()
+	case "JUMP", "J":
+		num--
+		err = c.PageState.CopyHistory(num)
+		if err != nil {
+			c.SetMessage(err.Error(), false)
+			c.DrawMessage()
+		} else {
+			c.Draw()
+		}
 	case "WRITE", "W":
 		links := c.PageState.History[c.PageState.Position].Links
 		if len(links) < num || num < 1 {
@@ -655,7 +690,7 @@ func (c *client) doLinkCommand(action, target string) {
 		}
 		c.saveFile(u, fn)
 	default:
-		c.SetMessage("Unknown command structure", true)
+		c.SetMessage(syntaxErrorMessage(action), true)
 		c.DrawMessage()
 	}
 
@@ -977,6 +1012,7 @@ func (c *client) handleGemini(u Url) {
 	case 2:
 		// Success
 		if capsule.MimeMaj == "text" || (c.Options["showimages"] == "true" && capsule.MimeMaj == "image") {
+			u.Mime = capsule.MimeMin
 			pg := MakePage(u, capsule.Content, capsule.Links)
 			pg.FileType = capsule.MimeMaj
 			pg.WrapContent(c.Width-1, (c.Options["theme"] == "color"))
@@ -999,6 +1035,13 @@ func (c *client) handleGemini(u Url) {
 		if strings.Replace(lowerRedirect, lowerOriginal, "", 1) == "/" {
 			c.Visit(capsule.Content)
 		} else {
+			if !strings.Contains(capsule.Content, "://") {
+				lnk, lnkErr := gemini.HandleRelativeUrl(capsule.Content, u.Full)
+				if lnkErr == nil {
+					capsule.Content = lnk
+				}
+			}
+
 			c.SetMessage(fmt.Sprintf("Follow redirect (y/n): %s?", capsule.Content), false)
 			c.DrawMessage()
 			ch := cui.Getch()
@@ -1194,4 +1237,24 @@ func findAvailableFileName(fpath, fname string) (string, error) {
 	}
 
 	return savePath, nil
+}
+
+func syntaxErrorMessage(action string) string {
+	if val, ok := ERRS[action]; ok {
+		return fmt.Sprintf("Incorrect syntax. Try: %s", val)
+	}
+	return fmt.Sprintf("Unknown command %q", action)
+}
+
+func updateTimeouts(timeoutString string) error {
+	sec, err := strconv.Atoi(timeoutString)
+	if err != nil {
+		return err
+	}
+	timeout := time.Duration(sec) * time.Second
+
+	gopher.Timeout = timeout
+	gemini.TlsTimeout = timeout
+
+	return nil
 }

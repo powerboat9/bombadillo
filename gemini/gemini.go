@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/url"
 	"strconv"
 	"strings"
@@ -22,23 +23,14 @@ type Capsule struct {
 
 type TofuDigest struct {
 	certs      map[string]string
-	ClientCert tls.Certificate
 }
 
-var BlockBehavior = "block"
+var BlockBehavior string = "block"
+var TlsTimeout time.Duration = time.Duration(15) * time.Second
 
 //------------------------------------------------\\
 // + + +          R E C E I V E R S          + + + \\
 //--------------------------------------------------\\
-
-func (t *TofuDigest) LoadCertificate(cert, key string) {
-	certificate, err := tls.LoadX509KeyPair(cert, key)
-	if err != nil {
-		t.ClientCert = tls.Certificate{}
-		return
-	}
-	t.ClientCert = certificate
-}
 
 func (t *TofuDigest) Purge(host string) error {
 	host = strings.ToLower(host)
@@ -86,7 +78,7 @@ func (t *TofuDigest) Match(host, localCert string, cState *tls.ConnectionState) 
 			return fmt.Errorf("EXP")
 		}
 
-		if err := cert.VerifyHostname(host); err != nil {
+		if err := cert.VerifyHostname(host); err != nil && cert.Subject.CommonName != host {
 			return fmt.Errorf("Certificate error: %s", err)
 		}
 
@@ -115,7 +107,7 @@ func (t *TofuDigest) newCert(host string, cState *tls.ConnectionState) error {
 			continue
 		}
 
-		if err := cert.VerifyHostname(host); err != nil {
+		if err := cert.VerifyHostname(host); err != nil && cert.Subject.CommonName != host {
 			reasons.WriteString(fmt.Sprintf("Cert [%d] hostname does not match", index+1))
 			continue
 		}
@@ -185,11 +177,7 @@ func Retrieve(host, port, resource string, td *TofuDigest) (string, error) {
 		InsecureSkipVerify: true,
 	}
 
-	conf.GetClientCertificate = func(*tls.CertificateRequestInfo) (*tls.Certificate, error) {
-		return &td.ClientCert, nil
-	}
-
-	conn, err := tls.Dial("tcp", addr, conf)
+	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: TlsTimeout}, "tcp", addr, conf)
 	if err != nil {
 		return "", fmt.Errorf("TLS Dial Error: %s", err.Error())
 	}
@@ -282,7 +270,7 @@ func Fetch(host, port, resource string, td *TofuDigest) ([]byte, error) {
 		case 5:
 			return make([]byte, 0), fmt.Errorf("[5] Permanent Failure.")
 		case 6:
-			return make([]byte, 0), fmt.Errorf("[6] Client Certificate Required")
+			return make([]byte, 0), fmt.Errorf("[6] Client Certificate Required (Unsupported)")
 		default:
 			return make([]byte, 0), fmt.Errorf("Invalid response status from server")
 		}
@@ -331,6 +319,9 @@ func Visit(host, port, resource string, td *TofuDigest) (Capsule, error) {
 	case 2:
 		mimeAndCharset := strings.Split(header[1], ";")
 		meta = mimeAndCharset[0]
+		if meta == "" {
+			meta = "text/gemini"
+		}
 		minMajMime := strings.Split(meta, "/")
 		if len(minMajMime) < 2 {
 			return capsule, fmt.Errorf("Improperly formatted mimetype received from server")
@@ -359,7 +350,7 @@ func Visit(host, port, resource string, td *TofuDigest) (Capsule, error) {
 	case 5:
 		return capsule, fmt.Errorf("[5] Permanent Failure. %s", header[1])
 	case 6:
-		return capsule, fmt.Errorf("[6] Client Certificate Required")
+		return capsule, fmt.Errorf("[6] Client Certificate Required (Unsupported)")
 	default:
 		return capsule, fmt.Errorf("Invalid response status from server")
 	}
@@ -370,6 +361,7 @@ func parseGemini(b, currentUrl string) (string, []string) {
 	links := make([]string, 0, 10)
 
 	inPreBlock := false
+	spacer := "      "
 
 	outputIndex := 0
 	for i, ln := range splitContent {
@@ -380,7 +372,7 @@ func parseGemini(b, currentUrl string) (string, []string) {
 			alt := strings.TrimSpace(ln)
 			if len(alt) > 3 {
 				alt = strings.TrimSpace(alt[3:])
-				splitContent[outputIndex] = fmt.Sprintf("[ %s ]", alt)
+				splitContent[outputIndex] = fmt.Sprintf("%s[ALT][ %s ]", spacer, alt)
 				outputIndex++
 			}
 		} else if isPreBlockDeclaration {
@@ -399,7 +391,7 @@ func parseGemini(b, currentUrl string) (string, []string) {
 			}
 
 			if strings.Index(link, "://") < 0 {
-				link, _ = handleRelativeUrl(link, currentUrl)
+				link, _ = HandleRelativeUrl(link, currentUrl)
 			}
 
 			links = append(links, link)
@@ -410,7 +402,12 @@ func parseGemini(b, currentUrl string) (string, []string) {
 			if inPreBlock && (BlockBehavior == "alt" || BlockBehavior == "neither") {
 				continue
 			}
-			splitContent[outputIndex] = ln
+			var leader, tail string = "", ""
+			if len(ln) > 0 && ln[0] == '#' {
+				leader = "\033[1m"
+				tail = "\033[0m"
+			}
+			splitContent[outputIndex] = fmt.Sprintf("%s%s%s%s", spacer, leader, ln, tail)
 			outputIndex++
 		}
 	}
@@ -418,7 +415,7 @@ func parseGemini(b, currentUrl string) (string, []string) {
 }
 
 // handleRelativeUrl provides link completion
-func handleRelativeUrl(relLink, current string) (string, error) {
+func HandleRelativeUrl(relLink, current string) (string, error) {
 	base, err := url.Parse(current)
 	if err != nil {
 		return relLink, err
@@ -444,5 +441,5 @@ func MakeCapsule() Capsule {
 }
 
 func MakeTofuDigest() TofuDigest {
-	return TofuDigest{make(map[string]string), tls.Certificate{}}
+	return TofuDigest{make(map[string]string)}
 }
