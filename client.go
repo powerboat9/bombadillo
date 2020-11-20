@@ -346,6 +346,14 @@ func (c *client) simpleCommand(action string) {
 		c.search("", "", "?")
 	case "HELP", "?":
 		c.Visit(helplocation)
+	case "JUMP", "J":
+		err := c.PageState.CopyHistory(-1)
+		if err != nil {
+			c.SetMessage(err.Error(), false)
+			c.DrawMessage()
+		} else {
+			c.Draw()
+		}
 	case "VERSION":
 		ver := version
 		if ver == "" {
@@ -414,7 +422,6 @@ func (c *client) doCommand(action string, values []string) {
 			fn = "index"
 		}
 		c.saveFile(u, fn)
-
 	default:
 		c.SetMessage(syntaxErrorMessage(action), true)
 		c.DrawMessage()
@@ -649,6 +656,15 @@ func (c *client) doLinkCommand(action, target string) {
 		link := links[num]
 		c.SetMessage(fmt.Sprintf("[%d] %s", num+1, link), false)
 		c.DrawMessage()
+	case "JUMP", "J":
+		num--
+		err = c.PageState.CopyHistory(num)
+		if err != nil {
+			c.SetMessage(err.Error(), false)
+			c.DrawMessage()
+		} else {
+			c.Draw()
+		}
 	case "WRITE", "W":
 		links := c.PageState.History[c.PageState.Position].Links
 		if len(links) < num || num < 1 {
