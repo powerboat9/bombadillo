@@ -209,6 +209,10 @@ set [setting name] [value]
 Sets the value for a given configuration setting. \fIs\fP can be used instead of the full \fIset\fP.
 .TP
 .B
+version
+Shows the current Bombadillo version number.
+.TP
+.B
 write .
 Writes the current document to a file. The file is named by the last component of the url path. If the last component is blank or \fI/\fP a default name will be used. The file saves to the directory set by the \fIsavelocation\fP setting. \fIw\fP can be entered rather than the full \fIwrite\fP.
 .TP
@@ -246,7 +250,7 @@ The path to the directory that \fBbombadillo\fP should write files to. This must
 .TP
 .B
 searchengine
-The url to use for the LINE COMMANDs \fI?\fP and \fIsearch\fP. Should be a valid search path that terms may be appended to.
+The url to use for the LINE COMMAND \fIsearch\fP. Should be a valid search path that terms may be appended to.
 .TP
 .B
 telnetcommand
@@ -259,6 +263,8 @@ Can toggle between visual modes. Valid values are \fInormal\fP, \fIcolor\fP, and
 .B
 timeout
 The number of seconds after which connections to gopher or gemini servers should time out if the server has not responded.
+.TP
+.B
 webmode
 Controls behavior when following web links. The following values are valid: \fInone\fP will disable following web links, \fIgui\fP will have the browser attempt to open web links in a user's default graphical web browser; \fIlynx\fP, \fIw3m\fP, and \fIelinks\fP will have the browser attempt to use the selected terminal web browser to handle the rendering of web pages and will display the pages directly in Bombadillo.
 
